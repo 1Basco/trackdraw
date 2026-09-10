@@ -8,20 +8,25 @@ import {
   createCurveSampler,
   FPV_CAMERA_FOV,
   getFpvCameraPose,
+  getFpvCameraSettings,
   getInitialFpvCameraPose,
 } from "@/lib/track/fpvCamera";
-import type { PolylineShape, Shape } from "@/lib/types";
+import { POLYLINE_3D_HEIGHT_OFFSET } from "@/lib/track/constants";
+import { getTrackScaleProfile } from "@/lib/track/track-class";
+import type { PolylineShape, Shape, TrackClass } from "@/lib/types";
 
 export function DroneCamera({
   shapes,
   playing,
   speed,
   bankingEnabled,
+  trackClass,
 }: {
   shapes: Shape[];
   playing: boolean;
   speed: number;
   bankingEnabled: boolean;
+  trackClass?: TrackClass | null;
 }) {
   const { camera } = useThree();
   const tRef = useRef(0);
@@ -29,6 +34,10 @@ export function DroneCamera({
   const cameraRef = useRef(camera);
   const bankingEnabledRef = useRef(bankingEnabled);
   const worldUpRef = useRef(new THREE.Vector3(0, 1, 0));
+  const cameraSettings = useMemo(
+    () => getFpvCameraSettings(getTrackScaleProfile(trackClass)),
+    [trackClass]
+  );
 
   useEffect(() => {
     cameraRef.current = camera;
@@ -59,7 +68,7 @@ export function DroneCamera({
     if (!pl) return null;
 
     const curve = getPolylineCurve3Derived(pl, {
-      heightOffset: 0.6,
+      heightOffset: POLYLINE_3D_HEIGHT_OFFSET,
       samplesPerSegment: 18,
       density: 12,
     })?.curve;
@@ -87,7 +96,8 @@ export function DroneCamera({
         sampleFlightPoint,
         t,
         bankingEnabledRef.current ? bankRef.current : 0,
-        delta
+        delta,
+        cameraSettings
       );
       bankRef.current = bankingEnabledRef.current ? pose.bankAngle : 0;
 
@@ -96,18 +106,21 @@ export function DroneCamera({
       camera.lookAt(pose.lookTarget);
       camera.rotateZ(bankRef.current);
     },
-    [camera, flightPath, sampleFlightPoint]
+    [camera, cameraSettings, flightPath, sampleFlightPoint]
   );
 
   useEffect(() => {
     if (!flightPath || !sampleFlightPoint) return;
     tRef.current = 0;
     bankRef.current = 0;
-    const initialPose = getInitialFpvCameraPose(sampleFlightPoint);
+    const initialPose = getInitialFpvCameraPose(
+      sampleFlightPoint,
+      cameraSettings
+    );
     cameraRef.current.position.copy(initialPose.position);
     cameraRef.current.up.copy(worldUpRef.current);
     cameraRef.current.lookAt(initialPose.lookTarget);
-  }, [flightPath, sampleFlightPoint]);
+  }, [cameraSettings, flightPath, sampleFlightPoint]);
 
   useFrame((_, delta) => {
     if (!playing || !flightPath) return;

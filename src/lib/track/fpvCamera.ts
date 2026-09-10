@@ -1,10 +1,21 @@
 "use client";
 
 import * as THREE from "three";
+import type { TrackScaleProfile } from "@/lib/track/track-class";
 
 export const FPV_CAMERA_FOV = 72;
 
-export const FPV_CAMERA_SETTINGS = {
+export interface FpvCameraSettings {
+  cameraHeightAbovePath: number;
+  cameraBackOffset: number;
+  lookTargetHeightAbovePath: number;
+  baseLookAhead: number;
+  turnLookAheadReduction: number;
+  bankIntensity: number;
+  maxBankAngle: number;
+}
+
+export const FPV_CAMERA_SETTINGS: FpvCameraSettings = {
   cameraHeightAbovePath: 0.45,
   cameraBackOffset: 0.28,
   lookTargetHeightAbovePath: -0.08,
@@ -12,7 +23,28 @@ export const FPV_CAMERA_SETTINGS = {
   turnLookAheadReduction: 0.012,
   bankIntensity: 1.7,
   maxBankAngle: 0.5,
-} as const;
+};
+
+/**
+ * Lens placement scales with the track class: the look-ahead fractions are
+ * shares of the whole lap and stay put, while the metre offsets shrink with
+ * the course so a whoop lap is not flown from above its own gates.
+ */
+export function getFpvCameraSettings(
+  profile: Pick<
+    TrackScaleProfile,
+    | "fpvCameraHeightAbovePathMeters"
+    | "fpvCameraBackOffsetMeters"
+    | "fpvLookTargetHeightAbovePathMeters"
+  >
+): FpvCameraSettings {
+  return {
+    ...FPV_CAMERA_SETTINGS,
+    cameraHeightAbovePath: profile.fpvCameraHeightAbovePathMeters,
+    cameraBackOffset: profile.fpvCameraBackOffsetMeters,
+    lookTargetHeightAbovePath: profile.fpvLookTargetHeightAbovePathMeters,
+  };
+}
 
 type SampleMode = "point" | "pointAt";
 
@@ -36,7 +68,8 @@ export function getFpvCameraPose(
   samplePoint: (t: number) => THREE.Vector3,
   t: number,
   previousBankAngle = 0,
-  delta = 1 / 60
+  delta = 1 / 60,
+  settings: FpvCameraSettings = FPV_CAMERA_SETTINGS
 ) {
   const pos = samplePoint(t);
   const behind = samplePoint(t - 0.015);
@@ -50,8 +83,7 @@ export function getFpvCameraPose(
       : 0;
   const lookAheadOffset = Math.max(
     0.014,
-    FPV_CAMERA_SETTINGS.baseLookAhead -
-      turnStrength * FPV_CAMERA_SETTINGS.turnLookAheadReduction
+    settings.baseLookAhead - turnStrength * settings.turnLookAheadReduction
   );
   const lookTarget = samplePoint(t + lookAheadOffset);
   const tangent = lookTarget.clone().sub(behind);
@@ -62,9 +94,9 @@ export function getFpvCameraPose(
     incoming.normalize();
     outgoing.normalize();
     bankTarget = THREE.MathUtils.clamp(
-      incoming.clone().cross(outgoing).y * FPV_CAMERA_SETTINGS.bankIntensity,
-      -FPV_CAMERA_SETTINGS.maxBankAngle,
-      FPV_CAMERA_SETTINGS.maxBankAngle
+      incoming.clone().cross(outgoing).y * settings.bankIntensity,
+      -settings.maxBankAngle,
+      settings.maxBankAngle
     );
   }
 
@@ -76,11 +108,11 @@ export function getFpvCameraPose(
   );
   const tangentOffset =
     tangent.lengthSq() > 1e-6
-      ? tangent.normalize().multiplyScalar(FPV_CAMERA_SETTINGS.cameraBackOffset)
+      ? tangent.normalize().multiplyScalar(settings.cameraBackOffset)
       : new THREE.Vector3();
   const position = pos.sub(tangentOffset);
-  position.y += FPV_CAMERA_SETTINGS.cameraHeightAbovePath;
-  lookTarget.y += FPV_CAMERA_SETTINGS.lookTargetHeightAbovePath;
+  position.y += settings.cameraHeightAbovePath;
+  lookTarget.y += settings.lookTargetHeightAbovePath;
 
   return {
     bankAngle,
@@ -90,7 +122,8 @@ export function getFpvCameraPose(
 }
 
 export function getInitialFpvCameraPose(
-  samplePoint: (t: number) => THREE.Vector3
+  samplePoint: (t: number) => THREE.Vector3,
+  settings: FpvCameraSettings = FPV_CAMERA_SETTINGS
 ) {
-  return getFpvCameraPose(samplePoint, 0, 0);
+  return getFpvCameraPose(samplePoint, 0, 0, 1 / 60, settings);
 }

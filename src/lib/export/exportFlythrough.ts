@@ -14,9 +14,12 @@ import {
   createCurveSampler,
   FPV_CAMERA_FOV,
   getFpvCameraPose,
+  getFpvCameraSettings,
   getInitialFpvCameraPose,
 } from "@/lib/track/fpvCamera";
+import { POLYLINE_3D_HEIGHT_OFFSET } from "@/lib/track/constants";
 import { getPolylineCurve3Derived } from "@/lib/track/polyline-derived-3d";
+import { getDesignScaleProfile } from "@/lib/track/track-class";
 import type { PolylineShape, Shape, TrackDesign } from "@/lib/types";
 
 const FPS = 60;
@@ -404,8 +407,11 @@ export function exportFlythrough(
       return reject(new Error("No track path to fly through"));
     }
 
+    const cameraSettings = getFpvCameraSettings(
+      getDesignScaleProfile(design)
+    );
     const curveResult = getPolylineCurve3Derived(polyline, {
-      heightOffset: 0.6,
+      heightOffset: POLYLINE_3D_HEIGHT_OFFSET,
       samplesPerSegment: 18,
       density: 12,
     });
@@ -516,7 +522,13 @@ export function exportFlythrough(
     let bankAngle = 0;
     const samplePoint = createCurveSampler(curve, closed, "pointAt");
     const tickCamera = (frame: number) => {
-      const pose = getFpvCameraPose(samplePoint, frame * tPerFrame, bankAngle);
+      const pose = getFpvCameraPose(
+        samplePoint,
+        frame * tPerFrame,
+        bankAngle,
+        1 / 60,
+        cameraSettings
+      );
       bankAngle = pose.bankAngle;
       camera.position.copy(pose.position);
       skySphere.position.copy(pose.position);
@@ -557,7 +569,10 @@ export function exportFlythrough(
           scene.add(wm);
         }
 
-        const initialPose = getInitialFpvCameraPose(samplePoint);
+        const initialPose = getInitialFpvCameraPose(
+          samplePoint,
+          cameraSettings
+        );
         camera.position.copy(initialPose.position);
         skySphere.position.copy(initialPose.position);
         camera.lookAt(initialPose.lookTarget);

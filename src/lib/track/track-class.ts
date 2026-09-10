@@ -45,6 +45,12 @@ export interface TrackScaleProfile {
   handle2dScreenRadiusCapPx: number;
   /** Closest the 3D orbit camera may get to its target (m). */
   cameraMinDistanceMeters: number;
+  /** FPV fly-through: lens height above the race line (m). */
+  fpvCameraHeightAbovePathMeters: number;
+  /** FPV fly-through: how far behind the sampled point the lens sits (m). */
+  fpvCameraBackOffsetMeters: number;
+  /** FPV fly-through: look target height relative to the race line (m). */
+  fpvLookTargetHeightAbovePathMeters: number;
 }
 
 export const STANDARD_TRACK_SCALE_PROFILE: TrackScaleProfile = {
@@ -69,6 +75,9 @@ export const STANDARD_TRACK_SCALE_PROFILE: TrackScaleProfile = {
   handle2dScale: 1,
   handle2dScreenRadiusCapPx: Number.POSITIVE_INFINITY,
   cameraMinDistanceMeters: 8,
+  fpvCameraHeightAbovePathMeters: 0.45,
+  fpvCameraBackOffsetMeters: 0.28,
+  fpvLookTargetHeightAbovePathMeters: -0.08,
 };
 
 export const WHOOP_TRACK_SCALE_PROFILE: TrackScaleProfile = {
@@ -93,6 +102,12 @@ export const WHOOP_TRACK_SCALE_PROFILE: TrackScaleProfile = {
   handle2dScale: 0.35,
   handle2dScreenRadiusCapPx: 6,
   cameraMinDistanceMeters: 1.2,
+  // A 65 mm whoop threading a 558 mm opening cannot fly with a lens half a
+  // metre over the race line: these keep the same lens-height-to-gate ratio
+  // the standard class has.
+  fpvCameraHeightAbovePathMeters: 0.1,
+  fpvCameraBackOffsetMeters: 0.07,
+  fpvLookTargetHeightAbovePathMeters: -0.02,
 };
 
 export const TRACK_CLASSES: readonly TrackClass[] = ["standard", "whoop"];

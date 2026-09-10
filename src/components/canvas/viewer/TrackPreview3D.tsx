@@ -64,6 +64,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
     usePerfMetric("render:viewer/TrackPreview3D");
 
     const field = useEditor((state) => state.track.design.field);
+    const trackClass = useEditor((state) => state.track.design.trackClass);
     const shapes = useEditor(selectDesignShapes);
     const primaryPolylineId = useEditor(
       (state) => selectPrimaryPolyline(state)?.id ?? null
@@ -217,6 +218,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                 playing={playing}
                 speed={speed}
                 bankingEnabled={bankingEnabled}
+                trackClass={trackClass}
               />
             </Suspense>
           ) : isMobile ? (

@@ -805,6 +805,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                 playing={playing}
                 speed={speed}
                 bankingEnabled={bankingEnabled}
+                trackClass={trackClass}
               />
             </Suspense>
           ) : isMobile ? (
