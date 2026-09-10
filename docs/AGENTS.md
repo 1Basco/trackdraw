@@ -44,6 +44,7 @@ Current research documents:
 - `generated-flightpath-assistance.md` — obstacle-order-based generated Race Line assistance direction
 - `map-field-overlay-evaluation.md` — field overlay product model and UX analysis
 - `accounts-project-sync.md` — shipped product direction for accounts and project sync
+- `whoop-pvc-frames.md` — shipped product direction and lattice/joint model for indoor whoop frames built from 20 mm PVC tubes
 
 ### `deployment/`
 

@@ -44,6 +44,7 @@ Use `README.md` for the product overview and `CONTRIBUTING.md` for setup, comman
 
 - English product copy in `lang/en-US/**` is the source of truth and belongs in normal feature pull requests.
 - Do not edit `lang/nl-NL/**`, `lang/de-DE/**`, or `lang/zh-CN/**` in a feature pull request, even when you can generate plausible translations. Crowdin owns those target catalogs.
+- `lang/pt-BR/**` is the documented exception: Brazilian Portuguese is repo-authored and may be updated in normal pull requests. See `docs/research/translation-management.md#brazilian-portuguese-is-repo-authored`.
 - Do not copy new English keys into target catalogs as placeholders. Missing target keys intentionally use the tested English runtime fallback.
 - After English reaches `main`, the Crowdin workflow uploads it automatically. Crowdin may reuse previously approved perfect Translation Memory matches, while contributors create or improve the remaining translations in Crowdin; accepted target updates return through the `l10n_crowdin` localization pull request.
 - Paid Crowdin AI and machine translation are disabled. Missing translations intentionally use the tested English fallback until Crowdin receives reviewed target copy.
@@ -182,3 +183,13 @@ When updating `CHANGELOG.md`, write for users first:
 - Keep entries compact and product-facing.
 - Group small related changes into one stronger theme.
 - Avoid dependency bumps, refactors, or internal cleanup unless they have a clear user-visible effect.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

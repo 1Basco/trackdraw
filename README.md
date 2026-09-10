@@ -48,7 +48,7 @@
 
 TrackDraw keeps the full race-planning workflow in one design:
 
-- **Design on the real venue.** Work at real-world scale in Metric or Imperial units, place MultiGP-style or custom obstacles, and align the layout with a satellite map when needed.
+- **Design on the real venue.** Work at real-world scale in Metric or Imperial units, place MultiGP-style or custom obstacles, snap together indoor whoop frames from 20 mm PVC tubes, and align the layout with a satellite map when needed.
 - **Validate before race day.** Review an editable race line in 2D, 3D, elevation, and FPV fly-through views, and catch route or inventory problems before loading the van.
 - **Hand off one clear plan.** Publish a read-only link or export a Race Pack with the course map, obstacle numbering, material requirements, stock status, and setup guidance.
 
@@ -56,7 +56,7 @@ TrackDraw keeps the full race-planning workflow in one design:
 
 Open the Studio and work immediately. Projects are stored in the browser, can be restored to earlier versions, and can be imported, exported, and temporarily shared without signing in. An account adds cross-device sync, durable published links, gallery publishing, embeds, and share management.
 
-TrackDraw is available in English, Dutch, German, and Simplified Chinese, with an independent choice of Metric or Imperial units. The editor supports desktop and mobile, while shared designs open in a dedicated read-only view.
+TrackDraw is available in English, Dutch, German, Brazilian Portuguese, and Simplified Chinese, with an independent choice of Metric or Imperial units. The editor supports desktop and mobile, while shared designs open in a dedicated read-only view.
 
 TrackDraw is actively developed. See the [public roadmap discussion](https://github.com/dutchdronesquad/trackdraw/discussions/106) for current priorities and progress.
 
