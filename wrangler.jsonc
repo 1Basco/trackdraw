@@ -71,5 +71,46 @@
         "PLUNK_REPLY_TO_EMAIL": "info@trackdraw.app",
       },
     },
+    // Fork-only throwaway environment for testing the whoop POC with friends.
+    // Uses its own Worker, D1 and R2 in this fork's Cloudflare account so it
+    // can never touch the upstream trackdraw.app resources.
+    "poc": {
+      "minify": false,
+      "name": "trackdraw-poc-whoop",
+      // Kept on as a fallback URL while the custom domain propagates.
+      "workers_dev": true,
+      // Requires 1basco.me to be an active zone in this Cloudflare account.
+      "routes": [
+        {
+          "pattern": "whooptrack.1basco.me",
+          "custom_domain": true,
+        },
+      ],
+      // No nightly cleanup cron on a throwaway environment.
+      "triggers": {
+        "crons": [],
+      },
+      "observability": {
+        "enabled": true,
+        "logs": {
+          "invocation_logs": true,
+        },
+      },
+      // No R2 binding here: gallery preview media is out of scope for this
+      // POC, and both call sites treat MEDIA_BUCKET as optional.
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "trackdraw-poc",
+          "database_id": "dd4e2860-6162-4f57-ac89-7ebd5d880450",
+        },
+      ],
+      "vars": {
+        "NEXT_PUBLIC_SITE_URL": "https://whooptrack.1basco.me",
+        "NEXT_PUBLIC_APP_ENV": "development",
+        "PLUNK_FROM_EMAIL": "noreply@emails.trackdraw.app",
+        "PLUNK_REPLY_TO_EMAIL": "info@trackdraw.app",
+      },
+    },
   },
 }
