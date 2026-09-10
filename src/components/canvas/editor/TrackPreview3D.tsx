@@ -68,7 +68,7 @@ import {
   DiveGateTiltHandle3D,
   GateRotateHandle3D,
   LadderElevationHandle3D,
-  PolylineElevationHandles3D,
+  PolylinePointHandles3D,
   TowerElevationHandle3D,
 } from "@/components/canvas/editor/edit-scene-content";
 import {
@@ -286,7 +286,12 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
       beginInteraction,
       endInteraction,
     } = useSessionActions();
-    const { setPolylinePoints, updateShape } = useTrackActions();
+    const {
+      insertPolylinePoint,
+      removePolylinePoint,
+      setPolylinePoints,
+      updateShape,
+    } = useTrackActions();
     const { setLiveShapePatch, clearLiveShapePatch } = useUiActions();
     const shapes = useEditor(selectDesignShapes);
     useCatalogTextureWarmup(shapes);
@@ -327,18 +332,19 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
       diveGateElevationDrag,
       diveGateElevationDragValueRef,
       dragRotationGroupRef,
-      elevationDrag,
       handleCameraCapture,
       handleContainerMouseDownCapture,
       handleDiveGateElevationDragStart,
       handleElevationDragStart,
       handleLadderElevationDragStart,
+      handlePointPlanarDragStart,
       handleRotateDragStart,
       handleTiltDragStart,
       handleTowerElevationDragStart,
       isMiddleMousePanning,
       ladderElevationDrag,
       ladderElevationDragValueRef,
+      pointDrag,
       previewPolyline,
       rotationDrag,
       rotationDragValueRef,
@@ -359,6 +365,32 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
       shapeById,
       updateShape,
     });
+
+    // Waypoint add/remove in 3D go through the same store actions as the 2D
+    // editor, so undo, autosave, and locking behave identically.
+    const handleInsertPolylinePoint = useCallback(
+      (segmentIndex: number) => {
+        if (!editableSelectedPolyline) return;
+        const { points } = editableSelectedPolyline;
+        const start = points[segmentIndex];
+        const end = points[(segmentIndex + 1) % points.length];
+        if (!start || !end) return;
+        insertPolylinePoint(editableSelectedPolyline.id, segmentIndex + 1, {
+          x: +((start.x + end.x) / 2).toFixed(2),
+          y: +((start.y + end.y) / 2).toFixed(2),
+          z: +(((start.z ?? 0) + (end.z ?? 0)) / 2).toFixed(2),
+        });
+      },
+      [editableSelectedPolyline, insertPolylinePoint]
+    );
+
+    const handleRemovePolylinePoint = useCallback(
+      (index: number) => {
+        if (!editableSelectedPolyline) return;
+        removePolylinePoint(editableSelectedPolyline.id, index);
+      },
+      [editableSelectedPolyline, removePolylinePoint]
+    );
 
     const hasSelectedRotatable = useMemo(
       () =>
@@ -385,7 +417,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
       isMiddleMousePanning &&
       !isMobile &&
       !flyMode &&
-      !elevationDrag &&
+      !pointDrag &&
       !rotationDrag &&
       !tiltDrag &&
       !ladderElevationDrag &&
@@ -457,7 +489,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
             isMobile ||
               flyMode ||
               Boolean(
-                elevationDrag ||
+                pointDrag ||
                 rotationDrag ||
                 tiltDrag ||
                 ladderElevationDrag ||
@@ -531,7 +563,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                 onSelect={handleShapeSelect}
                 theme={t}
                 shape={
-                  elevationDrag?.shapeId === shape.id && previewPolyline
+                  pointDrag?.shapeId === shape.id && previewPolyline
                     ? previewPolyline
                     : shape
                 }
@@ -557,12 +589,16 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
           ))}
 
           {previewPolyline && !flyMode && !readOnly ? (
-            <PolylineElevationHandles3D
+            <PolylinePointHandles3D
+              key={previewPolyline.id}
               handleScale={scaleProfile.handle3dScale}
               isMobile={isMobile}
               path={previewPolyline}
-              activeIndex={elevationDrag?.idx ?? null}
+              activeIndex={pointDrag?.idx ?? null}
               onDragStart={handleElevationDragStart}
+              onPlanarDragStart={handlePointPlanarDragStart}
+              onInsertPoint={handleInsertPolylinePoint}
+              onRemovePoint={handleRemovePolylinePoint}
             />
           ) : null}
 
@@ -748,7 +784,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
             enabled={
               !flyMode &&
               !isMobile &&
-              !elevationDrag &&
+              !pointDrag &&
               !rotationDrag &&
               !tiltDrag &&
               !ladderElevationDrag &&
@@ -776,7 +812,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               ref={orbitControlsRef}
               makeDefault
               enabled={
-                !elevationDrag &&
+                !pointDrag &&
                 !rotationDrag &&
                 !tiltDrag &&
                 !ladderElevationDrag &&
@@ -805,7 +841,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               ref={orbitControlsRef}
               makeDefault
               enabled={
-                !elevationDrag &&
+                !pointDrag &&
                 !rotationDrag &&
                 !tiltDrag &&
                 !ladderElevationDrag &&

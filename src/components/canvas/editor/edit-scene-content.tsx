@@ -441,26 +441,283 @@ export function DiveGateElevationHandle3D({
   );
 }
 
-export function PolylineElevationHandles3D({
+// react-three-fiber still reports a click when an orbit drag ends on the same
+// mesh, so badge taps ignore pointers that travelled more than a few pixels.
+const BADGE_TAP_SLOP_PX = 6;
+const MIDDLE_MOUSE_BUTTON = 1;
+
+function useBadgeTap(onTap: () => void) {
+  const pointerDownRef = useRef<{ x: number; y: number } | null>(null);
+
+  return {
+    onPointerDown: (event: ThreeEvent<PointerEvent>) => {
+      event.stopPropagation();
+      pointerDownRef.current = {
+        x: event.nativeEvent.clientX,
+        y: event.nativeEvent.clientY,
+      };
+    },
+    onPointerUp: (event: ThreeEvent<PointerEvent>) => {
+      const pointerDown = pointerDownRef.current;
+      pointerDownRef.current = null;
+      if (!pointerDown) return;
+      const travelled = Math.hypot(
+        event.nativeEvent.clientX - pointerDown.x,
+        event.nativeEvent.clientY - pointerDown.y
+      );
+      if (travelled > BADGE_TAP_SLOP_PX) return;
+      event.stopPropagation();
+      onTap();
+    },
+  };
+}
+
+// Ground-plane offset direction beside the route at a waypoint, so badges do
+// not sit on top of the lift grip.
+function getPolylineSideOffset(path: PolylineShape, index: number) {
+  const { points } = path;
+  const count = points.length;
+  const previous =
+    index > 0 ? points[index - 1] : path.closed ? points[count - 1] : null;
+  const next =
+    index < count - 1 ? points[index + 1] : path.closed ? points[0] : null;
+  const from = previous ?? points[index];
+  const to = next ?? points[index];
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy);
+  if (length < 1e-4) return { x: 1, y: 0 };
+  return { x: -dy / length, y: dx / length };
+}
+
+function PolylineRemovePointBadge3D({
+  handleScale,
+  isMobile,
+  onRemove,
+  path,
+  pointIndex,
+  y,
+}: {
+  handleScale: number;
+  isMobile: boolean;
+  onRemove: () => void;
+  path: PolylineShape;
+  pointIndex: number;
+  y: number;
+}) {
+  const point = path.points[pointIndex];
+  const side = getPolylineSideOffset(path, pointIndex);
+  const distance = (isMobile ? 0.62 : 0.46) * handleScale;
+  const badgeRadius = (isMobile ? 0.13 : 0.1) * handleScale;
+  const hitRadius = (isMobile ? 0.3 : 0.2) * handleScale;
+  const x = point.x + side.x * distance;
+  const z = point.y + side.y * distance;
+  const tapHandlers = useBadgeTap(onRemove);
+
+  return (
+    <group position={[x, y, z]}>
+      <mesh {...tapHandlers}>
+        <sphereGeometry args={[hitRadius, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[badgeRadius, 20, 20]} />
+        <meshStandardMaterial
+          color="#ef4444"
+          emissive="#f87171"
+          emissiveIntensity={0.6}
+          roughness={0.25}
+        />
+      </mesh>
+      <mesh>
+        <boxGeometry
+          args={[badgeRadius * 1.25, badgeRadius * 0.28, badgeRadius * 0.28]}
+        />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+    </group>
+  );
+}
+
+function PolylineInsertPointBadge3D({
+  badgeRadius,
+  hitRadius,
+  onInsert,
+  position,
+}: {
+  badgeRadius: number;
+  hitRadius: number;
+  onInsert: () => void;
+  position: [number, number, number];
+}) {
+  const [hovered, setHovered] = useState(false);
+  const tapHandlers = useBadgeTap(onInsert);
+  const barLength = badgeRadius * 1.35;
+  const barThickness = badgeRadius * 0.3;
+
+  return (
+    <group position={position}>
+      <mesh
+        {...tapHandlers}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <sphereGeometry args={[hitRadius, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[badgeRadius, 20, 20]} />
+        <meshStandardMaterial
+          color={hovered ? "#34d399" : "#0f766e"}
+          emissive={hovered ? "#6ee7b7" : "#2dd4bf"}
+          emissiveIntensity={hovered ? 0.85 : 0.4}
+          transparent
+          opacity={hovered ? 1 : 0.72}
+          roughness={0.25}
+        />
+      </mesh>
+      <mesh>
+        <boxGeometry args={[barLength, barThickness, barThickness]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      <mesh>
+        <boxGeometry args={[barThickness, barLength, barThickness]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+    </group>
+  );
+}
+
+function PolylineInsertHandles3D({
+  handleScale,
+  isMobile,
+  onInsertPoint,
+  path,
+}: {
+  handleScale: number;
+  isMobile: boolean;
+  onInsertPoint: (segmentIndex: number) => void;
+  path: PolylineShape;
+}) {
+  const { points } = path;
+  const segmentCount = path.closed ? points.length : points.length - 1;
+  const badgeRadius = (isMobile ? 0.12 : 0.09) * handleScale;
+  const hitRadius = (isMobile ? 0.3 : 0.2) * handleScale;
+  // Skip segments too short to host a badge without covering the grips.
+  const minSegmentLength = (isMobile ? 1.5 : 1.1) * handleScale;
+
+  return (
+    <group>
+      {Array.from({ length: Math.max(segmentCount, 0) }).map(
+        (_, segmentIndex) => {
+          const start = points[segmentIndex];
+          const end = points[(segmentIndex + 1) % points.length];
+          if (!start || !end) return null;
+          if (Math.hypot(end.x - start.x, end.y - start.y) < minSegmentLength) {
+            return null;
+          }
+          return (
+            <PolylineInsertPointBadge3D
+              badgeRadius={badgeRadius}
+              hitRadius={hitRadius}
+              key={`${path.id}-insert-${segmentIndex}`}
+              onInsert={() => onInsertPoint(segmentIndex)}
+              position={[
+                (start.x + end.x) / 2,
+                (Math.max(start.z ?? 0, 0) + Math.max(end.z ?? 0, 0)) / 2 +
+                  POLYLINE_3D_HEIGHT_OFFSET,
+                (start.y + end.y) / 2,
+              ]}
+            />
+          );
+        }
+      )}
+    </group>
+  );
+}
+
+export function PolylinePointHandles3D({
   isMobile,
   path,
   activeIndex,
   onDragStart,
+  onPlanarDragStart,
+  onInsertPoint,
+  onRemovePoint,
   handleScale = 1,
 }: {
   isMobile: boolean;
   path: PolylineShape;
   activeIndex: number | null;
   onDragStart: (event: ThreeEvent<PointerEvent>, index: number) => void;
+  onPlanarDragStart: (event: ThreeEvent<PointerEvent>, index: number) => void;
+  onInsertPoint: (segmentIndex: number) => void;
+  onRemovePoint: (index: number) => void;
   handleScale?: number;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const middleClickRef = useRef<{
+    index: number;
+    x: number;
+    y: number;
+  } | null>(null);
+  const canRemovePoint = path.points.length > 2;
+  const activeSelectedIndex =
+    selectedIndex !== null && selectedIndex < path.points.length
+      ? selectedIndex
+      : null;
+
+  // Middle button selects a waypoint instead of dragging it, so its remove
+  // badge stays put while the pointer travels over to click it. A middle drag
+  // still pans the camera, so only a stationary press counts as a selection.
+  const handlePuckPointerDown = (
+    event: ThreeEvent<PointerEvent>,
+    index: number,
+    startDrag: () => void
+  ) => {
+    if (event.nativeEvent.button === MIDDLE_MOUSE_BUTTON) {
+      middleClickRef.current = {
+        index,
+        x: event.nativeEvent.clientX,
+        y: event.nativeEvent.clientY,
+      };
+      return;
+    }
+    if (isMobile) setSelectedIndex(index);
+    startDrag();
+  };
+
+  const handlePuckPointerUp = (
+    event: ThreeEvent<PointerEvent>,
+    index: number
+  ) => {
+    const pending = middleClickRef.current;
+    middleClickRef.current = null;
+    if (!pending || pending.index !== index) return;
+    const travelled = Math.hypot(
+      event.nativeEvent.clientX - pending.x,
+      event.nativeEvent.clientY - pending.y
+    );
+    if (travelled > BADGE_TAP_SLOP_PX) return;
+    event.stopPropagation();
+    // Middle-clicking the selected waypoint again clears it.
+    setSelectedIndex((current) => (current === index ? null : index));
+  };
 
   return (
     <group>
+      <PolylineInsertHandles3D
+        handleScale={handleScale}
+        isMobile={isMobile}
+        onInsertPoint={onInsertPoint}
+        path={path}
+      />
       {path.points.map((point, index) => {
         const pointHeight = Math.max(point.z ?? 0, 0);
-        const isActive = activeIndex === index;
+        const isDragging = activeIndex === index;
+        const isSelected = activeSelectedIndex === index;
+        const isActive = isDragging || isSelected;
         const isHovered = hoveredIndex === index;
         const guideColor = isActive
           ? "#f59e0b"
@@ -488,9 +745,13 @@ export function PolylineElevationHandles3D({
         const touchTargetRadius = isMobile
           ? 0.38 * handleScale
           : gripRadius + 0.06 * handleScale;
+        const planeDiscRadius = Math.max(
+          (isMobile ? 0.42 : 0.32) * handleScale,
+          tubeRadius * 2.4
+        );
         const touchTargetHeight = isMobile ? 0.58 * handleScale : gripHeight;
         return (
-          <group key={`${path.id}-elev-${index}`}>
+          <group key={`${path.id}-point-${index}`}>
             <mesh position={[point.x, guideHeight / 2, point.y]}>
               <cylinderGeometry args={[0.028, 0.028, guideHeight, 16]} />
               <meshBasicMaterial
@@ -499,6 +760,23 @@ export function PolylineElevationHandles3D({
                 opacity={isActive ? 0.95 : isHovered ? 0.82 : 0.48}
               />
             </mesh>
+            {isSelected && (
+              <mesh
+                position={[point.x, lineCenterY, point.y]}
+                rotation={[-Math.PI / 2, 0, 0]}
+              >
+                <ringGeometry
+                  args={[planeDiscRadius * 0.82, planeDiscRadius, 48]}
+                />
+                <meshBasicMaterial
+                  color="#fbbf24"
+                  transparent
+                  opacity={0.7}
+                  side={THREE.DoubleSide}
+                  depthWrite={false}
+                />
+              </mesh>
+            )}
             <mesh
               position={[point.x, ringY, point.y]}
               rotation={[-Math.PI / 2, 0, 0]}
@@ -528,7 +806,14 @@ export function PolylineElevationHandles3D({
             )}
             <mesh
               position={[point.x, handleY, point.y]}
-              onPointerDown={(event) => onDragStart(event, index)}
+              onPointerDown={(event) =>
+                handlePuckPointerDown(event, index, () =>
+                  isSelected
+                    ? onPlanarDragStart(event, index)
+                    : onDragStart(event, index)
+                )
+              }
+              onPointerUp={(event) => handlePuckPointerUp(event, index)}
               onPointerOver={() => setHoveredIndex(index)}
               onPointerOut={() =>
                 setHoveredIndex((current) =>
@@ -589,6 +874,20 @@ export function PolylineElevationHandles3D({
                 />
               </mesh>
             )}
+            {canRemovePoint && !isDragging && isSelected ? (
+              <PolylineRemovePointBadge3D
+                handleScale={handleScale}
+                isMobile={isMobile}
+                onRemove={() => {
+                  setSelectedIndex(null);
+                  setHoveredIndex(null);
+                  onRemovePoint(index);
+                }}
+                path={path}
+                pointIndex={index}
+                y={handleY}
+              />
+            ) : null}
           </group>
         );
       })}

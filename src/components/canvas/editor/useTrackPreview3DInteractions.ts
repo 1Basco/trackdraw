@@ -33,6 +33,7 @@ import {
   sideGateTiltAngle,
   snapRotationDegrees,
 } from "@/components/canvas/preview3d/math";
+import { POLYLINE_3D_HEIGHT_OFFSET } from "@/lib/track/constants";
 
 const elevationDragRaycaster = new THREE.Raycaster();
 const elevationDragNdc = new THREE.Vector2();
@@ -80,6 +81,35 @@ function getVerticalDragPlaneY(
   return elevationDragHit.y;
 }
 
+const planarDragPlane = new THREE.Plane();
+const planarDragUp = new THREE.Vector3(0, 1, 0);
+const planarDragHit = new THREE.Vector3();
+
+// Raycast onto the horizontal plane the waypoint currently sits on, so a
+// drag keeps its height and only changes the ground position.
+function getHorizontalDragPoint(
+  clientX: number,
+  clientY: number,
+  rect: DOMRect,
+  camera: THREE.Camera,
+  planeY: number
+): { x: number; z: number } | null {
+  const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const ndcY = -((clientY - rect.top) / rect.height) * 2 + 1;
+  elevationDragNdc.set(ndcX, ndcY);
+  elevationDragRaycaster.setFromCamera(elevationDragNdc, camera);
+  planarDragPlane.setFromNormalAndCoplanarPoint(
+    planarDragUp,
+    planarDragHit.set(0, planeY, 0)
+  );
+  if (
+    !elevationDragRaycaster.ray.intersectPlane(planarDragPlane, planarDragHit)
+  ) {
+    return null;
+  }
+  return { x: planarDragHit.x, z: planarDragHit.z };
+}
+
 interface UseTrackPreview3DInteractionsParams {
   beginInteraction: () => void;
   endInteraction: () => void;
@@ -116,7 +146,8 @@ export function useTrackPreview3DInteractions({
   shapeById,
   updateShape,
 }: UseTrackPreview3DInteractionsParams) {
-  const [elevationDrag, setElevationDrag] = useState<{
+  const [pointDrag, setPointDrag] = useState<{
+    axis: "vertical" | "planar";
     anchorX: number;
     anchorZ: number;
     shapeId: string;
@@ -124,8 +155,11 @@ export function useTrackPreview3DInteractions({
     startClientY: number;
     startPlaneY: number | null;
     startZ: number;
+    planeY: number;
+    grabOffsetX: number;
+    grabOffsetZ: number;
   } | null>(null);
-  const [elevationPreviewPoints, setElevationPreviewPoints] = useState<
+  const [pointPreviewPoints, setPointPreviewPoints] = useState<
     PolylinePoint[] | null
   >(null);
   const [rotationDrag, setRotationDrag] = useState<{
@@ -160,9 +194,9 @@ export function useTrackPreview3DInteractions({
     resumeHistory,
   });
 
-  const elevationDragRef = useRef(elevationDrag);
-  const elevationPreviewPointsRef = useRef<PolylinePoint[] | null>(
-    elevationPreviewPoints
+  const pointDragRef = useRef(pointDrag);
+  const pointPreviewPointsRef = useRef<PolylinePoint[] | null>(
+    pointPreviewPoints
   );
   const rotationDragRef = useRef(rotationDrag);
   const tiltDragRef = useRef(tiltDrag);
@@ -176,7 +210,7 @@ export function useTrackPreview3DInteractions({
   const towerElevationDragAnimationFrameRef = useRef<number | null>(null);
   const towerElevationClearAnimationFrameRef = useRef<number | null>(null);
   const diveGateElevationDragAnimationFrameRef = useRef<number | null>(null);
-  const pendingElevationClientRef = useRef<{ x: number; y: number } | null>(
+  const pendingPointDragClientRef = useRef<{ x: number; y: number } | null>(
     null
   );
   const pendingRotationClientRef = useRef<{ x: number; y: number } | null>(
@@ -197,12 +231,12 @@ export function useTrackPreview3DInteractions({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    elevationDragRef.current = elevationDrag;
-  }, [elevationDrag]);
+    pointDragRef.current = pointDrag;
+  }, [pointDrag]);
 
   useEffect(() => {
-    elevationPreviewPointsRef.current = elevationPreviewPoints;
-  }, [elevationPreviewPoints]);
+    pointPreviewPointsRef.current = pointPreviewPoints;
+  }, [pointPreviewPoints]);
 
   useEffect(() => {
     rotationDragRef.current = rotationDrag;
@@ -239,12 +273,12 @@ export function useTrackPreview3DInteractions({
   }, []);
 
   const previewPolyline = useMemo(() => {
-    if (!selectedPolyline || !elevationPreviewPoints) return selectedPolyline;
+    if (!selectedPolyline || !pointPreviewPoints) return selectedPolyline;
     return {
       ...selectedPolyline,
-      points: elevationPreviewPoints,
+      points: pointPreviewPoints,
     };
-  }, [elevationPreviewPoints, selectedPolyline]);
+  }, [pointPreviewPoints, selectedPolyline]);
 
   const handleCameraCapture = useCallback((cam: THREE.Camera) => {
     cameraRef.current = cam;
@@ -282,8 +316,9 @@ export function useTrackPreview3DInteractions({
           : null;
       if (!startSession()) return;
       setSelection([selectedPolyline.id]);
-      setElevationPreviewPoints(selectedPolyline.points);
-      setElevationDrag({
+      setPointPreviewPoints(selectedPolyline.points);
+      setPointDrag({
+        axis: "vertical",
         anchorX: point.x,
         anchorZ: point.y,
         shapeId: selectedPolyline.id,
@@ -291,20 +326,92 @@ export function useTrackPreview3DInteractions({
         startClientY: event.nativeEvent.clientY,
         startPlaneY,
         startZ: point.z ?? 0,
+        planeY: 0,
+        grabOffsetX: 0,
+        grabOffsetZ: 0,
       });
     },
     [selectedPolyline, setSelection, startSession]
   );
 
-  const applyElevationDrag = useCallback(
+  const handlePointPlanarDragStart = useCallback(
+    (event: ThreeEvent<PointerEvent>, index: number) => {
+      event.stopPropagation();
+      const point = selectedPolyline?.points[index];
+      if (!selectedPolyline || selectedPolyline.locked || !point) return;
+      const camera = cameraRef.current;
+      const container = containerRef.current;
+      const rect = container?.getBoundingClientRect();
+      const planeY = Math.max(point.z ?? 0, 0) + POLYLINE_3D_HEIGHT_OFFSET;
+      const grab =
+        camera && rect
+          ? getHorizontalDragPoint(
+              event.nativeEvent.clientX,
+              event.nativeEvent.clientY,
+              rect,
+              camera,
+              planeY
+            )
+          : null;
+      if (!startSession()) return;
+      setSelection([selectedPolyline.id]);
+      setPointPreviewPoints(selectedPolyline.points);
+      setPointDrag({
+        axis: "planar",
+        anchorX: point.x,
+        anchorZ: point.y,
+        shapeId: selectedPolyline.id,
+        idx: index,
+        startClientY: event.nativeEvent.clientY,
+        startPlaneY: null,
+        startZ: point.z ?? 0,
+        planeY,
+        grabOffsetX: grab ? point.x - grab.x : 0,
+        grabOffsetZ: grab ? point.y - grab.z : 0,
+      });
+    },
+    [selectedPolyline, setSelection, startSession]
+  );
+
+  const applyPointDrag = useCallback(
     (clientX: number, clientY: number) => {
-      const drag = elevationDragRef.current;
+      const drag = pointDragRef.current;
       if (!drag) return;
       const shape = shapeById[drag.shapeId];
       if (!shape || shape.kind !== "polyline" || shape.locked) return;
       const camera = cameraRef.current;
       const container = containerRef.current;
       const rect = container?.getBoundingClientRect();
+
+      if (drag.axis === "planar") {
+        if (!camera || !rect) return;
+        const hit = getHorizontalDragPoint(
+          clientX,
+          clientY,
+          rect,
+          camera,
+          drag.planeY
+        );
+        if (!hit) return;
+        const basePoints = pointPreviewPointsRef.current ?? shape.points;
+        const currentPoint = basePoints[drag.idx];
+        if (!currentPoint) return;
+        const nextX = +(hit.x + drag.grabOffsetX).toFixed(2);
+        const nextY = +(hit.z + drag.grabOffsetZ).toFixed(2);
+        if (
+          Math.abs(currentPoint.x - nextX) < 0.01 &&
+          Math.abs(currentPoint.y - nextY) < 0.01
+        ) {
+          return;
+        }
+        setPointPreviewPoints(
+          basePoints.map((point, index) =>
+            index === drag.idx ? { ...point, x: nextX, y: nextY } : point
+          )
+        );
+        return;
+      }
+
       const planeY =
         camera && rect && drag.startPlaneY !== null
           ? getVerticalDragPlaneY(
@@ -322,20 +429,20 @@ export function useTrackPreview3DInteractions({
           : (drag.startClientY - clientY) * 0.02;
       const nextZ = Math.max(0, +(drag.startZ + deltaMeters).toFixed(2));
       const currentPoint =
-        elevationPreviewPointsRef.current?.[drag.idx] ?? shape.points[drag.idx];
+        pointPreviewPointsRef.current?.[drag.idx] ?? shape.points[drag.idx];
       if (!currentPoint || Math.abs((currentPoint.z ?? 0) - nextZ) < 0.01)
         return;
-      const basePoints = elevationPreviewPointsRef.current ?? shape.points;
+      const basePoints = pointPreviewPointsRef.current ?? shape.points;
       const nextPoints: PolylinePoint[] = basePoints.map((point, index) =>
         index === drag.idx ? { ...point, z: nextZ } : point
       );
-      setElevationPreviewPoints(nextPoints);
+      setPointPreviewPoints(nextPoints);
     },
     [shapeById]
   );
 
   useEffect(() => {
-    if (!elevationDrag) return;
+    if (!pointDrag) return;
 
     let finished = false;
     const cleanupListeners = () => {
@@ -355,28 +462,28 @@ export function useTrackPreview3DInteractions({
     const finishDrag = () => {
       if (finished) return;
       finished = true;
-      const drag = elevationDragRef.current;
-      const finalPoints = drag ? elevationPreviewPointsRef.current : null;
+      const drag = pointDragRef.current;
+      const finalPoints = drag ? pointPreviewPointsRef.current : null;
       cleanupListeners();
       finishSession(() => {
         if (!drag || !finalPoints) return;
         setPolylinePoints(drag.shapeId, finalPoints);
       });
-      setElevationPreviewPoints(null);
-      setElevationDrag(null);
+      setPointPreviewPoints(null);
+      setPointDrag(null);
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      pendingElevationClientRef.current = {
+      pendingPointDragClientRef.current = {
         x: event.clientX,
         y: event.clientY,
       };
       if (dragAnimationFrameRef.current !== null) return;
       dragAnimationFrameRef.current = window.requestAnimationFrame(() => {
         dragAnimationFrameRef.current = null;
-        const client = pendingElevationClientRef.current;
+        const client = pendingPointDragClientRef.current;
         if (client) {
-          applyElevationDrag(client.x, client.y);
+          applyPointDrag(client.x, client.y);
         }
       });
     };
@@ -384,16 +491,16 @@ export function useTrackPreview3DInteractions({
     const handleTouchMove = (event: TouchEvent) => {
       if (!event.touches.length) return;
       event.preventDefault();
-      pendingElevationClientRef.current = {
+      pendingPointDragClientRef.current = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY,
       };
       if (dragAnimationFrameRef.current !== null) return;
       dragAnimationFrameRef.current = window.requestAnimationFrame(() => {
         dragAnimationFrameRef.current = null;
-        const client = pendingElevationClientRef.current;
+        const client = pendingPointDragClientRef.current;
         if (client) {
-          applyElevationDrag(client.x, client.y);
+          applyPointDrag(client.x, client.y);
         }
       });
     };
@@ -407,8 +514,8 @@ export function useTrackPreview3DInteractions({
       finished = true;
       cleanupListeners();
       cancelSession(() => {
-        setElevationPreviewPoints(null);
-        setElevationDrag(null);
+        setPointPreviewPoints(null);
+        setPointDrag(null);
       });
     };
 
@@ -429,9 +536,9 @@ export function useTrackPreview3DInteractions({
       cancelDrag();
     };
   }, [
-    applyElevationDrag,
+    applyPointDrag,
     cancelSession,
-    elevationDrag,
+    pointDrag,
     finishSession,
     setPolylinePoints,
   ]);
@@ -1237,18 +1344,19 @@ export function useTrackPreview3DInteractions({
     dragRotationGroupRef,
     diveGateElevationDrag,
     diveGateElevationDragValueRef,
-    elevationDrag,
     handleCameraCapture,
     handleContainerMouseDownCapture,
     handleDiveGateElevationDragStart,
     handleElevationDragStart,
     handleLadderElevationDragStart,
+    handlePointPlanarDragStart,
     handleRotateDragStart,
     handleTiltDragStart,
     handleTowerElevationDragStart,
     isMiddleMousePanning,
     ladderElevationDrag,
     ladderElevationDragValueRef,
+    pointDrag,
     previewPolyline,
     rotationDrag,
     rotationDragValueRef,

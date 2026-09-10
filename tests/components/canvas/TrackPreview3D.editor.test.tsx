@@ -153,7 +153,7 @@ vi.mock("@/components/canvas/editor/edit-scene-content", () => ({
   DiveGateTiltHandle3D: () => null,
   GateRotateHandle3D: () => null,
   LadderElevationHandle3D: () => null,
-  PolylineElevationHandles3D: ({ path }: { path: PolylineShape }) => (
+  PolylinePointHandles3D: ({ path }: { path: PolylineShape }) => (
     <div data-path-id={path.id} data-testid="polyline-elevation-handles" />
   ),
 }));
