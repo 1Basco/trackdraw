@@ -1,0 +1,99 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "delete": "Excluir",
+    "duplicate": "Duplicar",
+    "hide": "Ocultar",
+    "lock": "Bloquear",
+    "remove": "Remover",
+    "rename": "Renomear",
+    "reset": "Redefinir",
+    "save": "Salvar",
+    "saveChanges": "Salvar alterações",
+    "select": "Selecionar",
+    "undo": "Desfazer",
+    "unlock": "Desbloquear"
+  },
+  "labels": {
+    "account": "Conta",
+    "actions": "Ações",
+    "dashboard": "Painel",
+    "description": "Descrição",
+    "expires": "Expira em",
+    "language": "Idioma",
+    "name": "Nome",
+    "owner": "Dono",
+    "profile": "Perfil",
+    "project": "Projeto",
+    "role": "Função",
+    "status": "Status",
+    "theme": "Tema",
+    "title": "Título",
+    "type": "Tipo",
+    "view": "Visualização"
+  },
+  "dataTable": {
+    "filterPlaceholder": "Filtrar {title}...",
+    "noResults": "Nenhum resultado encontrado.",
+    "selectedCount": "{count} selecionado(s)",
+    "clearFilters": "Limpar filtros",
+    "rowsPerPage": "Linhas por página",
+    "page": "Página {current} de {total}",
+    "previousPage": "Página anterior",
+    "nextPage": "Próxima página"
+  },
+  "measurementUnit": {
+    "metric": "Métrico",
+    "imperial": "Imperial",
+    "presetAriaLabel": "Unidade de medida: {current}. Mudar para {next}.",
+    "presetLabel": "Unidade de medida: {current}",
+    "description": "Altera as distâncias exibidas e os campos compatíveis."
+  },
+  "themeToggle": {
+    "labels": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "ariaLabel": "Tema: {theme}",
+    "tooltip": "Atual: {current}. Clique para {next}."
+  },
+  "versionTag": {
+    "tooltip": {
+      "openReleaseNotes": "Abrir as notas de versão no GitHub",
+      "openReleaseNotesForCommit": "commit {sha} · Abrir as notas de versão no GitHub"
+    }
+  },
+  "runtimeError": {
+    "badge": "Erro de execução",
+    "title": "O TrackDraw encontrou um problema.",
+    "description": "A tela atual parou de responder. Os dados do seu projeto local normalmente continuam guardados neste navegador, mas evite fechar a aba antes de tentar recuperá-los.",
+    "tryAgain": "Tentar de novo",
+    "openStudio": "Abrir o Studio",
+    "nextStep": "Se isso continuar acontecendo, reabra o Studio e exporte um backup em JSON antes de seguir com edições grandes."
+  },
+  "productAnalytics": {
+    "title": "Analytics do produto",
+    "description": "Controle a medição de uso com segurança de privacidade. Ao desativar, os eventos futuros param e o TrackDraw exclui os eventos ligados a esta sessão do navegador e, se você estiver conectado, à sua conta, aos seus projetos e aos seus compartilhamentos.",
+    "preferenceTitle": "Compartilhar dados de uso com segurança de privacidade",
+    "preferenceDescription": "Ajuda a melhorar os fluxos do editor e a confiabilidade. O conteúdo das pistas, URLs completas, endereços IP e perfis de publicidade nunca são incluídos.",
+    "saving": "Salvando…",
+    "toggleLabel": "Compartilhar analytics do produto com segurança de privacidade",
+    "error": "A coleta futura foi desativada neste navegador, mas o TrackDraw não conseguiu confirmar a exclusão dos eventos existentes. Tente novamente."
+  },
+  "status": {
+    "active": "Ativo",
+    "expired": "Expirado",
+    "featured": "Em destaque",
+    "hidden": "Oculto",
+    "listed": "Listado",
+    "loading": "Carregando",
+    "off": "Desligado",
+    "on": "Ligado",
+    "pending": "Pendente",
+    "published": "Publicado",
+    "revoked": "Revogado"
+  }
+}

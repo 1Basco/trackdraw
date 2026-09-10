@@ -6,6 +6,7 @@ import {
   getFlag2DShape,
   getGate2DShape,
   getLadder2DShape,
+  getPvcFrame2DShape,
   getStartFinish2DShape,
 } from "@/lib/track/shape2d";
 import { getPolylineBounds } from "@/lib/track/polyline-derived";
@@ -18,6 +19,7 @@ import type {
   LabelShape,
   LadderShape,
   PolylineShape,
+  PvcFrameShape,
   Shape,
   ShapeKind,
   StartFinishShape,
@@ -90,6 +92,8 @@ const shapeBoundsDispatch: Record<
     const { width, depth } = getBarrier2DShape(shape as BarrierShape, ppm);
     return { x: -width / 2, y: -depth / 2, width, height: depth };
   },
+  pvcframe: (shape, ppm) =>
+    getPvcFrame2DShape(shape as PvcFrameShape, ppm).bounds,
 };
 
 export function getShapeLocalBounds(shape: Shape, ppm: number): Bounds | null {

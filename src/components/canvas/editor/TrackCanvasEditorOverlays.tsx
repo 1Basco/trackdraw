@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Circle, Group, Layer, Line } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { FieldOverlayContent } from "@/components/canvas/renderers/field-layer";
@@ -17,6 +18,8 @@ interface TrackCanvasEditorOverlaysProps {
   dragSnapPreview: { x: number; y: number } | null;
   effectiveSelectionFrame: RectLike | null;
   frontLabel: string;
+  /** Multiplier for draft strokes and markers (smaller for whoop designs). */
+  handleScale: number;
   hoverCell: { x: number; y: number } | null;
   isDark: boolean;
   magneticSnapRadiusPx: number;
@@ -36,7 +39,7 @@ interface TrackCanvasEditorOverlaysProps {
   stepPx: number;
 }
 
-export default function TrackCanvasEditorOverlays({
+function TrackCanvasEditorOverlaysComponent({
   activeTool,
   cursor,
   designPpm,
@@ -46,6 +49,7 @@ export default function TrackCanvasEditorOverlays({
   dragSnapPreview,
   effectiveSelectionFrame,
   frontLabel,
+  handleScale,
   hoverCell,
   isDark,
   magneticSnapRadiusPx,
@@ -100,6 +104,7 @@ export default function TrackCanvasEditorOverlays({
             stroke={isDark ? "#7dd3fc66" : "#0ea5e955"}
             strokeWidth={0.8}
             opacity={0.42}
+            perfectDrawEnabled={false}
           />
           <Circle
             x={dragSnapPreview.x}
@@ -115,7 +120,10 @@ export default function TrackCanvasEditorOverlays({
         ? (() => {
             const sx = m2px(snapTarget.x, designPpm);
             const sy = m2px(snapTarget.y, designPpm);
-            const r = Math.max(m2px(snapRadiusMeters * 0.55, designPpm), 14);
+            const r = Math.max(
+              m2px(snapRadiusMeters * 0.55, designPpm),
+              14 * handleScale
+            );
             return (
               <Group listening={false}>
                 <Circle
@@ -138,7 +146,7 @@ export default function TrackCanvasEditorOverlays({
           <Line
             points={draftPreviewSmoothPx}
             stroke="#60a5fa"
-            strokeWidth={m2px(0.28, designPpm)}
+            strokeWidth={m2px(0.28, designPpm) * handleScale}
             lineCap="round"
             lineJoin="round"
             opacity={0.25}
@@ -146,7 +154,7 @@ export default function TrackCanvasEditorOverlays({
           <Line
             points={draftPreviewSmoothPx}
             stroke={snapTarget ? "#22c55e" : "#3b82f6"}
-            strokeWidth={m2px(0.18, designPpm)}
+            strokeWidth={m2px(0.18, designPpm) * handleScale}
             lineCap="round"
             lineJoin="round"
             opacity={0.65}
@@ -211,7 +219,7 @@ export default function TrackCanvasEditorOverlays({
           <Circle
             x={draftPointsPx[0]}
             y={draftPointsPx[1]}
-            radius={Math.max(5, m2px(0.1, designPpm))}
+            radius={Math.max(5, m2px(0.1, designPpm)) * handleScale}
             stroke="#22c55e"
             strokeWidth={1.5}
             opacity={0.6}
@@ -224,7 +232,7 @@ export default function TrackCanvasEditorOverlays({
           <Circle
             x={m2px(draftCloseTarget.x, designPpm)}
             y={m2px(draftCloseTarget.y, designPpm)}
-            radius={Math.max(9, m2px(0.28, designPpm))}
+            radius={Math.max(9, m2px(0.28, designPpm)) * handleScale}
             stroke="#f59e0b"
             strokeWidth={1.5}
             dash={[5, 4]}
@@ -233,7 +241,7 @@ export default function TrackCanvasEditorOverlays({
           <Circle
             x={m2px(draftCloseTarget.x, designPpm)}
             y={m2px(draftCloseTarget.y, designPpm)}
-            radius={3.5}
+            radius={3.5 * handleScale}
             fill="#f59e0b"
             opacity={0.95}
           />
@@ -269,3 +277,9 @@ export default function TrackCanvasEditorOverlays({
     </Layer>
   );
 }
+
+// Rendered inside the Konva stage, so it is re-rendered by every TrackCanvas
+// render — including the one the wheel-zoom animation triggers per frame.
+// None of its props depend on the stage transform, so a shallow memo keeps the
+// whole overlay layer out of the zoom path.
+export default memo(TrackCanvasEditorOverlaysComponent);

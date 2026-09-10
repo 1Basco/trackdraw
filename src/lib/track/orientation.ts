@@ -5,6 +5,7 @@ import type {
   GateShape,
   LadderShape,
   LabelShape,
+  PvcFrameShape,
   Shape,
   StartFinishShape,
   TowerShape,
@@ -16,7 +17,12 @@ import {
 } from "@/lib/track/items/registry";
 
 export type FrontBackShape =
-  GateShape | StartFinishShape | LadderShape | TowerShape | DiveGateShape;
+  | GateShape
+  | StartFinishShape
+  | LadderShape
+  | TowerShape
+  | DiveGateShape
+  | PvcFrameShape;
 
 export function hasFrontBackOrientation(shape: Shape): shape is FrontBackShape {
   return hasFrontBackItemOrientation(shape);
@@ -39,7 +45,8 @@ type OrientationShape =
   | DiveGateShape
   | FlagShape
   | LabelShape
-  | BarrierShape;
+  | BarrierShape
+  | PvcFrameShape;
 
 export function resolveShapeOrientationDegrees(
   shape: OrientationShape,
@@ -62,6 +69,7 @@ export function getPreviewRotationGuideDegrees(
     | StartFinishShape
     | DiveGateShape
     | FlagShape
+    | PvcFrameShape
 ) {
   return resolveShapeOrientationDegrees(shape, "previewGuide");
 }

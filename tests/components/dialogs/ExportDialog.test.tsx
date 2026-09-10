@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   exportFlythrough: vi.fn(),
   exportPdf: vi.fn(),
   exportPng: vi.fn(),
+  exportWhoopPack: vi.fn(),
   exportSvg: vi.fn(),
   toastError: vi.fn(),
   toastLoading: vi.fn(),
@@ -78,6 +79,10 @@ vi.mock("@/lib/export/exportPng", () => ({
   exportPng: mocks.exportPng,
 }));
 
+vi.mock("@/lib/export/exportWhoopPack", () => ({
+  exportWhoopPack: mocks.exportWhoopPack,
+}));
+
 vi.mock("@/lib/export/exportSvg", () => ({
   exportSvg: mocks.exportSvg,
 }));
@@ -132,6 +137,15 @@ describe("ExportDialog mobile workflow", () => {
     mocks.exportFlythrough.mockReset();
     mocks.exportPdf.mockReset();
     mocks.exportPng.mockReset();
+    mocks.exportWhoopPack.mockReset();
+    mocks.exportWhoopPack.mockResolvedValue({
+      zipFilename: "pack.zip",
+      entryNames: ["route-map.png", "bill-of-materials.md"],
+      zipByteLength: 2048,
+      gifIncluded: true,
+      viewCount: 6,
+      warnings: [],
+    });
     mocks.exportSvg.mockReset();
     mocks.toastError.mockReset();
     mocks.toastLoading.mockReset();
@@ -658,5 +672,56 @@ describe("ExportDialog mobile workflow", () => {
     });
     expect(mocks.toastSuccess).toHaveBeenCalledWith("Exported", undefined);
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("exports a Whoop Pack from the Race Day category", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    addGate();
+    addRaceLine();
+
+    render(
+      <ExportDialog
+        canvasRef={{ current: null }}
+        onOpenChange={onOpenChange}
+        open
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /^Race Day$/ }));
+    await user.click(await screen.findByText("Whoop Pack"));
+
+    // The pack is a ZIP of images plus the bill of materials, not a PDF.
+    expect(
+      await screen.findByText(/ZIP of images plus the bill of materials/)
+    ).toBeTruthy();
+    // The filename suffix next to the stem field is the archive extension.
+    expect(screen.getAllByText(".zip").length).toBeGreaterThan(0);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Export Whoop Pack" })
+    );
+
+    await waitFor(() => {
+      expect(mocks.exportWhoopPack).toHaveBeenCalledWith(
+        expect.objectContaining({ version: 2 }),
+        expect.stringMatching(/^New_Track_whoop_pack_dark_\d{4}-\d{2}-\d{2}$/),
+        "dark",
+        expect.objectContaining({
+          t: expect.any(Function),
+          tShapes: expect.any(Function),
+          tInspector: expect.any(Function),
+        }),
+        expect.objectContaining({
+          includeObstacleNumbers: true,
+          locale: "en",
+          onProgress: expect.any(Function),
+        })
+      );
+    });
+    expect(mocks.toastSuccess).toHaveBeenCalledWith(
+      "Whoop Pack ready",
+      expect.objectContaining({ id: "whoop-pack-export" })
+    );
   });
 });

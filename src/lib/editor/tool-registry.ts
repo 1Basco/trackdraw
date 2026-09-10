@@ -99,6 +99,8 @@ export function createShapeForTool(
     x: point.x,
     y: point.y,
     includeCatalogMetadata:
-      resolvedEntry?.official === true || resolvedEntry?.kind === "barrier",
+      resolvedEntry?.official === true ||
+      resolvedEntry?.kind === "barrier" ||
+      resolvedEntry?.kind === "pvcframe",
   });
 }

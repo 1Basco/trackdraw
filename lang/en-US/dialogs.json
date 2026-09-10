@@ -267,7 +267,9 @@
       "emptyRacePack": "Add at least one item to the track before exporting a Race Pack.",
       "missingRaceLine": "Add a race line before exporting a cinematic FPV video.",
       "emptyVelocidrone": "Add at least one item to the track before exporting a Velocidrone file.",
-      "experimentalSimulator": "Some TrackDraw items may import differently in Velocidrone."
+      "experimentalSimulator": "Some TrackDraw items may import differently in Velocidrone.",
+      "emptyWhoopPack": "Add at least one item to the track before exporting a Whoop Pack.",
+      "whoopPackWithoutRoute": "Without a race line the archive skips the lap animation and the race-line views."
     },
     "webm": {
       "renderingBackground": "Cinematic FPV is rendering in the background…",
@@ -327,11 +329,26 @@
         "label": "Velocidrone",
         "descriptionFull": "Experimental Velocidrone track file for testing in the simulator; check the layout after import.",
         "descriptionShort": "Experimental file for testing; check after import."
+      },
+      "whoopPack": {
+        "label": "Whoop Pack",
+        "descriptionFull": "ZIP of images plus the bill of materials: route map, six 3D corner views, a looping lap GIF, and the parts list as Markdown and CSV.",
+        "descriptionShort": "ZIP with route map, corner views, lap GIF, and the BOM."
       }
     },
     "errors": {
       "exportFailed": "Export failed",
       "exportFailedDescription": "{message} Try again, switch export format, or export the project JSON as a manual backup."
+    },
+    "whoopPack": {
+      "renderingBackground": "Whoop Pack is rendering in the background…",
+      "renderingProgress": "Rendering Whoop Pack… {status}",
+      "stageMap": "route map",
+      "stageViews": "3D views",
+      "stageAnimation": "lap animation",
+      "stageArchive": "archive",
+      "ready": "Whoop Pack ready",
+      "progressLabel": "Rendering {stage}"
     }
   },
   "import": {

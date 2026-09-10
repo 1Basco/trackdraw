@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "title": "Entrar",
+    "description": "Entre no TrackDraw com um link mágico de uso único."
+  },
+  "goHome": "Ir para a página inicial",
+  "backToStudio": "Voltar ao Studio",
+  "pageTitle": "Conta TrackDraw",
+  "heading": "Continue seu trabalho no TrackDraw de onde estiver.",
+  "description": "Acesse seus layouts em qualquer dispositivo, mantenha as pistas compartilhadas ligadas à sua conta e volte ao trabalho com um simples link por e-mail.",
+  "featureDevices": {
+    "title": "Em vários dispositivos",
+    "description": "Retome o trabalho em outro dispositivo sem mudar o fluxo do editor."
+  },
+  "featureOwnership": {
+    "title": "Propriedade",
+    "description": "Dê aos layouts compartilhados e aos recursos futuros de conta um lugar definido."
+  },
+  "featureMagicLink": {
+    "title": "Link mágico como alternativa",
+    "description": "Use uma passkey quando houver, ou recorra a um link de acesso enviado para o seu e-mail."
+  },
+  "signIn": {
+    "title": "Entrar",
+    "description": "Entre com uma passkey neste dispositivo ou use seu e-mail para receber um link mágico, sem senha.",
+    "checkInboxTitle": "Confira sua caixa de entrada",
+    "checkInboxBody": "Seu link de acesso de uso único foi enviado para {email}. Abra-o neste dispositivo, ou em outro, para continuar. Se não chegar logo, verifique a pasta de spam.",
+    "howItWorksTitle": "Como funciona o acesso por link mágico",
+    "howItWorksBody": "Cada e-mail contém um link de acesso de uso único. Não precisa criar senha: basta abrir o link e o TrackDraw conecta você.",
+    "useDifferentEmail": "Usar outro e-mail",
+    "openingPasskey": "Abrindo a passkey…",
+    "signInPasskey": "Entrar com passkey",
+    "or": "ou",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "sendingLink": "Enviando o link…",
+    "sendLink": "Enviar um link de acesso por e-mail",
+    "noPasskeySupport": "Este navegador não oferece suporte a passkeys aqui no momento, então use o link mágico.",
+    "passkeyNotFound": "Não conseguimos associar essa passkey à sua conta TrackDraw. Tente outra passkey ou use o link de acesso por e-mail.",
+    "passkeyFailed": "Não foi possível entrar com a passkey.",
+    "checkEmail": "Confira seu e-mail para encontrar o link de acesso."
+  },
+  "magicLinkVerify": {
+    "eyebrow": "Acesso seguro",
+    "secureSession": "Transferência protegida por link mágico",
+    "needsNewLink": "É preciso um link novo",
+    "autoTitle": "Conectando você",
+    "autoDescription": "O TrackDraw está abrindo seu espaço de trabalho com o link de acesso do seu e-mail.",
+    "title": "Abrir o TrackDraw",
+    "description": "Continue neste navegador para concluir o acesso. Isso protege seu link de uso único das verificações automáticas de segurança de e-mail.",
+    "statusEmail": "Link do e-mail recebido",
+    "statusVerify": "Verificando seu link de acesso",
+    "statusStudio": "Abrindo seu espaço de trabalho",
+    "continue": "Continuar para o TrackDraw",
+    "continuing": "Continuando...",
+    "requestNewLink": "Solicitar um novo link",
+    "backToLogin": "Voltar ao login",
+    "invalidTitle": "Este link de acesso está incompleto",
+    "invalidDescription": "Solicite um novo link de acesso e abra-o a partir do e-mail mais recente do TrackDraw.",
+    "failed": "Não foi possível usar este link de acesso. Solicite um novo link e tente de novo."
+  }
+}

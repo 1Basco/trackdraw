@@ -51,6 +51,7 @@ interface EditorMobilePanelsProps {
   mobileInspectorOpen: boolean;
   mobileMultiSelectEnabled: boolean;
   snapEnabled: boolean;
+  snapGridEnabled: boolean;
   mobileGizmoEnabled: boolean;
   mobileObstacleNumbersEnabled: boolean;
   mobileRulersEnabled: boolean;
@@ -98,6 +99,7 @@ interface EditorMobilePanelsProps {
   onSetMobileGizmoEnabled: (enabled: boolean) => void;
   onSetMobileObstacleNumbersEnabled: (enabled: boolean) => void;
   onToggleSnapEnabled: () => void;
+  onToggleSnapGridEnabled: () => void;
   onSelectPlacementElement: (
     tool: EditorTool,
     entryId: TrackElementCatalogId
@@ -374,6 +376,7 @@ export function EditorMobilePanels({
   mobileInspectorOpen,
   mobileMultiSelectEnabled,
   snapEnabled,
+  snapGridEnabled,
   mobileGizmoEnabled,
   mobileObstacleNumbersEnabled,
   mobileRulersEnabled,
@@ -418,6 +421,7 @@ export function EditorMobilePanels({
   onSetMobileGizmoEnabled,
   onSetMobileObstacleNumbersEnabled,
   onToggleSnapEnabled,
+  onToggleSnapGridEnabled,
   onSelectPlacementElement,
   onSelectTool,
   onSetMobileToolsOpen,
@@ -782,6 +786,8 @@ export function EditorMobilePanels({
             saveStatusLabel={saveStatusLabel}
             snapEnabled={snapEnabled}
             onToggleSnapEnabled={onToggleSnapEnabled}
+            snapGridEnabled={snapGridEnabled}
+            onToggleSnapGridEnabled={onToggleSnapGridEnabled}
             closePanel={() => onSetMobileViewOpen(false)}
             tab={tab}
           />

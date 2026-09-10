@@ -29,7 +29,8 @@ const MAX_GRID_CELLS_PER_AXIS = 4096;
 const TRACK_BORDER_WIDTH = 0.45;
 const TRACK_BORDER_HEIGHT = 0.08;
 
-const THEME = {
+/** Scene palette shared by the fly-through video and the Whoop Pack renders. */
+export const FLYTHROUGH_THEME = {
   dark: {
     bg: "#0b1018",
     skyTop: "#182848",
@@ -229,7 +230,7 @@ export function createFlythroughSurface(
   const terrainSize = Math.max(longest * 3, longest + 80);
   const gridStep = resolveFlythroughGridStep(field);
   const sectionSize = gridStep * 5;
-  const theme = THEME[themeName];
+  const theme = FLYTHROUGH_THEME[themeName];
   const group = new THREE.Group();
   group.name = "flythrough-track-surface";
   const borderOuterWidth = width + TRACK_BORDER_WIDTH * 2;
@@ -418,7 +419,7 @@ export function exportFlythrough(
     const cx = fw / 2;
     const cz = fh / 2;
 
-    const t = THEME[themeName];
+    const t = FLYTHROUGH_THEME[themeName];
     const isDark = themeName === "dark";
 
     const canvas = document.createElement("canvas");

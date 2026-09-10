@@ -20,6 +20,7 @@ const shapeKinds: ShapeKind[] = [
   "ladder",
   "divegate",
   "barrier",
+  "pvcframe",
 ];
 
 describe("track item adapters", () => {
@@ -55,6 +56,7 @@ describe("track item adapters", () => {
       "divegate",
       "gate",
       "ladder",
+      "pvcframe",
       "tower",
     ]);
   });
@@ -110,6 +112,7 @@ describe("getInventoryKinds", () => {
   it("excludes non-inventory kinds", () => {
     const inventoryKinds = getInventoryKinds();
     expect(inventoryKinds).not.toContain("tower");
+    expect(inventoryKinds).not.toContain("pvcframe");
     expect(inventoryKinds).not.toContain("label");
     expect(inventoryKinds).not.toContain("polyline");
   });

@@ -8,6 +8,18 @@ import { PreflightSummary } from "@/components/inspector/PreflightSummary";
 import { MeasurementUnitToggle } from "@/components/MeasurementUnitToggle";
 import { MapReferenceDialog } from "@/components/map-reference/MapReferenceDialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getDesignScaleProfile,
+  TRACK_CLASSES,
+  WHOOP_SUGGESTED_GRID_STEP_METERS,
+} from "@/lib/track/track-class";
 import { cn } from "@/lib/utils";
 import { getShapeKindLabel, type Translate } from "@/lib/track/items/registry";
 import {
@@ -16,6 +28,8 @@ import {
   normalizeInventoryProfile,
 } from "@/lib/planning/inventory";
 import { getObstacleNumberingReport } from "@/lib/track/obstacleNumbering";
+import { sumPvcFrameBillOfMaterials } from "@/lib/track/pvc-frame/bom";
+import { PVC_FITTING_KINDS } from "@/lib/track/pvc-frame/joints";
 import { getTrackPreflightReport } from "@/lib/track/preflight";
 import {
   generateRaceLineDraft,
@@ -379,6 +393,56 @@ export function ProjectLayoutInspectorView({
     });
   };
 
+  const scaleProfile = getDesignScaleProfile(design);
+  const trackClass = design.trackClass ?? "standard";
+  const setTrackClass = (value: string) => {
+    const nextClass = value === "whoop" ? "whoop" : undefined;
+    updateDesignMeta({ trackClass: nextClass });
+    if (
+      nextClass === "whoop" &&
+      design.field.gridStep > WHOOP_SUGGESTED_GRID_STEP_METERS
+    ) {
+      updateField({ gridStep: WHOOP_SUGGESTED_GRID_STEP_METERS });
+    }
+  };
+
+  const pvcMaterials = useMemo(
+    () =>
+      sumPvcFrameBillOfMaterials(
+        design.shapeOrder
+          .map((id) => design.shapeById[id])
+          .filter((shape): shape is Shape => Boolean(shape))
+      ),
+    [design.shapeById, design.shapeOrder]
+  );
+  const pvcMaterialsContent =
+    pvcMaterials.frames > 0 ? (
+      <Section title={t("layout.sections.pvcMaterials")}>
+        <div className="space-y-1">
+          <p className="text-muted-foreground/70 text-[11px] leading-relaxed">
+            {t("layout.pvcMaterials.description", {
+              count: pvcMaterials.frames,
+            })}
+          </p>
+          <Row label={t("pvcFrame.tubesLabel")}>
+            <span className="font-mono text-[11px]">{pvcMaterials.tubes}</span>
+          </Row>
+          {PVC_FITTING_KINDS.filter(
+            (kind) => pvcMaterials.fittings[kind] > 0
+          ).map((kind) => (
+            <Row key={kind} label={t(`pvcFrame.fittings.${kind}`)}>
+              <span className="font-mono text-[11px]">
+                {pvcMaterials.fittings[kind]}
+              </span>
+            </Row>
+          ))}
+          <Row label={t("pvcFrame.feetLabel")}>
+            <span className="font-mono text-[11px]">{pvcMaterials.feet}</span>
+          </Row>
+        </div>
+      </Section>
+    ) : null;
+
   const inventoryContent = (
     <Section title={t("layout.sections.inventory")}>
       <div className="space-y-3">
@@ -456,12 +520,36 @@ export function ProjectLayoutInspectorView({
         <Row label={t("layout.field.unitsLabel")}>
           <MeasurementUnitToggle />
         </Row>
+        <Row label={t("layout.field.trackClassLabel")}>
+          <Select value={trackClass} onValueChange={setTrackClass}>
+            <SelectTrigger
+              aria-label={t("layout.field.trackClassLabel")}
+              className="border-border/40 bg-muted/40 h-9 w-full text-xs shadow-none lg:h-7 lg:text-[11px]"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TRACK_CLASSES.map((value) => (
+                <SelectItem
+                  key={value}
+                  value={value}
+                  className="text-xs lg:text-[11px]"
+                >
+                  {t(`layout.field.trackClass.${value}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Row>
+        <p className="text-muted-foreground/70 text-[11px] leading-relaxed">
+          {t(`layout.field.trackClassDescription.${trackClass}`)}
+        </p>
         <Row label={t("dimensions.widthLabel", { unit: fieldUnitLabel })}>
           <MeasurementNum
             valueMeters={design.field.width}
             unitSystem={unitSystem}
             onChange={(value) => updateField({ width: value })}
-            minMeters={5}
+            minMeters={scaleProfile.fieldMinSizeMeters}
           />
         </Row>
         <Row label={t("dimensions.heightLabel", { unit: fieldUnitLabel })}>
@@ -469,7 +557,7 @@ export function ProjectLayoutInspectorView({
             valueMeters={design.field.height}
             unitSystem={unitSystem}
             onChange={(value) => updateField({ height: value })}
-            minMeters={5}
+            minMeters={scaleProfile.fieldMinSizeMeters}
           />
         </Row>
         <Row label={t("dimensions.gridLabel", { unit: fieldUnitLabel })}>
@@ -477,7 +565,7 @@ export function ProjectLayoutInspectorView({
             valueMeters={design.field.gridStep}
             unitSystem={unitSystem}
             onChange={(value) => updateField({ gridStep: value })}
-            minMeters={0.5}
+            minMeters={scaleProfile.gridStepMinMeters}
           />
         </Row>
       </Section>
@@ -505,6 +593,7 @@ export function ProjectLayoutInspectorView({
         </Row>
       </Section>
       {inventoryContent}
+      {pvcMaterialsContent}
     </>
   );
 

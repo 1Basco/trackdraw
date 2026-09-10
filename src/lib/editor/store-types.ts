@@ -21,6 +21,9 @@ export interface EditorUiState {
   activePresetId: string | null;
   activePlacementElementId: Partial<Record<EditorTool, TrackElementCatalogId>>;
   snapEnabled: boolean;
+  /** Round placements and drags to the field grid while snap is on. Off keeps object/route/joint snapping only. */
+  snapGridEnabled: boolean;
+  pvcBuildLevel: number;
   zoom: number;
   panOffset: { x: number; y: number };
   hoveredShapeId: string | null;
@@ -85,6 +88,11 @@ export interface EditorTrackActions {
   reversePolylinePoints: (id: string) => void;
   rotateShapes: (ids: string[], delta: number) => void;
   removeShapes: (ids: string[]) => void;
+  mergePvcFrames: (
+    sourceId: string,
+    targetId: string,
+    sourcePosition?: { x: number; y: number }
+  ) => boolean;
   duplicateShapes: (ids: string[]) => void;
   groupSelection: (ids: string[]) => string | null;
   setGroupName: (ids: string[], name: string) => void;
@@ -102,6 +110,7 @@ export interface EditorTrackActions {
         | "description"
         | "authorName"
         | "tags"
+        | "trackClass"
         | "inventory"
         | "mapReference"
       >
@@ -138,6 +147,9 @@ export interface EditorUiActions {
   ) => void;
   setSnapEnabled: (enabled: boolean) => void;
   toggleSnapEnabled: () => void;
+  setSnapGridEnabled: (enabled: boolean) => void;
+  toggleSnapGridEnabled: () => void;
+  setPvcBuildLevel: (level: number) => void;
   setZoom: (zoom: number) => void;
   setPanOffset: (offset: { x: number; y: number }) => void;
   setHoveredShapeId: (shapeId: string | null) => void;
@@ -259,6 +271,8 @@ export const editorStateOwnership = {
     "activePresetId",
     "activePlacementElementId",
     "snapEnabled",
+    "snapGridEnabled",
+    "pvcBuildLevel",
     "zoom",
     "panOffset",
     "hoveredShapeId",

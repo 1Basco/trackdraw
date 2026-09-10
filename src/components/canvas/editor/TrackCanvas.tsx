@@ -12,18 +12,23 @@ import {
   useState,
   forwardRef,
 } from "react";
-import { Stage, Layer, Circle, Line, Group, Rect, Text } from "react-konva";
+import { Stage, Layer, Circle, Group, Rect, Text } from "react-konva";
 import type { Vector2d } from "konva/lib/types";
 import type { Group as KonvaGroup } from "konva/lib/Group";
+import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { clamp } from "@/lib/utils";
 import {
   mergeClientRects,
+  quantizeViewportScale,
   type CursorState,
   type RectLike,
 } from "@/lib/canvas/shared";
 import { useTrackCanvasInteractions } from "@/components/canvas/editor/useTrackCanvasInteractions";
-import { StableFieldContent } from "@/components/canvas/renderers/field-layer";
+import {
+  buildFieldGridElements,
+  StableFieldContent,
+} from "@/components/canvas/renderers/field-layer";
 import { MapReferenceLayer } from "@/components/canvas/renderers/map-reference-layer";
 import { getShapeLocalBounds } from "@/components/canvas/renderers/shape-bounds";
 import { TrackShapeNode } from "@/components/canvas/renderers/shape-node";
@@ -49,12 +54,20 @@ import {
   m2px,
   px2m,
 } from "@/lib/track/units";
-import { DEFAULT_POLYLINE_STROKE_WIDTH } from "@/lib/track/constants";
+import { getDesignScaleProfile } from "@/lib/track/track-class";
 import {
   buildSnapIndex,
   getNearbySnapCandidates as getNearbySnapCandidatesFromIndex,
 } from "@/lib/canvas/interaction-helpers";
 import { resolveSnapPosition } from "@/lib/canvas/snap";
+import {
+  getPvcFramePitch,
+  resolvePvcFrameKit,
+} from "@/lib/track/pvc-frame/kit";
+import {
+  findPvcFrameMergeTarget,
+  resolvePvcFrameLatticeSnap,
+} from "@/lib/track/pvc-frame/snap";
 import {
   getCanvasRotationGuideAngleDeg,
   hasFrontBackOrientation,
@@ -184,6 +197,7 @@ const TrackCanvas = memo(
       addShapes,
       rotateShapes,
       removeShapes,
+      mergePvcFrames,
       duplicateShapes,
       groupSelection,
       joinPolylines,
@@ -199,6 +213,7 @@ const TrackCanvas = memo(
       (state) => state.ui.activePlacementElementId
     );
     const snapEnabled = useEditor((state) => state.ui.snapEnabled);
+    const snapGridEnabled = useEditor((state) => state.ui.snapGridEnabled);
     const segmentSel = useEditor((state) => state.ui.segmentSelection);
     const vertexSel = useEditor((state) => state.ui.vertexSelection);
     const draftPath = useEditor((state) => state.ui.draftPath);
@@ -482,9 +497,17 @@ const TrackCanvas = memo(
       [stepPx]
     );
 
+    const scaleProfile = getDesignScaleProfile(design);
     const waypointSnapRadiusMeters = useMemo(
-      () => Math.max(1, design.field.gridStep * 1.5),
-      [design.field.gridStep]
+      () =>
+        Math.min(
+          scaleProfile.waypointDragSnapRadiusMaxMeters,
+          Math.max(
+            scaleProfile.pointerSnapRadiusMinMeters,
+            design.field.gridStep * scaleProfile.pointerSnapRadiusGridFactor
+          )
+        ),
+      [design.field.gridStep, scaleProfile]
     );
     const waypointSnapCellSize = useMemo(
       () => Math.max(waypointSnapRadiusMeters * 2, design.field.gridStep * 4),
@@ -531,7 +554,7 @@ const TrackCanvas = memo(
         };
         const resolvedMeters = resolveSnapPosition({
           pos: posMeters,
-          snapToGrid: options.snapToGrid ?? true,
+          snapToGrid: options.snapToGrid ?? snapGridEnabled,
           snapToShapes: options.snapToShapes ?? true,
           snapToAxisAlignment: options.snapToAxisAlignment,
           gridStep: design.field.gridStep,
@@ -554,6 +577,7 @@ const TrackCanvas = memo(
         design.field.ppm,
         getWaypointSnapCandidates,
         routeSnapCandidates,
+        snapGridEnabled,
         waypointSnapRadiusMeters,
       ]
     );
@@ -584,12 +608,63 @@ const TrackCanvas = memo(
         const bounded = clampShapeDragPosition(pos);
         if (!snapEnabled) return bounded;
 
+        const draggedShape = design.shapeById[draggedShapeId];
+        if (draggedShape?.kind === "pvcframe") {
+          // Whoop frames snap joint-to-joint onto other frames instead of the
+          // field grid; a 61 cm lattice has nothing to gain from 1 m grid lines.
+          const pitch = getPvcFramePitch(resolvePvcFrameKit(draggedShape));
+          const snapped = resolvePvcFrameLatticeSnap({
+            shape: draggedShape,
+            position: {
+              x: px2m(bounded.x, design.field.ppm),
+              y: px2m(bounded.y, design.field.ppm),
+            },
+            others: designShapes,
+            radiusMeters: Math.min(waypointSnapRadiusMeters, pitch * 0.45),
+          });
+          return snapped
+            ? {
+                x: m2px(snapped.x, design.field.ppm),
+                y: m2px(snapped.y, design.field.ppm),
+              }
+            : bounded;
+        }
+
         return resolveCanvasSnapPosition(bounded, {
           excludeIds: [draggedShapeId],
           snapToAxisAlignment: false,
         });
       },
-      [clampShapeDragPosition, resolveCanvasSnapPosition]
+      [
+        clampShapeDragPosition,
+        design.field.ppm,
+        design.shapeById,
+        designShapes,
+        resolveCanvasSnapPosition,
+        waypointSnapRadiusMeters,
+      ]
+    );
+
+    const handleShapeDropped = useCallback(
+      (
+        shapeId: string,
+        positionMeters: { x: number; y: number },
+        snapped: boolean
+      ) => {
+        if (!snapped) return false;
+        const dropped = design.shapeById[shapeId];
+        if (!dropped || dropped.kind !== "pvcframe" || dropped.locked) {
+          return false;
+        }
+        const target = findPvcFrameMergeTarget(
+          dropped,
+          positionMeters,
+          designShapes
+        );
+        if (!target) return false;
+        return mergePvcFrames(shapeId, target.id, positionMeters);
+      },
+      [design.shapeById, designShapes, mergePvcFrames]
     );
 
     const resolveGroupDragPosition = useCallback(
@@ -663,8 +738,26 @@ const TrackCanvas = memo(
       ]
     );
 
+    // Konva hands dragBoundFunc the node's absolute (stage) position, so the
+    // generous field clamp has to be applied in layer coordinates. Clamping the
+    // absolute position directly made small, zoomed-in fields fling shapes away
+    // on the first drag frame.
     const dragBound = useCallback(
-      (pos: Vector2d): Vector2d => clampShapeDragPosition(pos),
+      (pos: Vector2d): Vector2d => {
+        const stage = stageRef.current;
+        const scale = stage?.scaleX() || 1;
+        const offsetX = stage?.x() ?? 0;
+        const offsetY = stage?.y() ?? 0;
+        const layerPos = {
+          x: (pos.x - offsetX) / scale,
+          y: (pos.y - offsetY) / scale,
+        };
+        const clamped = clampShapeDragPosition(layerPos);
+        return {
+          x: clamped.x * scale + offsetX,
+          y: clamped.y * scale + offsetY,
+        };
+      },
       [clampShapeDragPosition]
     );
 
@@ -846,10 +939,13 @@ const TrackCanvas = memo(
               .map((id) => shapeById[id])
               .filter((shape): shape is Shape => Boolean(shape))
           : designShapes;
+        // Read the live stage scale instead of the React copy: this only runs
+        // from pointer events, and depending on stageTransform would give the
+        // callback a new identity on every wheel-zoom frame.
+        const pointerScale = stageRef.current?.scaleX() ?? 1;
         const hit = findPolylineTarget({
           designPpm: design.field.ppm,
-          maxDistancePx:
-            options.maxDistanceScreenPx / Math.max(stageTransform.scale, 0.1),
+          maxDistancePx: options.maxDistanceScreenPx / Math.max(pointerScale, 0.1),
           pointer,
           shapes,
         });
@@ -880,7 +976,6 @@ const TrackCanvas = memo(
         setSelection,
         setVertexSel,
         shapeById,
-        stageTransform.scale,
       ]
     );
 
@@ -1065,7 +1160,7 @@ const TrackCanvas = memo(
           y: event.clientY,
         });
         if (!pointer) return;
-        const maxDistancePx = 28 / Math.max(stageTransform.scale, 0.1);
+        const maxDistancePx = 28 / Math.max(stageRef.current?.scaleX() ?? 1, 0.1);
         const hit = findPolylineTarget({
           designPpm: design.field.ppm,
           maxDistancePx,
@@ -1098,7 +1193,6 @@ const TrackCanvas = memo(
         readOnly,
         setSegmentSel,
         setVertexSel,
-        stageTransform.scale,
       ]
     );
 
@@ -1194,9 +1288,9 @@ const TrackCanvas = memo(
             rotation: 0,
             points,
             closed: nextClosed,
-            strokeWidth: DEFAULT_POLYLINE_STROKE_WIDTH,
+            strokeWidth: scaleProfile.defaultRouteStrokeWidthMeters,
             showArrows: false,
-            arrowSpacing: 15,
+            arrowSpacing: scaleProfile.defaultRouteArrowSpacingMeters,
             smooth: true,
             color: "#3b82f6",
           });
@@ -1218,6 +1312,8 @@ const TrackCanvas = memo(
         draftForceClosed,
         draftPath,
         draftSourcePath,
+        scaleProfile.defaultRouteArrowSpacingMeters,
+        scaleProfile.defaultRouteStrokeWidthMeters,
         setActiveTool,
         setDraftForceClosed,
         setDraftPath,
@@ -1280,6 +1376,7 @@ const TrackCanvas = memo(
       addShapes,
       contentDragActiveRef,
       designField: design.field,
+      scaleProfile,
       designShapes,
       disableTouchGestures: rotationSession !== null,
       draftPath,
@@ -1299,6 +1396,7 @@ const TrackCanvas = memo(
       mobileMultiSelectEnabled,
       readOnly,
       snapEnabled,
+      snapGridEnabled,
       selection,
       setActiveTool,
       setActivePresetId,
@@ -1334,95 +1432,17 @@ const TrackCanvas = memo(
     }, [selection, selectedShapes]);
 
     // ── Infinite grid ────────────────────────────────────────────
-    const grid = useMemo(() => {
-      const elements: React.JSX.Element[] = [];
-
-      const padX = Math.max(widthPx * 2, 1400);
-      const padY = Math.max(heightPx * 2, 1400);
-      const gx0 = -padX,
-        gy0 = -padY;
-      const gx1 = widthPx + padX,
-        gy1 = heightPx + padY;
-
-      const coarseStepPx = m2px(5, design.field.ppm);
-      const coarseEvery = Math.max(1, Math.round(coarseStepPx / stepPx));
-      const majorEvery = coarseEvery * 2;
-
-      const pmod = (n: number, m: number) => ((Math.round(n) % m) + m) % m;
-
-      const maxLines = 320;
-      const skipX = Math.max(
-        1,
-        Math.ceil(Math.ceil((gx1 - gx0) / stepPx) / maxLines)
-      );
-      const skipY = Math.max(
-        1,
-        Math.ceil(Math.ceil((gy1 - gy0) / stepPx) / maxLines)
-      );
-      const effStepX = stepPx * skipX;
-      const effStepY = stepPx * skipY;
-
-      // Theme-aware line styles — rulers handle labels so no text needed here
-      const stroke = isDark
-        ? { major: "#365a80", coarse: "#2a4060", minor: "#1e2f42" }
-        : { major: "#6890b0", coarse: "#98b4cc", minor: "#bdd0e0" };
-      const width = { major: 1.4, coarse: 1, minor: 0.6 };
-      const outOp = isDark ? 0.2 : 0.28;
-
-      const lineStyle = (
-        isMajor: boolean,
-        isCoarse: boolean,
-        inside: boolean
-      ) => ({
-        stroke: isMajor
-          ? stroke.major
-          : isCoarse
-            ? stroke.coarse
-            : stroke.minor,
-        strokeWidth: isMajor
-          ? width.major
-          : isCoarse
-            ? width.coarse
-            : width.minor,
-        opacity: inside ? 1 : outOp,
-      });
-
-      const startX = Math.floor(gx0 / effStepX) * effStepX;
-      for (let x = startX; x <= gx1; x += effStepX) {
-        const idx = Math.round(x / stepPx);
-        const isMajor = pmod(idx, majorEvery) === 0;
-        const isCoarse = !isMajor && pmod(idx, coarseEvery) === 0;
-        const inside = x >= 0 && x <= widthPx;
-        const s = lineStyle(isMajor, isCoarse, inside);
-        elements.push(
-          <Line
-            key={`vx-${x.toFixed(1)}`}
-            points={[x, gy0, x, gy1]}
-            {...s}
-            listening={false}
-          />
-        );
-      }
-
-      const startY = Math.floor(gy0 / effStepY) * effStepY;
-      for (let y = startY; y <= gy1; y += effStepY) {
-        const idx = Math.round(y / stepPx);
-        const isMajor = pmod(idx, majorEvery) === 0;
-        const isCoarse = !isMajor && pmod(idx, coarseEvery) === 0;
-        const inside = y >= 0 && y <= heightPx;
-        const s = lineStyle(isMajor, isCoarse, inside);
-        elements.push(
-          <Line
-            key={`hz-${y.toFixed(1)}`}
-            points={[gx0, y, gx1, y]}
-            {...s}
-            listening={false}
-          />
-        );
-      }
-
-      return elements;
-    }, [design.field.ppm, heightPx, isDark, stepPx, widthPx]);
+    const grid = useMemo(
+      () =>
+        buildFieldGridElements({
+          heightPx,
+          isDark,
+          ppm: design.field.ppm,
+          stepPx,
+          widthPx,
+        }),
+      [design.field.ppm, heightPx, isDark, stepPx, widthPx]
+    );
 
     const draftPointsPx = useMemo(() => {
       if (!draftPath.length) return [];
@@ -1567,6 +1587,49 @@ const TrackCanvas = memo(
         setActiveTool("polyline");
       },
     }));
+
+    // Stable identity so the memoized overlay layer is not re-rendered by
+    // every wheel-zoom frame.
+    const handleRotateStart = useCallback(
+      (event: KonvaEventObject<MouseEvent | TouchEvent>) => {
+        if (
+          !singleSelectedShape ||
+          singleSelectedShape.locked ||
+          !rotationGuide
+        ) {
+          return;
+        }
+
+        event.cancelBubble = true;
+        const stage = stageRef.current;
+        const pointer = stage?.getRelativePointerPosition();
+        if (!pointer) return;
+        if (!startRotationHistorySession()) return;
+
+        const startAngle =
+          (Math.atan2(
+            pointer.y - rotationGuide.center.y,
+            pointer.x - rotationGuide.center.x
+          ) *
+            180) /
+          Math.PI;
+
+        setRotationSession({
+          center: rotationGuide.center,
+          shapeId: singleSelectedShape.id,
+          initialRotation: singleSelectedShape.rotation,
+          previewRotation: singleSelectedShape.rotation,
+          startAngle,
+          startRotation: singleSelectedShape.rotation - 90,
+        });
+      },
+      [
+        rotationGuide,
+        setRotationSession,
+        singleSelectedShape,
+        startRotationHistorySession,
+      ]
+    );
 
     const cursorStyle = useMemo(() => {
       if (isStageDragging) return "grabbing";
@@ -1760,7 +1823,12 @@ const TrackCanvas = memo(
       ]
     );
 
-    const shapeNodeViewportScale = isMobile ? stageTransform.scale : 1;
+    // Only mobile shapes scale their touch targets with the stage. Quantizing
+    // keeps that behavior while stopping a zoom gesture from invalidating the
+    // whole shapeNodes memo (and every TrackShapeNode) on every frame.
+    const shapeNodeViewportScale = isMobile
+      ? quantizeViewportScale(stageTransform.scale)
+      : 1;
 
     // Memoize the shape nodes so that high-frequency local state changes
     // (cursor position, snap target, stage transform) do not trigger O(n)
@@ -1811,6 +1879,7 @@ const TrackCanvas = memo(
               }
               onMobileMultiSelectStart={onMobileMultiSelectStart}
               onShapeContextMenu={openShapeContextMenu}
+              onShapeDropped={handleShapeDropped}
               onSelectOnly={selectOnlyShape}
               onToggleSelection={toggleShapeSelection}
               snapEnabled={snapEnabled}
@@ -1857,6 +1926,7 @@ const TrackCanvas = memo(
         hoveredWaypoint,
         isMobile,
         mobileMultiSelectEnabled,
+        handleShapeDropped,
         onMobileMultiSelectStart,
         openShapeContextMenu,
         primaryPolylineId,
@@ -1881,6 +1951,82 @@ const TrackCanvas = memo(
         zmin,
       ]
     );
+
+    // Obstacle badges are O(shapes) JSX with a Konva Text each. Built inline
+    // they were re-created on every stage transform change, i.e. on every
+    // wheel-zoom frame. Nothing here depends on the stage transform, so the
+    // element array is memoized and React can skip the whole layer subtree.
+    const obstacleNumberBadges = useMemo(() => {
+      if (!showObstacleNumbers || !obstacleNumberMap) return null;
+
+      return designShapes
+        .filter((shape) => shape.id !== draftSourceShapeId)
+        .map((shape) => {
+          const obstacleNumber = obstacleNumberMap.get(shape.id);
+          if (typeof obstacleNumber !== "number") return null;
+
+          const bounds = getShapeLocalBounds(shape, design.field.ppm);
+          if (!bounds) return null;
+
+          const localX = bounds.x + bounds.width / 2;
+          const localY = bounds.y - 16;
+          const radians = (shape.rotation * Math.PI) / 180;
+          const rotatedX =
+            localX * Math.cos(radians) - localY * Math.sin(radians);
+          const rotatedY =
+            localX * Math.sin(radians) + localY * Math.cos(radians);
+          const offset =
+            groupDragPreview && groupDragIdSet.has(shape.id)
+              ? { x: groupDragPreview.dx, y: groupDragPreview.dy }
+              : { x: 0, y: 0 };
+          const x =
+            m2px(shape.kind === "polyline" ? 0 : shape.x, design.field.ppm) +
+            rotatedX +
+            offset.x;
+          const y =
+            m2px(shape.kind === "polyline" ? 0 : shape.y, design.field.ppm) +
+            rotatedY +
+            offset.y;
+          const isSelected = selectionIdSet.has(shape.id);
+
+          return (
+            <Group key={`obstacle-number-${shape.id}`} listening={false}>
+              <Circle
+                x={x}
+                y={y}
+                radius={10}
+                fill={isSelected ? "#0f172a" : "#111827"}
+                stroke={isSelected ? "#60a5fa" : "#94a3b8"}
+                strokeWidth={isSelected ? 1.5 : 1}
+                opacity={0.96}
+                // Avoid Konva's stage-sized buffer canvas per badge.
+                perfectDrawEnabled={false}
+              />
+              <Text
+                x={x - 10}
+                y={y - 9}
+                width={20}
+                height={20}
+                align="center"
+                verticalAlign="middle"
+                text={String(obstacleNumber)}
+                fontSize={11}
+                fontStyle="700"
+                fill="#f8fafc"
+              />
+            </Group>
+          );
+        });
+    }, [
+      design.field.ppm,
+      designShapes,
+      draftSourceShapeId,
+      groupDragIdSet,
+      groupDragPreview,
+      obstacleNumberMap,
+      selectionIdSet,
+      showObstacleNumbers,
+    ]);
 
     const mobileShapeHitTargets = useMemo(() => {
       if (!isMobile || activeTool !== "select" || readOnly) return null;
@@ -1917,7 +2063,7 @@ const TrackCanvas = memo(
             shapeRefs={shapeRefs}
             snapEnabled={snapEnabled}
             updateShape={updateShape}
-            viewportScale={stageTransform.scale}
+            viewportScale={shapeNodeViewportScale}
           />
         ));
     }, [
@@ -1939,8 +2085,8 @@ const TrackCanvas = memo(
       selection.length,
       selectionIdSet,
       setDragSnapPreview,
+      shapeNodeViewportScale,
       snapEnabled,
-      stageTransform.scale,
       toggleShapeSelection,
       updateShape,
     ]);
@@ -2252,6 +2398,7 @@ const TrackCanvas = memo(
                             strokeWidth={1}
                             cornerRadius={999}
                             opacity={0.96}
+                            perfectDrawEnabled={false}
                           />
                           <Text
                             x={0}
@@ -2277,6 +2424,7 @@ const TrackCanvas = memo(
                   activeTool={activeTool}
                   cursor={cursor}
                   designPpm={design.field.ppm}
+                  handleScale={scaleProfile.handle2dScale}
                   draftCloseTarget={draftCloseTarget}
                   draftPointsPx={draftPointsPx}
                   draftPreviewSmoothPx={draftPreviewSmoothPx}
@@ -2289,38 +2437,7 @@ const TrackCanvas = memo(
                   isDark={isDark}
                   magneticSnapRadiusPx={magneticSnapRadiusPx}
                   marqueeRect={marqueeRect}
-                  onRotateStart={(event) => {
-                    if (
-                      !singleSelectedShape ||
-                      singleSelectedShape.locked ||
-                      !rotationGuide
-                    ) {
-                      return;
-                    }
-
-                    event.cancelBubble = true;
-                    const stage = stageRef.current;
-                    const pointer = stage?.getRelativePointerPosition();
-                    if (!pointer) return;
-                    if (!startRotationHistorySession()) return;
-
-                    const startAngle =
-                      (Math.atan2(
-                        pointer.y - rotationGuide.center.y,
-                        pointer.x - rotationGuide.center.x
-                      ) *
-                        180) /
-                      Math.PI;
-
-                    setRotationSession({
-                      center: rotationGuide.center,
-                      shapeId: singleSelectedShape.id,
-                      initialRotation: singleSelectedShape.rotation,
-                      previewRotation: singleSelectedShape.rotation,
-                      startAngle,
-                      startRotation: singleSelectedShape.rotation - 90,
-                    });
-                  }}
+                  onRotateStart={handleRotateStart}
                   rotationGuide={rotationGuide}
                   showAngleLabel={rotationSession !== null}
                   showFrontLabel={
@@ -2334,88 +2451,7 @@ const TrackCanvas = memo(
                 />
               ) : null}
 
-              <Layer>
-                {showObstacleNumbers &&
-                  obstacleNumberMap &&
-                  designShapes
-                    .filter((shape) => shape.id !== draftSourceShapeId)
-                    .map((shape) => {
-                      const obstacleNumber = obstacleNumberMap.get(shape.id);
-                      if (typeof obstacleNumber !== "number") return null;
-
-                      const bounds = getShapeLocalBounds(
-                        shape,
-                        design.field.ppm
-                      );
-                      if (!bounds) return null;
-
-                      const localX = bounds.x + bounds.width / 2;
-                      const localY = bounds.y - 16;
-                      const radians = (shape.rotation * Math.PI) / 180;
-                      const rotatedX =
-                        localX * Math.cos(radians) - localY * Math.sin(radians);
-                      const rotatedY =
-                        localX * Math.sin(radians) + localY * Math.cos(radians);
-                      const offset =
-                        groupDragPreview && groupDragIdSet.has(shape.id)
-                          ? {
-                              x: groupDragPreview.dx,
-                              y: groupDragPreview.dy,
-                            }
-                          : { x: 0, y: 0 };
-                      const x =
-                        m2px(
-                          shape.kind === "polyline" ? 0 : shape.x,
-                          design.field.ppm
-                        ) +
-                        rotatedX +
-                        offset.x;
-                      const y =
-                        m2px(
-                          shape.kind === "polyline" ? 0 : shape.y,
-                          design.field.ppm
-                        ) +
-                        rotatedY +
-                        offset.y;
-
-                      return (
-                        <Group
-                          key={`obstacle-number-${shape.id}`}
-                          listening={false}
-                        >
-                          <Circle
-                            x={x}
-                            y={y}
-                            radius={10}
-                            fill={
-                              selectionIdSet.has(shape.id)
-                                ? "#0f172a"
-                                : "#111827"
-                            }
-                            stroke={
-                              selectionIdSet.has(shape.id)
-                                ? "#60a5fa"
-                                : "#94a3b8"
-                            }
-                            strokeWidth={selectionIdSet.has(shape.id) ? 1.5 : 1}
-                            opacity={0.96}
-                          />
-                          <Text
-                            x={x - 10}
-                            y={y - 9}
-                            width={20}
-                            height={20}
-                            align="center"
-                            verticalAlign="middle"
-                            text={String(obstacleNumber)}
-                            fontSize={11}
-                            fontStyle="700"
-                            fill="#f8fafc"
-                          />
-                        </Group>
-                      );
-                    })}
-              </Layer>
+              <Layer>{obstacleNumberBadges}</Layer>
             </Stage>
 
             {showRulers && (

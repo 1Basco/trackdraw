@@ -1,0 +1,430 @@
+{
+  "tabs": {
+    "ariaLabel": "Painéis do inspetor",
+    "layout": "Layout",
+    "selection": "Seleção"
+  },
+  "preflight": {
+    "title": "Preflight",
+    "status": {
+      "incomplete": {
+        "title": "Incompleto",
+        "description": "Adicione itens de pista para começar a análise do layout."
+      },
+      "review": {
+        "title": "Revisar",
+        "description": "{count, plural, one {1 item conhecido precisa de atenção.} other {{count} itens conhecidos precisam de atenção.}}"
+      },
+      "ready": {
+        "title": "Pronto",
+        "description": "Nenhum problema conhecido nas verificações ativas."
+      }
+    },
+    "categories": {
+      "route": "Traçado",
+      "timing": "Cronometragem",
+      "inventory": "Inventário"
+    },
+    "checkInactive": "desligado",
+    "openIssue": "Abrir",
+    "emptyDetails": "O preflight começa quando o layout tem itens de pista.",
+    "noIssues": "As verificações ativas não encontraram problemas conhecidos.",
+    "issues": {
+      "missingRoute": "Adicione uma linha de corrida para os obstáculos de traçado posicionados.",
+      "noRouteMatches": "Os obstáculos do traçado não estão perto o suficiente da linha de corrida.",
+      "offRoute": "{name} está fora da tolerância da linha de corrida.",
+      "timingMissingRoute": "A cronometragem precisa de uma linha de corrida utilizável.",
+      "multipleRoutes": "A cronometragem encontrou várias linhas de corrida utilizáveis.",
+      "missingStartFinish": "Adicione um marcador de cronometragem de largada/chegada.",
+      "duplicateStartFinish": "Mantenha só um marcador de cronometragem de largada/chegada.",
+      "missingSplitId": "Um marcador de parcial está sem ID.",
+      "duplicateTimingId": "Os IDs dos marcadores de cronometragem precisam ser únicos.",
+      "timingPointOffRoute": "Um marcador de cronometragem está longe demais da linha de corrida.",
+      "inventoryShortage": "{kind}: faltam {count} no inventário."
+    }
+  },
+  "emptyState": {
+    "title": "Nada selecionado",
+    "body": "Selecione um ou mais itens na tela para editar as propriedades dos objetos aqui."
+  },
+  "actions": {
+    "group": "Agrupar",
+    "continueEditing": "Continuar",
+    "connectEnds": "Fechar",
+    "deleteShort": "Excluir",
+    "duplicateShort": "Duplicar",
+    "ungroup": "Desagrupar",
+    "groupSelection": "Agrupar seleção",
+    "ungroupSelection": "Desagrupar seleção",
+    "lockShort": "Bloquear",
+    "unlockShort": "Desbloquear",
+    "savePreset": "Salvar como predefinição",
+    "joinPaths": "Unir traçados",
+    "remove": "Remover",
+    "removeItem": "Remover item"
+  },
+  "hints": {
+    "locked": "Bloqueado na tela. Desbloqueie antes de mover, redimensionar ou continuar editando o traçado."
+  },
+  "group": {
+    "sectionTitle": "Grupo",
+    "nameLabel": "Nome do grupo",
+    "namePlaceholder": "Nome do grupo (opcional)"
+  },
+  "raceTiming": {
+    "sectionTitle": "Cronometragem",
+    "ariaLabel": "Função na cronometragem",
+    "splitIdLabel": "ID da parcial",
+    "splitIdPlaceholder": "parcial-1",
+    "roleStart": "Largada",
+    "roleSplit": "Parcial",
+    "metaTimingStart": "cronometragem: largada",
+    "metaTimingSplit": "cronometragem: {id}",
+    "metaGrouped": "agrupado",
+    "metaLocked": "bloqueado",
+    "metaEditable": "editável"
+  },
+  "transform": {
+    "sectionTitle": "Transformação",
+    "positionLabel": "Posição",
+    "rotationLabel": "Rotação (graus)",
+    "colorLabel": "Cor",
+    "pickColorAriaLabel": "Escolher cor",
+    "editingSubtitle": "Editando as propriedades e o posicionamento de {kind}."
+  },
+  "ladder": {
+    "sectionTitle": "Escada"
+  },
+  "tower": {
+    "sectionTitle": "Torre"
+  },
+  "catalog": {
+    "sectionTitle": "Catálogo",
+    "sourceLabel": "Origem",
+    "sizeLabel": "Tamanho",
+    "officialBadge": "Oficial"
+  },
+  "dimensions": {
+    "widthLabel": "Largura ({unit})",
+    "heightLabel": "Altura ({unit})",
+    "gridLabel": "Grade ({unit})",
+    "thicknessLabel": "Espessura ({unit})",
+    "radiusLabel": "Raio ({unit})",
+    "poleHeightLabel": "Altura do mastro ({unit})",
+    "tiltLabel": "Inclinação (graus)",
+    "gatesLabel": "Gates",
+    "elevationLabel": "Elevação ({unit})",
+    "levelsLabel": "Níveis",
+    "sizeLabel": "Tamanho ({unit})",
+    "openingHeightLabel": "Altura da abertura ({unit})"
+  },
+  "label": {
+    "sectionTitle": "Rótulo",
+    "textLabel": "Texto",
+    "fontSizeLabel": "Tamanho da fonte (px)",
+    "threeDModeLabel": "Modo 3D",
+    "floatOption": "Flutuante (billboard)",
+    "groundOption": "Projetar no chão"
+  },
+  "multiSelection": {
+    "sectionTitle": "Seleção",
+    "mixedTypesPlaceholder": "Tipos variados",
+    "titleSelected": "{count, plural, one {1 item selecionado} other {{count} itens selecionados}}",
+    "subtitle": "As ações em massa ficam aqui. Abra um item pela tela quando precisar de uma edição detalhada.",
+    "groupCountMeta": "{count, plural, one {1 grupo} other {{count} grupos}}",
+    "joinAvailableMeta": "união disponível",
+    "saveSectionLabel": "Salvar seção",
+    "lockedItemsNote": "Os itens bloqueados ficam sem alteração.",
+    "arrange": {
+      "sectionTitle": "Organizar",
+      "alignHorizontal": "Alinhar pelos centros horizontais",
+      "alignVertical": "Alinhar pelos centros verticais",
+      "distributeHorizontal": "Distribuir na horizontal",
+      "distributeVertical": "Distribuir na vertical"
+    }
+  },
+  "polyline": {
+    "sectionTitle": "Linha de corrida",
+    "flowLabel": "Fluxo",
+    "directionLabel": "Direção",
+    "waypointsTitle": "Waypoints",
+    "waypointsSubtitle": "Ajuste cada ponto e a sua elevação.",
+    "elevationColumn": "elev",
+    "editColumn": "editar",
+    "insertPointAfter": "Inserir ponto depois",
+    "removePoint": "Remover ponto",
+    "addPoint": "Adicionar ponto"
+  },
+  "listPanel": {
+    "panelTitle": "Itens da pista",
+    "placedItemsTitle": "Itens posicionados",
+    "placedItemsSubtitle": "Selecione um item da lista.",
+    "filterPlaceholder": "Filtrar itens",
+    "filterAll": "Todos",
+    "filterObstacles": "Obstáculos",
+    "itemColumn": "Item",
+    "pathColumn": "Traçado",
+    "noItemsMatchFilter": "Nenhum item corresponde a este filtro.",
+    "routeStatus": {
+      "off": "fora"
+    }
+  },
+  "layout": {
+    "mapReference": {
+      "title": "Mapa de referência",
+      "fields": {
+        "opacity": "Opacidade",
+        "rotation": "Rotação"
+      },
+      "actions": {
+        "removeTitle": "Remover o mapa de referência",
+        "editTitle": "Editar o mapa de referência",
+        "addTitle": "Adicionar um mapa de referência",
+        "edit": "Editar",
+        "add": "Adicionar mapa",
+        "showTitle": "Mostrar o mapa de referência",
+        "hideTitle": "Ocultar o mapa de referência",
+        "show": "Mostrar"
+      }
+    },
+    "sections": {
+      "routeNumbering": "Numeração do traçado",
+      "inventory": "Inventário",
+      "field": "Campo",
+      "advanced": "Avançado",
+      "pvcMaterials": "Materiais de PVC"
+    },
+    "field": {
+      "unitsLabel": "Unidades",
+      "trackClassLabel": "Classe da pista",
+      "trackClass": {
+        "standard": "Padrão (5 polegadas)",
+        "whoop": "Tiny whoop"
+      },
+      "trackClassDescription": {
+        "standard": "Gates na escala de metros: encaixe, análise do traçado e padrões da linha de corrida dimensionados para corridas ao ar livre.",
+        "whoop": "Quadros PVC indoor: encaixe mais fino, os waypoints podem ficar a centímetros de distância, análise do traçado e padrões da linha de corrida reduzidos. Ao mudar, a grade também passa para 0,5 m."
+      },
+      "renderScaleLabel": "Escala de renderização",
+      "renderScaleTooltip": "Densidade interna da tela em pixels por metro",
+      "pxPerMeterAriaLabel": "pixels por metro, escala interna da tela"
+    },
+    "project": {
+      "titlePlaceholder": "Pista sem título",
+      "subtitle": "Ajuste o título do projeto, a configuração do campo e o estoque de obstáculos disponível."
+    },
+    "overview": {
+      "title": "Layout atual",
+      "subtitle": "Confira os itens posicionados, a numeração do traçado e a viabilidade de montagem do layout atual.",
+      "emptyTitle": "Nenhum item posicionado ainda",
+      "emptyDescription": "Adicione alguns objetos na tela para analisar o layout e compará-lo com o seu inventário."
+    },
+    "inventory": {
+      "status": {
+        "buildable": "Montável",
+        "short": "Faltando"
+      },
+      "labels": {
+        "missing": "Faltando",
+        "types": "Tipos"
+      },
+      "description": "O TrackDraw compara o layout atual com o estoque de obstáculos salvo neste projeto.",
+      "needCountSuffix": "precisa de {count}",
+      "stockOk": "ok"
+    },
+    "meta": {
+      "itemsCount": "{count} itens",
+      "grid": "grade {grid}",
+      "buildable": "montável",
+      "shortItems": "{count, plural, one {falta 1 item} other {faltam {count} itens}}",
+      "stockCovered": "estoque suficiente",
+      "typesShort": "{count, plural, one {1 tipo em falta} other {{count} tipos em falta}}",
+      "numbered": "{count} numerados",
+      "numberingIdle": "numeração parada",
+      "numberingNeedsReview": "a numeração precisa de revisão"
+    },
+    "pvcMaterials": {
+      "description": "{count, plural, one {Tubos e conexões necessários para o 1 quadro PVC deste layout.} other {Tubos e conexões necessários para os # quadros PVC deste layout.}}"
+    }
+  },
+  "routeNumbering": {
+    "status": {
+      "ready": "Pronto",
+      "partial": "Precisa de revisão",
+      "noRouteMatches": "Sem correspondências",
+      "missingRoute": "Traçado ausente",
+      "noNumberedObstacles": "Sem obstáculos no traçado",
+      "empty": "Vazio"
+    },
+    "messages": {
+      "ready": "{count, plural, one {1 obstáculo do traçado numerado.} other {{count} obstáculos do traçado numerados.}}",
+      "partial": "{mapped} de {total} obstáculos do traçado estão numerados.",
+      "noRouteMatches": "{count, plural, one {1 obstáculo de traçado encontrado, mas nenhum está perto o suficiente da linha de corrida.} other {{count} obstáculos de traçado encontrados, mas nenhum está perto o suficiente da linha de corrida.}}",
+      "missingRoute": "Os obstáculos suportados estão prontos para uma linha de corrida.",
+      "noNumberedObstacles": "Gates, escadas e dive gates vão aparecer na numeração do traçado.",
+      "empty": "Adicione obstáculos de traçado primeiro."
+    },
+    "issues": {
+      "offRoutePrefix": "Fora do traçado: {names}",
+      "moreSuffix": " +{count} outros"
+    },
+    "meta": {
+      "numbered": "Numerados",
+      "issues": "Problemas",
+      "raceLine": "Linha de corrida"
+    },
+    "generate": {
+      "button": "Gerar linha de corrida",
+      "regenerateButton": "Gerar a linha de corrida de novo",
+      "success": "Linha de corrida gerada.",
+      "errors": {
+        "noObstacles": "Não foi possível gerar uma linha de corrida — adicione pelo menos dois obstáculos suportados (gates, escadas ou dive gates) primeiro."
+      },
+      "warnings": {
+        "unsupportedShapes": "{count, plural, one {1 obstáculo ainda não é suportado e foi ignorado.} other {{count} obstáculos ainda não são suportados e foram ignorados.}}",
+        "tooFewObstacles": "Adicione mais obstáculos suportados para uma linha de corrida mais útil.",
+        "closeObstacles": "{count, plural, one {1 par de obstáculos está muito próximo — confira o traçado gerado.} other {{count} pares de obstáculos estão muito próximos — confira o traçado gerado.}}"
+      }
+    }
+  },
+  "elevationChart": {
+    "noRouteSelected": "Nenhuma linha de corrida selecionada",
+    "title": "Perfil de elevação",
+    "subtitle": "Altura do traçado, trechos de alerta coloridos e notas da análise do traçado.",
+    "openDetailsAria": "Abrir os detalhes de elevação",
+    "detailsTooltip": "Detalhes de elevação",
+    "chartAriaLabel": "Gráfico do perfil de elevação",
+    "routeDistance": "{distance} de traçado",
+    "elevationRange": "elevação de {min}-{max}",
+    "moreCount": "+{count} outros",
+    "maneuversHeading": "Manobras",
+    "maneuverDetected": "{maneuver} detectada perto de {range}",
+    "apexSuffix": ", ápice {index}",
+    "waypointSingle": "waypoint {index}",
+    "waypointRange": "waypoints {start}-{end}",
+    "waypointMarkerAria": "Selecionar o waypoint {index} no perfil de elevação",
+    "warningMarkerAria": "Ir para o segmento {segment} do alerta {warning}",
+    "timingMarkerAria": "Selecionar o marcador de cronometragem {label} no perfil de elevação",
+    "obstacleMarkerAria": "Selecionar o obstáculo {index} no perfil de elevação",
+    "routeReviewHeading": "Análise do traçado",
+    "warningSegmentsHeading": "Segmentos com alerta",
+    "jumpToSegment": "Ir para o segmento {segment}",
+    "noWarnings": "Nenhum alerta de traçado para este percurso.",
+    "normal": "Normal",
+    "timingMarkersLegend": "Cronometragem",
+    "obstacleMarkersLegend": "Obstáculos",
+    "warningMarkersLegend": "Alertas",
+    "maneuvers": {
+      "powerloop": "Powerloop",
+      "split-s": "Split-S"
+    },
+    "warnings": {
+      "stub": {
+        "summary": "O traçado precisa de pelo menos 2 waypoints para formar um percurso",
+        "shortLabel": "Traçado incompleto",
+        "title": "O traçado está incompleto",
+        "problem": "O traçado precisa de pelo menos dois waypoints antes de o TrackDraw poder analisá-lo como percurso.",
+        "fix": "Adicione outro waypoint ou termine de desenhar a linha de corrida."
+      },
+      "flat": {
+        "summary": "Nenhuma elevação definida - a visualização 3D ficará plana",
+        "shortLabel": "Elevação plana",
+        "title": "Nenhuma elevação foi definida",
+        "problem": "Todos os waypoints ainda estão a 0 m, então a visualização 3D e o gráfico de elevação ficam planos.",
+        "fix": "Defina a elevação dos waypoints no inspetor ou na vista 3D se o traçado precisar subir ou descer."
+      },
+      "steep": {
+        "summary": "{count, plural, one {Inclinação forte perto do waypoint {first}} other {Inclinação forte em {count} segmentos, começando perto do waypoint {first}}}",
+        "shortLabel": "Inclinação forte",
+        "title": "A inclinação muda rápido demais",
+        "problem": "Um trecho sobe ou desce bruscamente em pouca distância, o que pode deixar a linha 3D abrupta.",
+        "fix": "Distribua a mudança de altura por uma distância maior ou adicione um waypoint intermediário."
+      },
+      "hairpin": {
+        "summary": "{count, plural, one {Curva fechada no waypoint {first}} other {{count} curvas fechadas, começando no waypoint {first}}}",
+        "shortLabel": "Curva fechada",
+        "title": "A curva está muito fechada",
+        "problem": "Um waypoint cria uma inversão brusca que pode ser difícil de voar com precisão em velocidade.",
+        "fix": "Mova o waypoint para fora ou dê mais espaço antes e depois da curva."
+      },
+      "close-points": {
+        "summary": "{count, plural, one {Waypoints próximos perto de {first}} other {{count} waypoints muito próximos perto de {first}}}",
+        "shortLabel": "Pontos próximos",
+        "title": "Os waypoints estão próximos demais",
+        "problem": "Dois waypoints estão tão perto um do outro que criam um segmento minúsculo no traçado.",
+        "fix": "Exclua um dos pontos ou afaste-o do vizinho."
+      },
+      "spacing-shift": {
+        "summary": "{count, plural, one {Mudança brusca de espaçamento perto do waypoint {first}} other {{count} mudanças bruscas de espaçamento, começando perto do waypoint {first}}}",
+        "shortLabel": "Mudança de espaçamento",
+        "title": "O ritmo entre os gates muda de repente",
+        "problem": "A distância antes e depois de um waypoint muda de repente, o que pode deixar o traçado irregular.",
+        "fix": "Reposicione os waypoints próximos para o espaçamento mudar de forma mais gradual."
+      },
+      "rhythm-break": {
+        "summary": "{count, plural, one {Segmento curto de correção perto do waypoint {first}} other {{count} segmentos curtos de correção, começando perto do waypoint {first}}}",
+        "shortLabel": "Correção curta",
+        "title": "Uma correção curta quebra o fluxo",
+        "problem": "Um segmento curto no meio interrompe trechos mais longos ao redor e pode criar um repique estranho.",
+        "fix": "Suavize a correção movendo o ponto, excluindo-o ou criando uma transição mais leve."
+      }
+    }
+  },
+  "mapReference": {
+    "title": "Mapa de referência",
+    "subtitle": "Escolha o centro do campo e alinhe a área ocupada por ele.",
+    "searchPlaceholder": "Busque um lugar ou cole coordenadas",
+    "searching": "Buscando",
+    "enterHint": "Enter",
+    "zoomLabel": "Zoom {zoom}",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "resetRotation": "Redefinir a rotação",
+    "rotateLeft15": "Girar 15 graus à esquerda",
+    "rotateLeft1": "Girar 1 grau à esquerda",
+    "rotateRight1": "Girar 1 grau à direita",
+    "rotateRight15": "Girar 15 graus à direita",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "rotation": "Rotação",
+    "rotationValue": "{deg} graus",
+    "view": "Vista",
+    "out": "Afastar",
+    "in": "Aproximar",
+    "previewZoom": "Zoom da prévia {zoom}",
+    "center": "Centro",
+    "useLocation": "Usar a localização",
+    "locating": "Localizando",
+    "saveMap": "Salvar mapa",
+    "locationUnavailable": "A localização não está disponível neste navegador.",
+    "locationPermissionDenied": "A permissão de localização foi negada.",
+    "locationTimeout": "A busca pela localização expirou.",
+    "locationError": "Não foi possível determinar a sua localização."
+  },
+  "pvcFrame": {
+    "sectionTitle": "Quadro PVC",
+    "buildLevelLabel": "Nível de montagem",
+    "levelHeight": "a {height}",
+    "buildHint": "Encaixe rápido: com o quadro selecionado, toque em um + verde na tela para adicionar um tubo, em uma ↑ azul para levantar um tubo sobre uma junção, ou em um × vermelho para remover. Levantar um tubo leva você para a fileira de cima; use o seletor ▼ nível ▲ ao lado do quadro (ou este campo) para descer de novo.",
+    "tubeLengthLabel": "Tubo ({unit})",
+    "pipeDiameterLabel": "Ø do tubo ({unit})",
+    "pitchLabel": "Passo",
+    "openingLabel": "Abertura",
+    "heightLabel": "Altura",
+    "materialsTitle": "Materiais",
+    "tubesLabel": "Tubos",
+    "tubesValue": "{count} × {length}",
+    "feetLabel": "Pés",
+    "unbuildableWarning": "{count, plural, one {1 junção precisa de seis bocas, o que as conexões comuns de 20 mm não oferecem.} other {# junções precisam de seis bocas, o que as conexões comuns de 20 mm não oferecem.}}",
+    "fittings": {
+      "elbow": "Joelhos",
+      "tee": "Tês",
+      "corner": "Cantos de 3 vias",
+      "cross": "Cruzetas",
+      "sideOutlet": "Saídas laterais",
+      "fiveWay": "5 vias",
+      "straight": "Luvas",
+      "sixWay": "6 vias"
+    }
+  }
+}

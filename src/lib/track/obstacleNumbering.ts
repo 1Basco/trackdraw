@@ -5,6 +5,7 @@ import {
   isNumberedTrackObstacle,
 } from "@/lib/track/items/registry";
 import { getPolyline2DDerived } from "@/lib/track/polyline-derived";
+import { getPvcFrameLocalFootprint } from "@/lib/track/pvc-frame/lattice";
 import type { PolylineShape, Shape, TrackDesign } from "@/lib/types";
 
 export type ObstacleNumberingStatus =
@@ -56,7 +57,7 @@ export function isNumberedObstacle(shape: Shape) {
   return isNumberedTrackObstacle(shape);
 }
 
-function getPrimaryPolyline(design: TrackDesign): PolylineShape | null {
+export function getPrimaryPolyline(design: TrackDesign): PolylineShape | null {
   return (
     getDesignShapes(design).find(
       (shape): shape is PolylineShape =>
@@ -71,7 +72,11 @@ function getObstacleNumberAnchor(shape: Shape) {
 
 function getObstaclePathTolerance(shape: Shape) {
   const width =
-    "width" in shape && typeof shape.width === "number" ? shape.width : 0;
+    shape.kind === "pvcframe"
+      ? getPvcFrameLocalFootprint(shape).width
+      : "width" in shape && typeof shape.width === "number"
+        ? shape.width
+        : 0;
   const factor = getObstacleRouteToleranceWidthFactor(shape);
   return factor > 0 ? Math.max(width * factor, 1.15) : 1.1;
 }

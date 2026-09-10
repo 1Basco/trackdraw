@@ -65,6 +65,12 @@
     "snapIsOff": "Snap is off",
     "snapOnDescription": "Points and drags lock to nearby grid positions, objects, and route points. Hold Alt while placing or dragging to bypass it once.",
     "snapOffDescription": "Placement and dragging stay freeform until you turn snap back on.",
+    "gridOn": "Grid On",
+    "gridOff": "Grid Off",
+    "gridIsOn": "Grid snap is on",
+    "gridIsOff": "Grid snap is off",
+    "gridOnDescription": "Points and drags round to the field grid before snapping to objects. Turn it off for small parts such as whoop PVC frames.",
+    "gridOffDescription": "Points and drags stay free but still snap to objects, route points, and PVC joints.",
     "selected": "{count} selected",
     "grouped": "Grouped",
     "groupNamed": "Group: {name}",
@@ -354,6 +360,10 @@
         "snap": {
           "label": "Snap",
           "description": "Lock to nearby grid positions and objects"
+        },
+        "gridSnap": {
+          "label": "Grid snap",
+          "description": "Round points and drags to the field grid; off keeps object snapping only"
         },
         "rulers": {
           "label": "Rulers",

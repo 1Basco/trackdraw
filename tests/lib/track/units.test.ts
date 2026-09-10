@@ -30,6 +30,7 @@ describe("track unit helpers", () => {
     expect(getMeasurementUnitSystemFromLocales(["en-GB"])).toBe("metric");
     expect(getMeasurementUnitSystemFromLocales(["ja-JP"])).toBe("metric");
     expect(getMeasurementUnitSystemFromLocales(["nl-NL"])).toBe("metric");
+    expect(getMeasurementUnitSystemFromLocales(["pt-BR"])).toBe("metric");
   });
 
   it("formats metric and imperial measurements", () => {

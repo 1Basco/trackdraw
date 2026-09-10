@@ -9,6 +9,16 @@ import {
   getMultiGpDiveGateArchLayout,
   getMultiGpLaunchGateLayout,
 } from "@/lib/track/render3d-layout";
+import { DEFAULT_PVC_FRAME_COLOR } from "@/lib/track/elements/catalog";
+import {
+  getPvcFrameJoints,
+  type PvcJointKind,
+} from "@/lib/track/pvc-frame/joints";
+import {
+  getPvcFrameLocalFootprint,
+  getPvcFrameLocalGeometry,
+  getPvcFrameNodeKey,
+} from "@/lib/track/pvc-frame/lattice";
 import type {
   BarrierShape,
   ConeShape,
@@ -17,6 +27,7 @@ import type {
   FlagShape,
   GateShape,
   LadderShape,
+  PvcFrameShape,
   StartFinishShape,
 } from "@/lib/types";
 
@@ -416,5 +427,153 @@ export function getDiveGate2DShape(shape: DiveGateShape, ppm: number) {
     size,
     variant: "frame-only" as const,
     visibleDepth,
+  };
+}
+
+export function mixHexColor(
+  hex: string,
+  targetHex: string,
+  amount: number
+): string {
+  const parse = (value: string) => {
+    const normalized = value.replace("#", "");
+    const full =
+      normalized.length === 3
+        ? normalized
+            .split("")
+            .map((char) => char + char)
+            .join("")
+        : normalized;
+    const parsed = Number.parseInt(full, 16);
+    if (Number.isNaN(parsed)) return { r: 0, g: 0, b: 0 };
+    return {
+      r: (parsed >> 16) & 255,
+      g: (parsed >> 8) & 255,
+      b: parsed & 255,
+    };
+  };
+
+  const source = parse(hex);
+  const target = parse(targetHex);
+  const channel = (from: number, to: number) =>
+    Math.round(from + (to - from) * amount)
+      .toString(16)
+      .padStart(2, "0");
+
+  return `#${channel(source.r, target.r)}${channel(
+    source.g,
+    target.g
+  )}${channel(source.b, target.b)}`;
+}
+
+export interface PvcFrame2DTube {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  level: number;
+  color: string;
+}
+
+export interface PvcFrame2DPost {
+  x: number;
+  y: number;
+  level: number;
+  color: string;
+}
+
+export interface PvcFrame2DFitting {
+  x: number;
+  y: number;
+  level: number;
+  kind: PvcJointKind;
+  color: string;
+}
+
+/**
+ * Top-down metrics for a PVC frame in canvas pixels. Horizontal tubes become
+ * lines, vertical tubes become post dots at their base node, and every joint
+ * that needs a fitting becomes a small fitting dot. Higher levels are drawn
+ * later and tinted lighter so stacked structures stay readable from above.
+ */
+export function getPvcFrame2DShape(shape: PvcFrameShape, ppm: number) {
+  const geometry = getPvcFrameLocalGeometry(shape);
+  const baseColor = shape.color ?? DEFAULT_PVC_FRAME_COLOR;
+  const tubeWidth = Math.max(m2px(geometry.pipeRadius * 2, ppm), 3);
+  const levelColor = (level: number) =>
+    mixHexColor(baseColor, "#ffffff", Math.min(0.55, level * 0.18));
+  const postColor = mixHexColor(baseColor, "#0f172a", 0.32);
+  const fittingColor = mixHexColor(baseColor, "#0f172a", 0.5);
+
+  const tubes: PvcFrame2DTube[] = [];
+  const posts: PvcFrame2DPost[] = [];
+  for (const segment of geometry.segments) {
+    if (segment.edge.axis === "z") {
+      posts.push({
+        x: m2px(segment.start.x, ppm),
+        y: m2px(segment.start.y, ppm),
+        level: segment.edge.z,
+        color: postColor,
+      });
+      continue;
+    }
+    tubes.push({
+      x1: m2px(segment.start.x, ppm),
+      y1: m2px(segment.start.y, ppm),
+      x2: m2px(segment.end.x, ppm),
+      y2: m2px(segment.end.y, ppm),
+      level: segment.edge.z,
+      color: levelColor(segment.edge.z),
+    });
+  }
+  tubes.sort((a, b) => a.level - b.level);
+  posts.sort((a, b) => a.level - b.level);
+
+  const positionByNode = new Map(
+    geometry.nodes.map((entry) => [
+      getPvcFrameNodeKey(entry.node),
+      entry.position,
+    ])
+  );
+  const fittings: PvcFrame2DFitting[] = [];
+  for (const joint of getPvcFrameJoints(shape.edges)) {
+    if (joint.kind === "empty" || joint.kind === "stub") continue;
+    const position = positionByNode.get(getPvcFrameNodeKey(joint.node));
+    if (!position) continue;
+    fittings.push({
+      x: m2px(position.x, ppm),
+      y: m2px(position.y, ppm),
+      level: joint.node.z,
+      kind: joint.kind,
+      color: fittingColor,
+    });
+  }
+  fittings.sort((a, b) => a.level - b.level);
+
+  // Pad the thin tube footprint so a frame is easy to grab and hover, while
+  // staying inside the half-pitch ring where the build handles sit.
+  const footprint = getPvcFrameLocalFootprint(shape);
+  const grabPad = Math.min(m2px(0.16, ppm), m2px(geometry.pitch * 0.3, ppm));
+  const minSize = Math.max(tubeWidth * 3, grabPad * 2);
+  const rawWidth = m2px(footprint.width, ppm) + grabPad * 2;
+  const rawHeight = m2px(footprint.height, ppm) + grabPad * 2;
+  const width = Math.max(rawWidth, minSize);
+  const height = Math.max(rawHeight, minSize);
+  const bounds = {
+    x: m2px(footprint.x, ppm) - grabPad - (width - rawWidth) / 2,
+    y: m2px(footprint.y, ppm) - grabPad - (height - rawHeight) / 2,
+    width,
+    height,
+  };
+
+  return {
+    bounds,
+    color: baseColor,
+    fittings,
+    pitch: m2px(geometry.pitch, ppm),
+    posts,
+    topLevel: geometry.topLevel,
+    tubeWidth,
+    tubes,
   };
 }

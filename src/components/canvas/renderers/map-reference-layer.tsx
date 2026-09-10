@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Group, Image as KonvaImage } from "react-konva";
 import {
   getFieldMapTileCoverage,
@@ -9,7 +9,9 @@ import {
 import { getMapReferenceTileUrl } from "@/lib/map-reference/tiles";
 import type { FieldSpec, MapReference } from "@/lib/types";
 
-export function MapReferenceLayer({
+// Memoized: it lives inside the Konva stage, so it would otherwise re-render
+// on every TrackCanvas render, including each wheel-zoom frame.
+export const MapReferenceLayer = memo(function MapReferenceLayer({
   field,
   heightPx,
   mapReference,
@@ -98,7 +100,7 @@ export function MapReferenceLayer({
       </Group>
     </Group>
   );
-}
+});
 
 function MapTileImage({
   image,

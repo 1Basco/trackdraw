@@ -9,7 +9,8 @@
     "startfinish": "Start / Finish",
     "ladder": "Ladder",
     "divegate": "Dive Gate",
-    "barrier": "Barrier"
+    "barrier": "Barrier",
+    "pvcframe": "PVC Frame"
   },
   "toolLabels": {
     "select": "Select",
@@ -24,7 +25,8 @@
     "startfinish": "Start Pads",
     "ladder": "Ladder",
     "divegate": "Dive Gate",
-    "barrier": "Barrier"
+    "barrier": "Barrier",
+    "pvcframe": "PVC Frame"
   },
   "toolGroups": {
     "track": "Track",
@@ -33,7 +35,8 @@
   "toolMobileLabels": {
     "startfinish": "Start",
     "divegate": "Dive",
-    "barrier": "Barrier"
+    "barrier": "Barrier",
+    "pvcframe": "PVC"
   },
   "mobileStatus": {
     "multiSelect": "Multi",
@@ -141,6 +144,42 @@
     "multigp-hurdle": {
       "name": "MultiGP Hurdle",
       "size": "10 ft wide, 5 ft tall"
+    },
+    "trackdraw-pvc-arch-gate": {
+      "name": "PVC Arch Gate",
+      "size": "61 cm, 61 cm tall, 3 tubes"
+    },
+    "trackdraw-pvc-square-gate": {
+      "name": "PVC Square Gate",
+      "size": "61 cm, 61 cm tall, 4 tubes"
+    },
+    "trackdraw-pvc-tall-arch": {
+      "name": "PVC Tall Arch",
+      "size": "61 cm, 122 cm tall, 5 tubes"
+    },
+    "trackdraw-pvc-double-arch": {
+      "name": "PVC Double Arch",
+      "size": "122 cm, 61 cm tall, 5 tubes"
+    },
+    "trackdraw-pvc-dive-gate": {
+      "name": "PVC Dive Gate",
+      "size": "61 × 61 cm, 61 cm tall, 6 tubes"
+    },
+    "trackdraw-pvc-turn-post": {
+      "name": "PVC Turn Post",
+      "size": "122 cm, 61 cm tall, 3 tubes"
+    },
+    "trackdraw-pvc-flag-post": {
+      "name": "PVC Flag Post",
+      "size": "122 × 122 cm, 61 cm tall, 5 tubes"
+    },
+    "trackdraw-pvc-tower": {
+      "name": "PVC Tower",
+      "size": "122 × 122 cm, 122 cm tall, 6 tubes"
+    },
+    "trackdraw-pvc-slalom-pair": {
+      "name": "PVC Slalom Pair",
+      "size": "122 × 61 cm, 61 cm tall, 6 tubes"
     }
   }
 }

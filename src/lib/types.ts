@@ -10,7 +10,8 @@ export type ShapeKind =
   | "startfinish"
   | "ladder"
   | "divegate"
-  | "barrier";
+  | "barrier"
+  | "pvcframe";
 
 export type InventoryShapeKind = Extract<
   ShapeKind,
@@ -97,6 +98,29 @@ export interface BarrierShape extends BaseShape {
   height: number; // m height above ground (top of barrier)
 }
 
+export type PvcFrameAxis = "x" | "y" | "z";
+
+/**
+ * One PVC tube on the frame lattice, identified by its lower node and axis.
+ * `x` runs across the frame, `y` into the depth (canvas down at rotation 0),
+ * `z` up. Lattice units; the pitch is derived from the kit dimensions.
+ */
+export interface PvcFrameEdge {
+  x: number;
+  y: number;
+  z: number;
+  axis: PvcFrameAxis;
+}
+
+export interface PvcFrameShape extends BaseShape {
+  kind: "pvcframe";
+  edges: PvcFrameEdge[];
+  tubeLength: number; // m nominal cut length of one tube (default 0.6)
+  pipeDiameter: number; // m outer tube diameter (default 0.02)
+  socketDepth?: number; // m tube insertion depth into a fitting (default 0.021)
+  centerToFace?: number; // m fitting centre to socket face (default 0.026)
+}
+
 export interface PolylinePoint {
   x: number;
   y: number;
@@ -123,7 +147,8 @@ export type Shape =
   | StartFinishShape
   | LadderShape
   | DiveGateShape
-  | BarrierShape;
+  | BarrierShape
+  | PvcFrameShape;
 
 export type ShapeDraft<T extends Shape = Shape> = T extends Shape
   ? Omit<T, "id">
@@ -150,6 +175,13 @@ export interface MapReference {
   locked: boolean;
 }
 
+/**
+ * Scale class of a design. `standard` is 5-inch racing with metre-scale
+ * gates; `whoop` is an indoor tiny whoop course built from 61 cm PVC frames,
+ * which shrinks snapping radii, route review thresholds, and route defaults.
+ */
+export type TrackClass = "standard" | "whoop";
+
 export interface TrackDesign {
   id: UUID;
   version: 2;
@@ -157,6 +189,7 @@ export interface TrackDesign {
   description?: string;
   tags?: string[];
   authorName?: string;
+  trackClass?: TrackClass;
   inventory: InventoryProfile;
   field: FieldSpec;
   mapReference?: MapReference | null;
@@ -173,6 +206,7 @@ export interface SerializedTrackDesign {
   description?: string;
   tags?: string[];
   authorName?: string;
+  trackClass?: TrackClass;
   inventory: InventoryProfile;
   field: FieldSpec;
   mapReference?: MapReference | null;

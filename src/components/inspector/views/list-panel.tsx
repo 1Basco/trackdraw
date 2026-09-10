@@ -28,6 +28,7 @@ export type DesignMetaPatch = Partial<
     | "description"
     | "authorName"
     | "tags"
+    | "trackClass"
     | "inventory"
     | "mapReference"
   >

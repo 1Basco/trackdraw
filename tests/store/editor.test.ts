@@ -1535,10 +1535,15 @@ describe("editor store history", () => {
     state.toggleSnapEnabled();
     expect(useEditor.getState().ui.snapEnabled).toBe(true);
 
+    state.setSnapGridEnabled(false);
+    expect(useEditor.getState().ui.snapGridEnabled).toBe(false);
+    state.toggleSnapGridEnabled();
+    expect(useEditor.getState().ui.snapGridEnabled).toBe(true);
+
     state.setZoom(0.05);
     expect(useEditor.getState().ui.zoom).toBeCloseTo(0.1);
-    state.setZoom(10);
-    expect(useEditor.getState().ui.zoom).toBeCloseTo(5);
+    state.setZoom(20);
+    expect(useEditor.getState().ui.zoom).toBeCloseTo(12);
 
     state.setPanOffset({ x: 100, y: -50 });
     expect(useEditor.getState().ui.panOffset).toEqual({ x: 100, y: -50 });

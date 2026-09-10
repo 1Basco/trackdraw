@@ -22,6 +22,7 @@ import {
   type RouteWarning,
   type RouteWarningKind,
 } from "@/lib/track/polyline-derived";
+import { getDesignScaleProfile } from "@/lib/track/track-class";
 import {
   getObstacleNumberMap,
   isNumberedObstacle,
@@ -935,9 +936,10 @@ export default function ElevationChart({ className }: { className?: string }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const portalRoot = typeof document === "undefined" ? null : document.body;
 
+  const scaleProfile = getDesignScaleProfile(design);
   const warnings = useMemo(
-    () => (path ? getPolylineRouteWarnings(path) : []),
-    [path]
+    () => (path ? getPolylineRouteWarnings(path, scaleProfile) : []),
+    [path, scaleProfile]
   );
   const warningKinds = useMemo(
     () => warnings.map((warning) => warning.kind),

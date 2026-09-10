@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Stage, Layer, Circle, Group, Text, Line } from "react-konva";
+import { Stage, Layer, Circle, Group, Text } from "react-konva";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { Scan } from "lucide-react";
 import {
@@ -19,7 +19,10 @@ import {
   TooltipTrigger,
 } from "@/components/AppTooltip";
 import { CanvasRuler, RULER_SIZE } from "@/components/canvas/CanvasRuler";
-import { StableFieldContent } from "@/components/canvas/renderers/field-layer";
+import {
+  buildFieldGridElements,
+  StableFieldContent,
+} from "@/components/canvas/renderers/field-layer";
 import { getShapeLocalBounds } from "@/components/canvas/renderers/shape-bounds";
 import { useTrackCanvasViewport } from "@/components/canvas/useTrackCanvasViewport";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -289,89 +292,17 @@ const TrackCanvas = memo(
       lastPinchDistRef.current = null;
     }, []);
 
-    const grid = useMemo(() => {
-      const elements: React.JSX.Element[] = [];
-
-      const padX = Math.max(widthPx * 2, 1400);
-      const padY = Math.max(heightPx * 2, 1400);
-      const gx0 = -padX;
-      const gy0 = -padY;
-      const gx1 = widthPx + padX;
-      const gy1 = heightPx + padY;
-
-      const coarseStepPx = m2px(5, design.field.ppm);
-      const coarseEvery = Math.max(1, Math.round(coarseStepPx / stepPx));
-      const majorEvery = coarseEvery * 2;
-      const pmod = (n: number, m: number) => ((Math.round(n) % m) + m) % m;
-      const maxLines = 320;
-      const skipX = Math.max(
-        1,
-        Math.ceil(Math.ceil((gx1 - gx0) / stepPx) / maxLines)
-      );
-      const skipY = Math.max(
-        1,
-        Math.ceil(Math.ceil((gy1 - gy0) / stepPx) / maxLines)
-      );
-      const effStepX = stepPx * skipX;
-      const effStepY = stepPx * skipY;
-      const stroke = isDark
-        ? { major: "#365a80", coarse: "#2a4060", minor: "#1e2f42" }
-        : { major: "#6890b0", coarse: "#98b4cc", minor: "#bdd0e0" };
-      const width = { major: 1.4, coarse: 1, minor: 0.6 };
-      const outOp = isDark ? 0.2 : 0.28;
-
-      const lineStyle = (
-        isMajor: boolean,
-        isCoarse: boolean,
-        inside: boolean
-      ) => ({
-        stroke: isMajor
-          ? stroke.major
-          : isCoarse
-            ? stroke.coarse
-            : stroke.minor,
-        strokeWidth: isMajor
-          ? width.major
-          : isCoarse
-            ? width.coarse
-            : width.minor,
-        opacity: inside ? 1 : outOp,
-      });
-
-      const startX = Math.floor(gx0 / effStepX) * effStepX;
-      for (let x = startX; x <= gx1; x += effStepX) {
-        const idx = Math.round(x / stepPx);
-        const isMajor = pmod(idx, majorEvery) === 0;
-        const isCoarse = !isMajor && pmod(idx, coarseEvery) === 0;
-        const inside = x >= 0 && x <= widthPx;
-        elements.push(
-          <Line
-            key={`vx-${x.toFixed(1)}`}
-            points={[x, gy0, x, gy1]}
-            {...lineStyle(isMajor, isCoarse, inside)}
-            listening={false}
-          />
-        );
-      }
-
-      const startY = Math.floor(gy0 / effStepY) * effStepY;
-      for (let y = startY; y <= gy1; y += effStepY) {
-        const idx = Math.round(y / stepPx);
-        const isMajor = pmod(idx, majorEvery) === 0;
-        const isCoarse = !isMajor && pmod(idx, coarseEvery) === 0;
-        const inside = y >= 0 && y <= heightPx;
-        elements.push(
-          <Line
-            key={`hz-${y.toFixed(1)}`}
-            points={[gx0, y, gx1, y]}
-            {...lineStyle(isMajor, isCoarse, inside)}
-            listening={false}
-          />
-        );
-      }
-
-      return elements;
-    }, [design.field.ppm, heightPx, isDark, stepPx, widthPx]);
+    const grid = useMemo(
+      () =>
+        buildFieldGridElements({
+          heightPx,
+          isDark,
+          ppm: design.field.ppm,
+          stepPx,
+          widthPx,
+        }),
+      [design.field.ppm, heightPx, isDark, stepPx, widthPx]
+    );
 
     const shapeNodes = useMemo(
       () =>

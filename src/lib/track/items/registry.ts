@@ -6,6 +6,7 @@ import {
   TRACKDRAW_GATE_ELEMENT_ID,
   TRACKDRAW_LABEL_ELEMENT_ID,
   TRACKDRAW_LADDER_ELEMENT_ID,
+  TRACKDRAW_PVC_ARCH_GATE_ELEMENT_ID,
   TRACKDRAW_START_FINISH_ELEMENT_ID,
   TRACKDRAW_TOWER_ELEMENT_ID,
   type TrackElementCatalogId,
@@ -22,6 +23,10 @@ import {
   getMultiGpLaunchGateLayout,
   getPanelFrameLadderLayout,
 } from "@/lib/track/render3d-layout";
+import {
+  getPvcFrameLocalFootprint,
+  getPvcFrameLocalGeometry,
+} from "@/lib/track/pvc-frame/lattice";
 import type {
   DiveGateShape,
   FlagShape,
@@ -29,6 +34,7 @@ import type {
   InventoryShapeKind,
   LadderShape,
   PolylinePoint,
+  PvcFrameShape,
   Shape,
   ShapeKind,
   TowerShape,
@@ -46,7 +52,8 @@ export type TrackItemToolId =
   | "ladder"
   | "tower"
   | "divegate"
-  | "barrier";
+  | "barrier"
+  | "pvcframe";
 
 export type CatalogPlacementToolId = Exclude<TrackItemToolId, "polyline">;
 
@@ -259,6 +266,24 @@ function getLadderApproachDistance(shape: Shape): number {
 function getDiveGateApproachDistance(shape: Shape): number {
   const diveGate = shape as DiveGateShape;
   return Math.max(3, diveGate.width * 0.75);
+}
+
+function getPvcFrameRouteAnchor(shape: Shape): PolylinePoint {
+  const geometry = getPvcFrameLocalGeometry(shape as PvcFrameShape);
+  // Aim for the middle of the highest horizontal bar; a bare post frame gets a
+  // low waypoint beside the post instead.
+  const highestBar = geometry.segments.reduce(
+    (max, segment) =>
+      segment.edge.axis === "z" ? max : Math.max(max, segment.start.z),
+    0
+  );
+  const elevation = highestBar > 0 ? highestBar / 2 : geometry.pitch * 0.5;
+  return getShapeAnchorAtElevation(shape, Math.max(0.2, elevation));
+}
+
+function getPvcFrameApproachDistance(shape: Shape): number {
+  const footprint = getPvcFrameLocalFootprint(shape as PvcFrameShape);
+  return Math.max(0.4, footprint.width * 1.2);
 }
 
 function getFlagClearanceDistance(shape: Shape): number {
@@ -524,6 +549,43 @@ export const trackItemAdapters = [
       note: t("obstacleNotes.barrier"),
       complexity: "standard" as const,
     }),
+  },
+  {
+    kind: "pvcframe",
+    label: "PVC Frame",
+    tool: {
+      id: "pvcframe",
+      label: "PVC Frame",
+      mobileLabel: "PVC",
+      shortcut: "W",
+      defaultCatalogEntryId: TRACKDRAW_PVC_ARCH_GATE_ELEMENT_ID,
+      catalogPlacement: true,
+    },
+    orientation: { facing: 0, canvasGuide: 90, previewGuide: 0 },
+    frontBack: true,
+    numberedObstacle: true,
+    timingMarker: true,
+    setupHardObstacle: false,
+    rotateHandle3d: true,
+    generatedRoute: {
+      traversal: "through",
+      getAnchor: getPvcFrameRouteAnchor,
+      getHeadingDeg: getRouteHeadingDeg,
+      getApproachDistance: getPvcFrameApproachDistance,
+    },
+    canvasRenderRotationOffsetDeg: 0,
+    mobileTouchTargetMinScreenPx: 44,
+    routeToleranceWidthFactor: 0.42,
+    getSetupProfile: (shape, t) => {
+      const tubes = (shape as PvcFrameShape).edges.length;
+      return {
+        priority: 3,
+        prepMinutes: Math.max(1, Math.ceil(tubes * 0.5)),
+        placeMinutes: 1,
+        note: t("obstacleNotes.pvcframe"),
+        complexity: tubes > 4 ? ("standard" as const) : ("light" as const),
+      };
+    },
   },
 ] satisfies TrackItemAdapter[];
 

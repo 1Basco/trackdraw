@@ -22,6 +22,7 @@ const titles: Record<SupportedLocale, string> = {
   en: "TrackDraw API Docs",
   nl: "TrackDraw API-documentatie",
   de: "TrackDraw API-Dokumentation",
+  "pt-BR": "Documentação da API do TrackDraw",
   "zh-CN": "TrackDraw API 文档",
 };
 

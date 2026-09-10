@@ -105,6 +105,27 @@ function BarrierIcon({ className }: { className?: string }) {
   );
 }
 
+function PvcFrameIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      {/* Two posts and a top bar, with fitting dots at the corners */}
+      <line x1="3" y1="12.5" x2="3" y2="3" />
+      <line x1="11" y1="12.5" x2="11" y2="3" />
+      <line x1="3" y1="3" x2="11" y2="3" />
+      <circle cx="3" cy="3" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="11" cy="3" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 function iconForTool(tool: EditorTool, className: string): ReactNode {
   switch (tool) {
     case "select":
@@ -123,6 +144,8 @@ function iconForTool(tool: EditorTool, className: string): ReactNode {
       return <DiveGateIcon className={className} />;
     case "barrier":
       return <BarrierIcon className={className} />;
+    case "pvcframe":
+      return <PvcFrameIcon className={className} />;
     case "startfinish":
       return <Target className={className} />;
     case "flag":
@@ -179,6 +202,7 @@ export function getToolbarToolGroups(t: Translate): ToolGroup[] {
         buildToolEntry("tower", "size-3.5", t),
         buildToolEntry("divegate", "size-3.5", t),
         buildToolEntry("barrier", "size-3.5", t),
+        buildToolEntry("pvcframe", "size-3.5", t),
         buildToolEntry("flag", "size-3.5", t),
         buildToolEntry("cone", "size-3.5", t),
       ],
@@ -202,6 +226,7 @@ export function getMobileToolEntries(t: Translate): ToolEntry[] {
     buildToolEntry("tower", "size-5", t),
     buildToolEntry("divegate", "size-5", t),
     buildToolEntry("barrier", "size-5", t),
+    buildToolEntry("pvcframe", "size-5", t),
     buildToolEntry("startfinish", "size-5", t),
     buildToolEntry("flag", "size-5", t),
     buildToolEntry("cone", "size-5", t),

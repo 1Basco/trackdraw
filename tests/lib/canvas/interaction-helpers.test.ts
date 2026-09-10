@@ -103,6 +103,36 @@ describe("canvas interaction helpers", () => {
     ).toEqual({ x: 1.35, y: 2.15 });
   });
 
+  it("keeps object snapping when grid snapping is off", () => {
+    // Free pointer: no grid rounding, no nearby objects.
+    expect(
+      pointerToMeters({
+        designPpm: 20,
+        getNearbySnapCandidates: () => [],
+        pointer: { x: 27, y: 43 },
+        snap: true,
+        snapToGrid: false,
+        magnetic: true,
+        snapRadiusMeters: 1,
+        stepPx: 20,
+      })
+    ).toEqual({ x: 1.35, y: 2.15 });
+
+    // Still magnetic towards a nearby object centre.
+    expect(
+      pointerToMeters({
+        designPpm: 20,
+        getNearbySnapCandidates: () => shapes,
+        pointer: { x: 208, y: 203 },
+        snap: true,
+        snapToGrid: false,
+        magnetic: true,
+        snapRadiusMeters: 1,
+        stepPx: 20,
+      })
+    ).toEqual({ x: 10, y: 10 });
+  });
+
   it("snaps pointer placement to path waypoints", () => {
     const route = shapes.find((shape) => shape.kind === "polyline");
     expect(route?.kind).toBe("polyline");
@@ -164,7 +194,7 @@ describe("canvas interaction helpers", () => {
       })
     ).toBe(true);
 
-    expect(clampZoom(10)).toBe(5);
+    expect(clampZoom(20)).toBe(12);
     expect(
       getWheelZoomTarget({
         ctrlKey: false,

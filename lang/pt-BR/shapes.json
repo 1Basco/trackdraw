@@ -1,0 +1,185 @@
+{
+  "kindLabels": {
+    "gate": "Gate",
+    "tower": "Torre",
+    "flag": "Bandeira",
+    "cone": "Cone",
+    "label": "Rótulo",
+    "polyline": "Linha de corrida",
+    "startfinish": "Largada / Chegada",
+    "ladder": "Escada",
+    "divegate": "Dive Gate",
+    "barrier": "Barreira",
+    "pvcframe": "Quadro PVC"
+  },
+  "toolLabels": {
+    "select": "Selecionar",
+    "grab": "Mover",
+    "preset": "Predefinições",
+    "gate": "Gate",
+    "tower": "Torre",
+    "flag": "Bandeira",
+    "cone": "Cone",
+    "label": "Rótulo",
+    "polyline": "Traçado",
+    "startfinish": "Pads de largada",
+    "ladder": "Escada",
+    "divegate": "Dive Gate",
+    "barrier": "Barreira",
+    "pvcframe": "Quadro PVC"
+  },
+  "toolGroups": {
+    "track": "Pista",
+    "extra": "Extras"
+  },
+  "toolMobileLabels": {
+    "startfinish": "Largada",
+    "divegate": "Dive",
+    "barrier": "Barreira",
+    "pvcframe": "PVC"
+  },
+  "mobileStatus": {
+    "multiSelect": "Múltipla",
+    "tool": "Ferramenta",
+    "itemsCount": "{count} itens"
+  },
+  "canvas": {
+    "selectionCount": "{count} itens",
+    "selectionFallback": "Seleção",
+    "frontLabel": "Frente"
+  },
+  "catalogEntries": {
+    "trackdraw-generic-gate": {
+      "name": "TrackDraw Gate",
+      "size": "2 x 2 m"
+    },
+    "multigp-standard-gate-5x5": {
+      "name": "MultiGP Standard Gate 5x5",
+      "size": "5 ft x 5 ft"
+    },
+    "multigp-championship-gate-7x6": {
+      "name": "MultiGP Championship Gate 7x6",
+      "size": "7 ft x 6 ft"
+    },
+    "trackdraw-generic-tower": {
+      "name": "TrackDraw Tower",
+      "size": "2 x 2 m, elevada"
+    },
+    "multigp-tower-5x5": {
+      "name": "MultiGP Tower 5x5",
+      "size": "5 ft x 5 ft, elevada 5 ft"
+    },
+    "multigp-tower-7x6": {
+      "name": "MultiGP Tower 7x6",
+      "size": "7 ft x 6 ft, elevada 6 ft"
+    },
+    "multigp-double-gate-tower-5x5": {
+      "name": "MultiGP Double Gate Tower 5x5",
+      "size": "5 ft de largura, 2 aberturas de 5 ft"
+    },
+    "multigp-double-gate-tower-7x6": {
+      "name": "MultiGP Double Gate Tower 7x6",
+      "size": "7 ft de largura, 2 aberturas de 6 ft"
+    },
+    "trackdraw-generic-flag": {
+      "name": "TrackDraw Flag",
+      "size": "0,25 m de raio, mastro de 3,5 m"
+    },
+    "multigp-corner-flag": {
+      "name": "MultiGP Corner Flag",
+      "size": "10 ft"
+    },
+    "trackdraw-generic-cone": {
+      "name": "TrackDraw Cone",
+      "size": "0,2 m de raio"
+    },
+    "trackdraw-generic-label": {
+      "name": "TrackDraw Label",
+      "size": "Rótulo de texto"
+    },
+    "trackdraw-generic-start-finish": {
+      "name": "TrackDraw Start / Finish",
+      "size": "3 m de largura"
+    },
+    "trackdraw-generic-ladder": {
+      "name": "TrackDraw Ladder",
+      "size": "2 x 6 m, 3 degraus"
+    },
+    "multigp-standard-ladder-5x5": {
+      "name": "MultiGP Standard Ladder 5x5",
+      "size": "5 ft de largura, 3 × seções de 5 ft"
+    },
+    "multigp-championship-ladder-7x6": {
+      "name": "MultiGP Championship Ladder 7x6",
+      "size": "7 ft de largura, 3 × aberturas de 6 ft"
+    },
+    "multigp-topless-ladder-7x6": {
+      "name": "MultiGP Topless Ladder 7x6",
+      "size": "7 ft de largura, 3 x 6 ft sem topo"
+    },
+    "trackdraw-generic-dive-gate": {
+      "name": "TrackDraw Dive Gate",
+      "size": "2,8 m quadrado"
+    },
+    "multigp-dive-gate-7x6": {
+      "name": "MultiGP Dive Gate 7x6",
+      "size": "7 ft x 6 ft"
+    },
+    "multigp-launch-gate-7x6": {
+      "name": "MultiGP Launch Gate 7x6",
+      "size": "7 ft x 6 ft"
+    },
+    "trackdraw-generic-banner": {
+      "name": "TrackDraw Banner",
+      "size": "3 × 2 m"
+    },
+    "trackdraw-generic-fence": {
+      "name": "TrackDraw Fence",
+      "size": "3 × 1,2 m"
+    },
+    "trackdraw-generic-net": {
+      "name": "TrackDraw Net",
+      "size": "3 × 2 m"
+    },
+    "multigp-hurdle": {
+      "name": "MultiGP Hurdle",
+      "size": "10 ft de largura, 5 ft de altura"
+    },
+    "trackdraw-pvc-arch-gate": {
+      "name": "PVC Arch Gate",
+      "size": "61 cm, 61 cm de altura, 3 tubos"
+    },
+    "trackdraw-pvc-square-gate": {
+      "name": "PVC Square Gate",
+      "size": "61 cm, 61 cm de altura, 4 tubos"
+    },
+    "trackdraw-pvc-tall-arch": {
+      "name": "PVC Tall Arch",
+      "size": "61 cm, 122 cm de altura, 5 tubos"
+    },
+    "trackdraw-pvc-double-arch": {
+      "name": "PVC Double Arch",
+      "size": "122 cm, 61 cm de altura, 5 tubos"
+    },
+    "trackdraw-pvc-dive-gate": {
+      "name": "PVC Dive Gate",
+      "size": "61 × 61 cm, 61 cm de altura, 6 tubos"
+    },
+    "trackdraw-pvc-turn-post": {
+      "name": "PVC Turn Post",
+      "size": "122 cm, 61 cm de altura, 3 tubos"
+    },
+    "trackdraw-pvc-flag-post": {
+      "name": "PVC Flag Post",
+      "size": "122 × 122 cm, 61 cm de altura, 5 tubos"
+    },
+    "trackdraw-pvc-tower": {
+      "name": "PVC Tower",
+      "size": "122 × 122 cm, 122 cm de altura, 6 tubos"
+    },
+    "trackdraw-pvc-slalom-pair": {
+      "name": "PVC Slalom Pair",
+      "size": "122 × 61 cm, 61 cm de altura, 6 tubos"
+    }
+  }
+}

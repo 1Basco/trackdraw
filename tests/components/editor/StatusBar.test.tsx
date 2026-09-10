@@ -77,6 +77,22 @@ describe("StatusBar", () => {
     expect(screen.getByRole("button", { name: /Snap Off/ })).toBeTruthy();
   });
 
+  it("toggles grid snapping independently from object snapping", () => {
+    useEditor.getState().setSnapEnabled(true);
+    useEditor.getState().setSnapGridEnabled(true);
+
+    render(<StatusBar />);
+
+    const gridButton = screen.getByRole("button", { name: /Grid On/ });
+    expect(gridButton.getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(gridButton);
+
+    expect(useEditor.getState().ui.snapGridEnabled).toBe(false);
+    expect(useEditor.getState().ui.snapEnabled).toBe(true);
+    expect(screen.getByRole("button", { name: /Grid Off/ })).toBeTruthy();
+  });
+
   it("toggles developer mode from the development control", () => {
     developerModeState.enabled = true;
 

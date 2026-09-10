@@ -1,5 +1,6 @@
 import { distance2D } from "@/lib/track/geometry";
 import { getGeneratedRouteProfile } from "@/lib/track/items/registry";
+import { getDesignScaleProfile } from "@/lib/track/track-class";
 import type {
   PolylinePoint,
   PolylineShape,
@@ -99,6 +100,7 @@ export function generateRaceLineDraft(
   const warnings: GeneratedRouteWarning[] = [];
   const unsupportedShapeIds: string[] = [];
   const points: PolylinePoint[] = [];
+  const scale = getDesignScaleProfile(design);
   const orderedShapes = getOrderedShapes(design);
   const supportedItems: SupportedRouteItem[] = [];
 
@@ -147,7 +149,10 @@ export function generateRaceLineDraft(
           ? getBearingDeg(item.anchor, nextAnchor)
           : item.shape.rotation;
       const offsetHeadingDeg = item.headingDeg ?? fallbackBearingDeg;
-      const clearance = Math.max(1, item.approachDistance ?? 1);
+      const clearance = Math.max(
+        scale.routeClearanceMinMeters,
+        item.approachDistance ?? scale.routeClearanceMinMeters
+      );
 
       appendPoint(
         points,
@@ -157,7 +162,10 @@ export function generateRaceLineDraft(
     }
 
     const headingDeg = item.headingDeg ?? item.shape.rotation;
-    const approachDistance = Math.max(1, item.approachDistance ?? 2);
+    const approachDistance = Math.max(
+      scale.routeApproachMinMeters,
+      item.approachDistance ?? scale.routeApproachDefaultMeters
+    );
 
     if (index === 0) {
       appendPoint(

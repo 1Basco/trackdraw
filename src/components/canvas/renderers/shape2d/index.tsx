@@ -12,6 +12,7 @@ export { renderFlag } from "./flag";
 export { renderGate } from "./gate";
 export { renderLabel } from "./label";
 export { renderLadder } from "./ladder";
+export { renderPvcFrame } from "./pvcframe";
 export { renderStartFinish } from "./startfinish";
 export { renderTower } from "./tower";
 import { renderBarrier } from "./barrier";
@@ -21,6 +22,7 @@ import { renderFlag } from "./flag";
 import { renderGate } from "./gate";
 import { renderLabel } from "./label";
 import { renderLadder } from "./ladder";
+import { renderPvcFrame } from "./pvcframe";
 import { renderStartFinish } from "./startfinish";
 import { renderTower } from "./tower";
 
@@ -124,6 +126,8 @@ export function LockedPathSelectBadge({
         strokeWidth={1}
         cornerRadius={999}
         opacity={0.94}
+        // Avoid Konva's stage-sized buffer canvas (fill + stroke + opacity).
+        perfectDrawEnabled={false}
       />
       <Text
         width={width}
@@ -168,6 +172,7 @@ export const shape2DRenderers: Shape2DRendererMap = {
   gate: renderGate,
   label: (shape, selected) => renderLabel(shape, selected),
   ladder: renderLadder,
+  pvcframe: renderPvcFrame,
   startfinish: renderStartFinish,
   tower: renderTower,
 };

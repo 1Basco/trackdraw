@@ -37,6 +37,7 @@ export const productEventElementKinds = [
   "ladder",
   "divegate",
   "barrier",
+  "pvcframe",
 ] as const satisfies readonly ShapeKind[];
 
 export const productEventEditTypes = [
@@ -56,6 +57,7 @@ export const productEventExportFormats = [
   "pdf",
   "webm",
   "race_pack",
+  "whoop_pack",
   "velocidrone",
   "render_3d",
 ] as const;
@@ -303,6 +305,7 @@ export function classifyProductExportFailure(
     format === "svg" ||
     format === "pdf" ||
     format === "race_pack" ||
+    format === "whoop_pack" ||
     format === "render_3d"
   ) {
     return { category: "rendering", reason: "rendering_failed" };

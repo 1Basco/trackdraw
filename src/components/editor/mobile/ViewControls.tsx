@@ -22,6 +22,8 @@ interface EditorMobileViewControlsProps {
   onStartFlyThrough: () => void;
   snapEnabled?: boolean;
   onToggleSnapEnabled?: () => void;
+  snapGridEnabled?: boolean;
+  onToggleSnapGridEnabled?: () => void;
   onTabChange: (tab: EditorViewportTab) => void;
   saveStatusLabel: string;
   showShareActions?: boolean;
@@ -94,6 +96,8 @@ export function ViewControls({
   saveStatusLabel,
   showShareActions = true,
   snapEnabled = false,
+  snapGridEnabled = true,
+  onToggleSnapGridEnabled,
   studioHref = "/studio",
   tab,
 }: EditorMobileViewControlsProps) {
@@ -185,6 +189,14 @@ export function ViewControls({
                 </div>
               </button>
             )}
+            {onToggleSnapGridEnabled && snapEnabled ? (
+              <ToggleRow
+                title={t("controls.gridSnap.label")}
+                description={t("controls.gridSnap.description")}
+                enabled={snapGridEnabled}
+                onClick={onToggleSnapGridEnabled}
+              />
+            ) : null}
             <ToggleRow
               title={t("controls.rulers.label")}
               description={t("controls.rulers.description")}

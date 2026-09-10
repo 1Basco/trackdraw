@@ -12,6 +12,7 @@ The catalog should start local and typed, not as a database. A database becomes 
 - [x] Show catalog identity, official size status, and fixed official dimensions for placed catalog-backed gates.
 - [x] Extend catalog-backed MultiGP entries to gates, ladders, and the 10 ft corner flag with texture-based 3D rendering.
 - [x] Add a barrier category with TrackDraw banner/fence/net entries and the official MultiGP Hurdle.
+- [x] Add a PVC Frame category for indoor whoop tracks with lattice-based templates and snap-on tube editing (see `whoop-pvc-frames.md`).
 
 ## Reference Observations
 

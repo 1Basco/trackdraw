@@ -1,22 +1,32 @@
 import type Konva from "konva";
 import { jsPDF } from "@/lib/vendor/jspdf";
 import type { SupportedLocale } from "@/lib/i18n/locales";
-import {
-  getRequiredInventoryCounts,
-  inventoryKinds,
-  normalizeInventoryProfile,
-} from "@/lib/planning/inventory";
+import { getRequiredInventoryCounts } from "@/lib/planning/inventory";
 import { buildSetupPlan } from "@/lib/planning/setup-estimate";
 import { createQrCode } from "@/lib/qr-code";
-import { getShapeKindLabel, type Translate } from "@/lib/track/items/registry";
+import type { Translate } from "@/lib/track/items/registry";
+import { getObstacleSpacing } from "@/lib/track/obstacle-spacing";
 import { getDesignTimingMarkers, timingRoleLabels } from "@/lib/track/timing";
 import { formatFieldSize, formatMeasurement } from "@/lib/track/units";
 import type { TrackDesign } from "../types";
+import { type Export2DOptions, type ExportTheme } from "./exportSvg";
 import {
-  designToSvg,
-  type Export2DOptions,
-  type ExportTheme,
-} from "./exportSvg";
+  BORDER,
+  BRAND_LOGO_ASPECT,
+  drawInfoCard,
+  drawPageFooter,
+  drawSectionTitle,
+  drawSmallPageLogo,
+  formatPdfDate,
+  getInventoryComparison,
+  INK,
+  loadBrandLogo,
+  MUTED,
+  PANEL,
+  renderDesignPngDataUrl,
+  setPageBackground,
+  WARN,
+} from "./pdf/page-kit";
 import { configurePdfFont, setPdfFont } from "./pdf-font";
 
 export type ExportPdfOptions = Export2DOptions & {
@@ -29,188 +39,6 @@ export type ExportPdfTranslate = {
   tSetup: Translate;
   tShapes: Translate;
 };
-
-const PRINT_BG: [number, number, number] = [255, 255, 255];
-const INK: [number, number, number] = [24, 39, 60];
-const MUTED: [number, number, number] = [95, 112, 140];
-const BORDER: [number, number, number] = [215, 223, 235];
-const PANEL: [number, number, number] = [245, 248, 252];
-const WARN: [number, number, number] = [180, 83, 9];
-const BRAND_LOGO_ASPECT = 1027 / 200;
-
-function formatPdfDate(locale: SupportedLocale | undefined) {
-  const dateLocale =
-    locale === "zh-CN"
-      ? locale
-      : locale === "nl"
-        ? "nl-NL"
-        : locale === "de"
-          ? "de-DE"
-          : "en-GB";
-
-  return new Date().toLocaleDateString(dateLocale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-async function loadSvgAsPng(
-  svgUrl: string,
-  w: number,
-  h: number
-): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        resolve("");
-        return;
-      }
-      ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = () => resolve("");
-    img.src = svgUrl;
-  });
-}
-
-async function renderDesignPngDataUrl(
-  design: TrackDesign,
-  theme: ExportTheme,
-  options?: Export2DOptions
-) {
-  const svgString = designToSvg(design, theme, options);
-  const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
-  const svgUrl = URL.createObjectURL(svgBlob);
-  const dataUrl = await loadSvgAsPng(
-    svgUrl,
-    Math.round(design.field.width * design.field.ppm * 2),
-    Math.round(design.field.height * design.field.ppm * 2)
-  );
-  URL.revokeObjectURL(svgUrl);
-  return dataUrl;
-}
-
-async function loadBrandLogo() {
-  return loadSvgAsPng(
-    "/assets/brand/trackdraw-logo-mono-lightbg.svg",
-    799,
-    200
-  );
-}
-
-function setPageBackground(pdf: jsPDF) {
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  pdf.setFillColor(...PRINT_BG);
-  pdf.rect(0, 0, pageW, pageH, "F");
-}
-
-function drawPageFooter(
-  pdf: jsPDF,
-  {
-    pageLabel,
-    pageNumber,
-    totalPages,
-    t,
-  }: {
-    pageLabel: string;
-    pageNumber: number;
-    totalPages: number;
-    t: Translate;
-  }
-) {
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const margin = 14;
-  const footerY = pageH - 10;
-
-  pdf.setDrawColor(...BORDER);
-  pdf.setLineWidth(0.25);
-  pdf.line(margin, footerY - 3.5, pageW - margin, footerY - 3.5);
-
-  setPdfFont(pdf, "normal");
-  pdf.setFontSize(7);
-  pdf.setTextColor(...MUTED);
-  pdf.text(t("footer.brand", { pageLabel }), margin, footerY);
-  pdf.text(
-    t("footer.pageOf", { pageNumber, totalPages }),
-    pageW - margin,
-    footerY,
-    { align: "right" }
-  );
-}
-
-function drawSmallPageLogo(pdf: jsPDF, logoDataUrl: string) {
-  if (!logoDataUrl) return;
-  const pageW = pdf.internal.pageSize.getWidth();
-  const margin = 14;
-  const logoH = 3.8;
-  const logoW = logoH * BRAND_LOGO_ASPECT;
-  pdf.addImage(
-    logoDataUrl,
-    "PNG",
-    pageW - margin - logoW,
-    margin - 1,
-    logoW,
-    logoH
-  );
-}
-
-function drawSectionTitle(
-  pdf: jsPDF,
-  title: string,
-  x: number,
-  y: number,
-  w: number
-) {
-  setPdfFont(pdf, "bold");
-  pdf.setFontSize(9);
-  pdf.setTextColor(...MUTED);
-  pdf.text(title.toUpperCase(), x, y);
-  pdf.setDrawColor(...BORDER);
-  pdf.setLineWidth(0.25);
-  pdf.line(x, y + 2.5, x + w, y + 2.5);
-}
-
-function drawInfoCard(
-  pdf: jsPDF,
-  {
-    x,
-    y,
-    w,
-    h,
-    label,
-    value,
-    tone = "neutral",
-  }: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    label: string;
-    value: string;
-    tone?: "neutral" | "warn";
-  }
-) {
-  pdf.setFillColor(...PANEL);
-  pdf.setDrawColor(...BORDER);
-  pdf.setLineWidth(0.25);
-  pdf.roundedRect(x, y, w, h, 3, 3, "FD");
-  setPdfFont(pdf, "bold");
-  pdf.setFontSize(7);
-  pdf.setTextColor(...MUTED);
-  pdf.text(label.toUpperCase(), x + 4, y + 6);
-  setPdfFont(pdf, "bold");
-  pdf.setFontSize(13);
-  pdf.setTextColor(...(tone === "warn" ? WARN : INK));
-  pdf.text(value, x + 4, y + 14);
-}
 
 function drawQrCode(
   pdf: jsPDF,
@@ -315,26 +143,6 @@ function drawSharedViewBlock(
   pdf.text(lines, x + 4, y + 20);
 }
 
-function getInventoryComparison(design: TrackDesign, tShapes: Translate) {
-  const available = normalizeInventoryProfile(design.inventory);
-  const required = getRequiredInventoryCounts(design);
-
-  return inventoryKinds.map((kind) => {
-    const needed = required[kind];
-    const stock = available[kind];
-    const missing = Math.max(0, needed - stock);
-
-    return {
-      kind,
-      label: getShapeKindLabel(kind, tShapes),
-      required: needed,
-      available: stock,
-      missing,
-      buildable: missing === 0,
-    };
-  });
-}
-
 function buildRacePackContext(
   design: TrackDesign,
   { tSetup, tShapes }: ExportPdfTranslate,
@@ -351,10 +159,17 @@ function buildRacePackContext(
   const numberingEnabled = options?.includeObstacleNumbers !== false;
   const setupPlan = buildSetupPlan(design, tSetup, tShapes);
   const timingMarkers = getDesignTimingMarkers(design);
+  const includeObstacleSpacing =
+    options?.includeObstacleSpacing ?? design.trackClass === "whoop";
+  const obstacleSpacing =
+    numberingEnabled && includeObstacleSpacing
+      ? getObstacleSpacing(design)
+      : [];
 
   return {
     inventoryComparison,
     numberingEnabled,
+    obstacleSpacing,
     unitSystem: options?.unitSystem ?? "metric",
     setupSequence: setupPlan.steps,
     shortages,
@@ -647,6 +462,48 @@ function drawRacePackBuildSheet(
     pdf.text(String(item.missing), margin + 148, y, { align: "right" });
     y += 5.5;
   });
+
+  if (context.obstacleSpacing.length) {
+    y += 8;
+    drawSectionTitle(pdf, t("buildSheet.spacingTitle"), margin, y, contentW);
+    y += 10;
+
+    setPdfFont(pdf, "bold");
+    pdf.setFontSize(8);
+    pdf.setTextColor(...MUTED);
+    pdf.text(t("buildSheet.spacingFromColumn"), margin, y);
+    pdf.text(t("buildSheet.spacingToColumn"), margin + 40, y);
+    pdf.text(t("buildSheet.spacingDistanceColumn"), margin + 118, y, {
+      align: "right",
+    });
+    y += 5;
+
+    setPdfFont(pdf, "normal");
+    pdf.setFontSize(8.5);
+    context.obstacleSpacing.forEach((entry) => {
+      ensurePageSpace(7, t("buildSheet.spacingTitle"));
+      pdf.setTextColor(...INK);
+      pdf.text(
+        t("buildSheet.spacingObstacle", { number: entry.fromNumber }),
+        margin,
+        y
+      );
+      pdf.text(
+        t("buildSheet.spacingObstacle", { number: entry.toNumber }),
+        margin + 40,
+        y
+      );
+      pdf.text(
+        formatMeasurement(entry.distanceMeters, context.unitSystem, {
+          precision: 2,
+        }),
+        margin + 118,
+        y,
+        { align: "right" }
+      );
+      y += 5.5;
+    });
+  }
 
   y += 8;
   drawSectionTitle(pdf, t("buildSheet.timingPointsTitle"), margin, y, contentW);

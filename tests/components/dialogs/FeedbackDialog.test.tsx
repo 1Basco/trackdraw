@@ -13,7 +13,10 @@ vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => false,
 }));
 
-describe("FeedbackDialog", () => {
+// The user-event typing in these tests is slow under full-suite load; the
+// default 5 s budget times out on slower machines even though the assertions
+// pass in isolation.
+describe("FeedbackDialog", { timeout: 20000 }, () => {
   beforeEach(() => {
     vi.spyOn(window, "open").mockImplementation(() => null);
   });

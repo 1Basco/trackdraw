@@ -1,5 +1,6 @@
 import type {
   BarrierShape,
+  PvcFrameShape,
   TrackDesign,
   Shape,
   ShapeKind,
@@ -18,14 +19,17 @@ import {
   getObstacleNumberMap,
   isNumberedObstacle,
 } from "../track/obstacleNumbering";
+import { getObstacleSpacing } from "../track/obstacle-spacing";
 import {
   formatCompactFieldSize,
+  formatMeasurement,
   type MeasurementUnitSystem,
 } from "../track/units";
 import {
   getDiveGate2DShape,
   getGate2DShape,
   getLadder2DShape,
+  getPvcFrame2DShape,
   getTower2DShape,
 } from "../track/shape2d";
 import { barrierToSvg } from "./svg/barrier";
@@ -34,9 +38,13 @@ import { diveGateToSvg } from "./svg/divegate";
 import { flagToSvg } from "./svg/flag";
 import { gateToSvg } from "./svg/gate";
 import { labelToSvg } from "./svg/label";
+import { lapStartToSvg } from "./svg/lap-start";
 import { ladderToSvg } from "./svg/ladder";
 import { polylineToSvg } from "./svg/polyline";
+import { pvcFrameToSvg } from "./svg/pvcframe";
 import { startfinishToSvg } from "./svg/startfinish";
+import { getExport2DColors, type ExportTheme } from "./svg/theme";
+import { structureGapsToSvg } from "./svg/structure-gaps";
 import { towerToSvg } from "./svg/tower";
 import { escapeXml, m } from "./svg/utils";
 
@@ -61,9 +69,10 @@ const shapeToSvgDispatch: Record<
   ladder: (shape, ppm) => ladderToSvg(shape as LadderShape, ppm),
   tower: (shape, ppm) => towerToSvg(shape as TowerShape, ppm),
   divegate: (shape, ppm) => diveGateToSvg(shape as DiveGateShape, ppm),
+  pvcframe: (shape, ppm) => pvcFrameToSvg(shape as PvcFrameShape, ppm),
 };
 
-function shapeToSvg(
+export function shapeToSvg(
   shape: Shape,
   ppm: number,
   primaryPolylineId: string | null
@@ -71,7 +80,7 @@ function shapeToSvg(
   return shapeToSvgDispatch[shape.kind](shape, ppm, primaryPolylineId);
 }
 
-function getNumberedShapeBounds(shape: Shape, ppm: number) {
+export function getNumberedShapeBounds(shape: Shape, ppm: number) {
   switch (shape.kind) {
     case "gate": {
       const { width, depth } = getGate2DShape(shape, ppm);
@@ -99,6 +108,8 @@ function getNumberedShapeBounds(shape: Shape, ppm: number) {
         height: visibleDepth,
       };
     }
+    case "pvcframe":
+      return getPvcFrame2DShape(shape, ppm).bounds;
     default:
       return null;
   }
@@ -115,12 +126,18 @@ function rotatePoint(
   };
 }
 
-function obstacleNumbersToSvg(
+/**
+ * Numbered badges above each obstacle. `scale` grows every fixed pixel size
+ * together, so a high-resolution render keeps the badges proportional instead
+ * of shrinking them into the artwork.
+ */
+export function obstacleNumbersToSvg(
   design: TrackDesign,
   shapes: Shape[],
   ppm: number,
   theme: ExportTheme,
-  boundsCache?: Map<string, ReturnType<typeof getNumberedShapeBounds>>
+  boundsCache?: Map<string, ReturnType<typeof getNumberedShapeBounds>>,
+  scale = 1
 ) {
   const obstacleNumberMap = getObstacleNumberMap(design);
   if (!obstacleNumberMap.size) return "";
@@ -141,23 +158,73 @@ function obstacleNumbersToSvg(
 
       const localPoint = {
         x: bounds.x + bounds.width / 2,
-        y: bounds.y - 16,
+        y: bounds.y - 16 * scale,
       };
       const rotatedPoint = rotatePoint(localPoint, shape.rotation);
       const cx = m(shape.x, ppm) + rotatedPoint.x;
       const cy = m(shape.y, ppm) + rotatedPoint.y;
 
       return `<g>
-    <circle cx="${cx}" cy="${cy}" r="10" fill="${badgeFill}" stroke="${badgeStroke}" stroke-width="1"/>
-    <text x="${cx}" y="${cy + 3.7}" font-size="11" font-weight="700" fill="${textFill}" text-anchor="middle">${number}</text>
+    <circle cx="${cx}" cy="${cy}" r="${10 * scale}" fill="${badgeFill}" stroke="${badgeStroke}" stroke-width="${scale}"/>
+    <text x="${cx}" y="${cy + 3.7 * scale}" font-size="${11 * scale}" font-weight="700" fill="${textFill}" text-anchor="middle">${number}</text>
   </g>`;
     })
     .join("");
 }
 
-export type ExportTheme = "dark" | "light";
+/** Route-order spacing dimensions. See `obstacleNumbersToSvg` for `scale`. */
+export function obstacleSpacingToSvg(
+  design: TrackDesign,
+  ppm: number,
+  theme: ExportTheme,
+  unitSystem: MeasurementUnitSystem,
+  scale = 1
+) {
+  const spacing = getObstacleSpacing(design);
+  if (!spacing.length) return "";
+
+  const lineColor = theme === "dark" ? "#fbbf24" : "#d97706";
+  const pillFill = theme === "dark" ? "#1c1917" : "#fffbeb";
+  const pillStroke = theme === "dark" ? "#fbbf24" : "#d97706";
+  const textFill = theme === "dark" ? "#fde68a" : "#78350f";
+
+  return spacing
+    .map((entry) => {
+      const x1 = m(entry.from.x, ppm);
+      const y1 = m(entry.from.y, ppm);
+      const x2 = m(entry.to.x, ppm);
+      const y2 = m(entry.to.y, ppm);
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      const label = formatMeasurement(entry.distanceMeters, unitSystem, {
+        precision: 2,
+      });
+      const pillWidth = Math.max(34, label.length * 6.2 + 10) * scale;
+      const pillHeight = 14 * scale;
+      return `<g>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${lineColor}" stroke-width="${scale}" stroke-dasharray="${4 * scale} ${3 * scale}" opacity="0.7"/>
+    <rect x="${midX - pillWidth / 2}" y="${midY - pillHeight / 2}" width="${pillWidth}" height="${pillHeight}" rx="${7 * scale}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="${0.8 * scale}" opacity="0.95"/>
+    <text x="${midX}" y="${midY + 3.4 * scale}" font-size="${9 * scale}" font-weight="600" fill="${textFill}" text-anchor="middle">${escapeXml(label)}</text>
+  </g>`;
+    })
+    .join("");
+}
+
+export type { ExportTheme };
 export interface Export2DOptions {
   includeObstacleNumbers?: boolean;
+  /** Mark where the lap begins and which way it is flown. */
+  includeLapStart?: boolean;
+  /** Translated caption for the lap-start marker. */
+  lapStartLabel?: string;
+  /** Draw centre-to-centre distances between consecutive numbered obstacles. Defaults to on for whoop designs. */
+  includeObstacleSpacing?: boolean;
+  /**
+   * Draw the gaps between separate structures: a minimum spanning tree over
+   * the placed items, labelled with the edge-to-edge distance. Off by default,
+   * so the standard 2D exports are unchanged.
+   */
+  includeStructureGaps?: boolean;
   locale?: string;
   preset?: "standard" | "race-day";
   titleFallback?: string;
@@ -194,23 +261,7 @@ export function designToSvg(
   const majorStep = step * 10;
   const bl = 12; // corner bracket arm length
 
-  const isDark = theme === "dark";
-  const colors = {
-    bg: isDark ? "#0b0f18" : "#ffffff",
-    fieldFill: isDark ? "#0c1520" : "#f8fafc",
-    fieldFillOp: isDark ? "0.6" : "1",
-    gridMajor: isDark ? "#1e3550" : "#c8d8e8",
-    gridCoarse: isDark ? "#172c42" : "#dce8f0",
-    gridMinor: isDark ? "#111f30" : "#eaf0f6",
-    gridOp: isDark ? "0.85" : "0.7",
-    borderGlow: isDark ? "#1a2d44" : "#b0c8e0",
-    border: isDark ? "#2a4060" : "#7a9ab8",
-    brackets: isDark ? "#3a5878" : "#6a8aa8",
-    footerBg: isDark ? "#060a10" : "#f0f4f8",
-    footerLine: isDark ? "#1e3550" : "#c0d0e0",
-    footerTitle: isDark ? "#6a9abf" : "#1a3050",
-    footerMeta: isDark ? "#3a6080" : "#4a6a88",
-  };
+  const colors = getExport2DColors(theme);
 
   // Grid lines — three levels (kept subtle so shapes read clearly). Very fine
   // grid settings are clamped for export so large layouts do not produce
@@ -240,9 +291,10 @@ export function designToSvg(
   }
 
   const shapes = getDesignShapes(design);
-  const primaryPolylineId =
-    shapes.find((shape): shape is PolylineShape => shape.kind === "polyline")
-      ?.id ?? null;
+  const primaryPolyline =
+    shapes.find((shape): shape is PolylineShape => shape.kind === "polyline") ??
+    null;
+  const primaryPolylineId = primaryPolyline?.id ?? null;
   const shapeBoundsCache = new Map<
     string,
     ReturnType<typeof getNumberedShapeBounds>
@@ -258,6 +310,24 @@ export function designToSvg(
     options?.includeObstacleNumbers === false
       ? ""
       : obstacleNumbersToSvg(design, shapes, ppm, theme, shapeBoundsCache);
+  const includeObstacleSpacing =
+    options?.includeObstacleSpacing ?? design.trackClass === "whoop";
+  const obstacleSpacingMarkup =
+    includeObstacleSpacing && options?.includeObstacleNumbers !== false
+      ? obstacleSpacingToSvg(
+          design,
+          ppm,
+          theme,
+          options?.unitSystem ?? "metric"
+        )
+      : "";
+  const structureGapMarkup = options?.includeStructureGaps
+    ? structureGapsToSvg(design, ppm, theme, options?.unitSystem ?? "metric")
+    : "";
+  const lapStartMarkup =
+    options?.includeLapStart && primaryPolyline
+      ? lapStartToSvg(primaryPolyline, ppm, theme, options.lapStartLabel)
+      : "";
   const titleText =
     design.title.trim() || options?.titleFallback || "Untitled Track";
   const sizeText = formatCompactFieldSize(
@@ -291,8 +361,14 @@ export function designToSvg(
   </g>
   <!-- Shapes -->
   ${shapeMarkup}
+  <!-- Obstacle spacing -->
+  ${obstacleSpacingMarkup}
+  <!-- Structure gaps -->
+  ${structureGapMarkup}
   <!-- Obstacle numbers -->
   ${obstacleNumberMarkup}
+  <!-- Lap start -->
+  ${lapStartMarkup}
   <!-- Footer bar -->
   <rect x="0" y="${H - FOOTER}" width="${W}" height="${FOOTER}" fill="${colors.footerBg}" opacity="0.85"/>
   <line x1="0" y1="${H - FOOTER}" x2="${W}" y2="${H - FOOTER}" stroke="${colors.footerLine}" stroke-width="0.75"/>

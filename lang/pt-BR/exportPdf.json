@@ -1,0 +1,132 @@
+{
+  "renderFailed": "Falha ao gerar o PDF",
+  "untitledTrack": "Pista sem título",
+  "footer": {
+    "brand": "TrackDraw · {pageLabel}",
+    "pageOf": "Página {pageNumber} de {totalPages}",
+    "pageOverview": "Visão geral",
+    "pageTrackMap": "Mapa da pista",
+    "pageBuildSheet": "Ficha de montagem"
+  },
+  "sharedView": {
+    "title": "VISUALIZAÇÃO COMPARTILHADA",
+    "scanToOpen": "Escaneie para abrir a pista",
+    "scanDescription": "Abre o link de compartilhamento canônico do TrackDraw para consulta e briefing no celular.",
+    "noShare": "Nenhum compartilhamento publicado vinculado",
+    "noShareDescription": "Publique este projeto primeiro se quiser que o Race Pack inclua um código para escanear."
+  },
+  "cover": {
+    "title": "Race Pack",
+    "numberingIncluded": "com numeração",
+    "numberingHidden": "sem numeração",
+    "statusLabel": "Status",
+    "statusBuildable": "Montável",
+    "statusShort": "Faltando",
+    "missingLabel": "Faltando",
+    "obstaclesLabel": "Obstáculos",
+    "intro": "Este Race Pack foi feito para acompanhar a equipe de montagem no dia da corrida. Use o mapa como referência de posicionamento, a lista de materiais como conferência de estoque e a sequência de montagem como a ordem prática para colocar o circuito no campo. O tempo de montagem considera uma equipe típica de 2 a 3 pessoas e um fluxo de clube: descarregar, organizar, pré-montar e depois posicionar e fixar.",
+    "contentsTitle": "Conteúdo",
+    "contentsItem1": "1. Mapa da pista e visão geral do campo",
+    "contentsItem2": "2. Lista de materiais, conferência de estoque e pontos de cronometragem",
+    "contentsItem3": "3. Sequência de montagem e notas do dia da corrida",
+    "summaryTitle": "Resumo",
+    "summaryShortage": "{count, plural, one {Este layout passa do estoque disponível em 1 tipo de obstáculo.} other {Este layout passa do estoque disponível em {count} tipos de obstáculo.}} Resolva as faltas antes de usar este pacote como referência final de montagem.",
+    "summaryBuildable": "Este layout é montável com o perfil de inventário salvo. Use as páginas a seguir como referência de montagem e de entrega no dia da corrida."
+  },
+  "mapPage": {
+    "title": "Mapa da pista",
+    "stockShort": "Faltam {count} no estoque",
+    "stockBuildable": "Conferência de estoque: montável",
+    "numberingShown": "com numeração",
+    "numberingHidden": "sem numeração"
+  },
+  "buildSheet": {
+    "title": "Ficha de montagem",
+    "materialListTitle": "Lista de materiais",
+    "obstacleColumn": "Obstáculo",
+    "requiredColumn": "Necessário",
+    "availableColumn": "Disponível",
+    "missingColumn": "Faltando",
+    "spacingTitle": "Espaçamento entre obstáculos",
+    "spacingFromColumn": "De",
+    "spacingToColumn": "Para",
+    "spacingDistanceColumn": "Distância entre centros",
+    "spacingObstacle": "Obstáculo nº {number}",
+    "timingPointsTitle": "Pontos de cronometragem",
+    "noTimingPoints": "Nenhum ponto de cronometragem foi atribuído ainda. Marque um gate como largada/chegada ou parcial no inspetor antes da entrega no dia da corrida.",
+    "setupSequenceTitle": "Sequência de montagem",
+    "setupIntro": "Esforço estimado de montagem: cerca de {min}-{max} minutos. Complexidade geral: {complexity}. {summary}",
+    "crewStepLabel": "Etapa da equipe",
+    "groupedTaskLabel": "Tarefa agrupada da pista",
+    "obstacleNumberSuffix": "{kind} · Obstáculo nº {number}",
+    "minutesSuffix": "{minutes} min",
+    "noSetupSequenceNumbering": "Ainda não há uma sequência de montagem disponível. Adicione um traçado e posicione alguns obstáculos para gerar um pacote mais útil.",
+    "noSetupSequenceHidden": "A numeração está oculta nesta exportação. Ative os números dos obstáculos se quiser que a sequência de montagem siga as referências do traçado.",
+    "notesTitle": "Notas do dia da corrida",
+    "note1": "Use a página do mapa como referência de posicionamento durante a montagem e o briefing dos pilotos.",
+    "note2": "Trate a conferência de estoque como a fonte da verdade antes de fechar o layout para a montagem.",
+    "note3": "Ancore o circuito primeiro e depois fixe as estruturas de maior esforço, como dive gates e escadas, antes da passada dos gates padrão.",
+    "note4": "Se o traçado ou a quantidade de obstáculos mudar, gere o Race Pack de novo para manter o mapa, a lista de estoque e a sequência de montagem alinhados."
+  },
+  "whoopPack": {
+    "lapStartLabel": "INÍCIO DA VOLTA",
+    "views": {
+      "topLeft": "Canto superior esquerdo",
+      "topRight": "Canto superior direito",
+      "bottomRight": "Canto inferior direito"
+    },
+    "bom": {
+      "title": "Lista de materiais",
+      "summaryTitle": "Visão geral",
+      "trackRow": "Pista",
+      "fieldRow": "Campo",
+      "dateRow": "Data",
+      "obstaclesRow": "Obstáculos",
+      "lapLengthRow": "Comprimento da volta",
+      "itemColumn": "Item",
+      "quantityColumn": "Quantidade",
+      "fittingColumn": "Conexão",
+      "edgeGapColumn": "Vão livre",
+      "structureGapsTitle": "Vãos entre estruturas",
+      "structureGapsNote": "Distâncias entre estruturas vizinhas, medidas no chão. Cada estrutura é ligada às vizinhas mais próximas, então toda peça tem pelo menos um vão para marcar. O vão livre é o espaço livre entre as duas bases; a distância entre centros é medida de centro a centro.",
+      "structureLabel": "{kind} {id}",
+      "contentsTitle": "Neste arquivo",
+      "contents": {
+        "routeMap": "Mapa 2D do traçado com o início da volta, os números dos obstáculos e as distâncias entre centros.",
+        "viewRoute": "{view}, com a linha de corrida e as setas de direção.",
+        "viewObstacles": "{view}, só os obstáculos, para a equipe de montagem.",
+        "flythrough": "Animação em loop de {seconds} segundos de um whoop voando a volta pelos obstáculos.",
+        "markdown": "Este arquivo.",
+        "csv": "A mesma lista de materiais em formato de planilha."
+      },
+      "csv": {
+        "sectionColumn": "Seção",
+        "itemColumn": "Item",
+        "quantityColumn": "Quantidade",
+        "availableColumn": "Disponível",
+        "missingColumn": "Faltando",
+        "distanceColumn": "Distância"
+      }
+    },
+    "partsPage": {
+      "title": "Lista de peças",
+      "pvcTitle": "Quadros PVC",
+      "framesRow": "Quadros",
+      "tubesRow": "Tubos cortados em {length}",
+      "totalTubeLengthRow": "Comprimento total de tubo",
+      "fittingsTitle": "Conexões",
+      "noFittings": "Estes quadros não precisam de conexões.",
+      "feetRow": "Pés no chão",
+      "unbuildableWarning": "{count, plural, one {1 junção precisa de seis bocas, o que as conexões comuns de 20 mm não oferecem.} other {# junções precisam de seis bocas, o que as conexões comuns de 20 mm não oferecem.}}",
+      "stockTitle": "Conferência do estoque de obstáculos",
+      "notesTitle": "Notas de montagem",
+      "note1": "Encaixe cada tubo até o fim na conexão antes de levantar um quadro e depois confira se todos os pés encostam no chão.",
+      "note2": "Distribua os quadros na ordem numerada e meça as distâncias entre centros usando o mapa do traçado.",
+      "note3": "Gere este pacote de novo depois de mover quadros ou editar a linha de corrida, para manter mapa, vistas e peças alinhados."
+    },
+    "warnings": {
+      "animationFailed": "Não foi possível gerar a animação da volta ({message}), então o arquivo não tem GIF.",
+      "noRoute": "Este projeto não tem linha de corrida, então o arquivo não tem animação da volta nem vistas com a linha de corrida."
+    }
+  }
+}

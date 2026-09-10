@@ -1,0 +1,278 @@
+{
+  "metadata": {
+    "homeTitle": "TrackDraw · Criador de pistas de corrida de drone",
+    "homeSocialTitle": "TrackDraw | Criador de pistas de corrida de drone",
+    "homeDescription": "O TrackDraw é um criador de pistas de corrida de drone para diretores de prova FPV. Desenhe pistas em escala, avalie o fluxo do traçado em 3D e compartilhe layouts somente leitura para o dia da corrida.",
+    "homeSocialDescription": "Use o TrackDraw como criador de pistas de corrida de drone para planejar layouts FPV em escala, avaliar o fluxo do traçado em 3D e compartilhar planos somente leitura para o dia da corrida.",
+    "studioTitle": "Criador de pistas de corrida de drone",
+    "studioSocialTitle": "TrackDraw | Criador de pistas de corrida de drone",
+    "studioDescription": "Abra o criador de pistas de corrida de drone do TrackDraw para desenhar layouts FPV em escala, adicionar gates e obstáculos e visualizar o fluxo do traçado em 3D.",
+    "studioSocialDescription": "Desenhe pistas de corrida de drone FPV em escala, adicione gates e obstáculos e visualize o fluxo do traçado em 3D."
+  },
+  "header": {
+    "homeAriaLabel": "Início",
+    "homeTooltip": "Voltar à página inicial",
+    "featuresNav": "Recursos",
+    "featuresTooltip": "Ir para a visão geral do produto",
+    "galleryNav": "Galeria",
+    "galleryTooltip": "Explorar layouts públicos da comunidade",
+    "pricingNav": "Planos",
+    "pricingTooltip": "Ver planos e preços",
+    "faqNav": "FAQ",
+    "faqTooltip": "Ler as perguntas e respostas frequentes",
+    "logoAriaLabel": "TrackDraw",
+    "siteNavAriaLabel": "Página inicial, galeria e seções públicas do site",
+    "mobileNavAriaLabel": "Navegar",
+    "themeAriaLabel": "Tema",
+    "themeTooltip": "Mudar o tema do site público.",
+    "languageAriaLabel": "Idioma",
+    "languageTooltip": "Mudar o idioma do site.",
+    "login": "Entrar",
+    "account": "Conta",
+    "openStudio": "Abrir o Studio"
+  },
+  "hero": {
+    "eyebrow": "Feito para diretores de prova FPV",
+    "headingLine1": "O dia da corrida começa",
+    "headingLine2": "com um plano.",
+    "description": "O TrackDraw é um criador de pistas de corrida de drone que roda no navegador, feito para diretores de prova FPV. Desenhe em escala no 2D, avalie o fluxo em 3D, compartilhe um layout somente leitura com pilotos e equipe e mantenha o plano utilizável no computador ou no celular.",
+    "ctaStudio": "Abrir o Studio",
+    "ctaFeatures": "Ver os recursos",
+    "feature1": "Catálogo oficial de obstáculos",
+    "feature2": "Seções de pista",
+    "feature3": "Visualização 3D e flythrough",
+    "feature4": "Race Pack em PDF e SVG",
+    "videoAlt": "Demonstração do criador de pistas de corrida de drone TrackDraw",
+    "videoDescription": "Uma demonstração rápida do produto mostrando como o TrackDraw ajuda diretores de prova FPV a montar o layout de uma pista de corrida de drone, avaliá-lo em 3D e compartilhá-lo com pilotos e equipe."
+  },
+  "features": {
+    "sectionTitle": "Recursos",
+    "sectionHeading": "Desenhe, avalie e compartilhe.",
+    "sectionDescription": "O TrackDraw dá aos diretores de prova FPV um jeito prático de desenhar pistas do jeito certo: dimensões reais do campo, o conjunto correto de obstáculos e um único fluxo que leva o mesmo plano do layout à avaliação e à entrega para a equipe.",
+    "trueToScale": {
+      "title": "Área de desenho em escala real",
+      "description": "Defina o tamanho do campo, posicione os elementos em escala e trabalhe em uma grade que corresponde ao local real."
+    },
+    "obstacleCatalog": {
+      "title": "Catálogo oficial de obstáculos",
+      "description": "Posicione obstáculos oficiais da MultiGP (gates, bandeiras, escadas, hurdles e barreiras) com dimensões reais e renderização 3D precisa."
+    },
+    "preview3d": {
+      "title": "Visualização 3D realista",
+      "description": "Orbite em 3D, adicione elevação à linha de corrida, avalie as curvas das manobras e voe pelo traçado para achar problemas de fluxo antes do dia da montagem."
+    },
+    "shareLinks": {
+      "title": "Links de avaliação compartilhados",
+      "description": "Compartilhe um layout somente leitura com pilotos e equipe. Links de convidado são temporários; links publicados por uma conta podem ficar ativos até serem revogados."
+    },
+    "sections": {
+      "title": "Seções de pista",
+      "description": "Salve qualquer seleção da tela como uma seção nomeada e posicione-a de novo com um clique. As seções sincronizam com a sua conta em todos os dispositivos."
+    },
+    "export": {
+      "title": "Race Pack e exportação",
+      "description": "Gere um PDF de briefing para os pilotos com o layout dos obstáculos, o mapa do traçado e as notas de montagem. Também dá para exportar SVG, PNG e JSON do mesmo projeto."
+    }
+  },
+  "workflow": {
+    "sectionEyebrow": "A fundo",
+    "sectionHeading": "Do primeiro layout à entrega para a equipe.",
+    "sectionDescription": "A ferramenta funciona melhor como uma sequência: mapeie a pista de corrida de drone em 2D, confira em 3D, faça ajustes práticos quando a realidade mudar e então entregue o mesmo plano aos pilotos e à equipe.",
+    "layout": {
+      "title": "Layout 2D",
+      "subtitle": "Monte a pista em um campo que corresponde à realidade.",
+      "description": "Comece pelas dimensões do campo e depois posicione os elementos que a equipe já reconhece. Isso torna a primeira versão do plano útil de imediato, em vez de ser só um rascunho.",
+      "screenshotAlt": "Editor de layout 2D do TrackDraw com a biblioteca de obstáculos e o plano da pista",
+      "bullets": [
+        "Dimensões de campo fiéis à escala",
+        "Gates, bandeiras, cones, pads de largada e estruturas maiores",
+        "Linha de corrida e rótulos para deixar o briefing claro"
+      ]
+    },
+    "fineTune": {
+      "title": "Ajuste fino",
+      "subtitle": "Continue editando quando o local exigir mudanças.",
+      "description": "Um bom plano muda sem bagunça. Os controles do inspetor e a edição pensada para o celular permitem ajustar propriedades dos objetos, reposicionar itens e manter o projeto utilizável mesmo quando o local real se recusa a ficar parado.",
+      "screenshotAlt": "Editor mobile do TrackDraw com o painel de configurações aberto",
+      "bullets": [
+        "Controles do inspetor para dimensões, rotação e cor",
+        "Edição por toque em celulares e tablets",
+        "Ajustes rápidos sem sair do plano principal"
+      ]
+    },
+    "preview": {
+      "title": "Visualização 3D",
+      "subtitle": "Caminhe pela pista antes de montá-la.",
+      "description": "Um clique troca o plano 2D pela cena 3D ao vivo. Atribua elevação a cada waypoint da linha de corrida para modelar o perfil vertical completo. Encontre aproximações perigosas antes de fincar a primeira estaca.",
+      "screenshotAlt": "Visualização 3D do TrackDraw mostrando o fluxo do traçado e a elevação",
+      "bullets": [
+        "3D ao vivo renderizado direto do seu projeto 2D",
+        "Altitude por waypoint na linha de corrida",
+        "Gráfico de elevação no painel do inspetor"
+      ]
+    },
+    "handOff": {
+      "title": "Entrega",
+      "subtitle": "Dê a pilotos e equipe a mesma versão atual.",
+      "description": "Um plano só importa se outras pessoas conseguirem abri-lo. Links somente leitura e exportações transformam o layout em algo que os pilotos podem avaliar, a equipe pode imprimir e os organizadores podem reaproveitar depois.",
+      "screenshotAlt": "Visualização compartilhada somente leitura do TrackDraw aberta no celular",
+      "gallery": "Explore a galeria para se inspirar",
+      "bullets": [
+        "Links somente leitura que abrem em qualquer dispositivo",
+        "PDF, PNG e SVG para briefing e impressão",
+        "Exportação em JSON para arquivar e reaproveitar layouts depois"
+      ]
+    }
+  },
+  "faq": {
+    "sectionTitle": "FAQ",
+    "sectionHeading": "Bom saber.",
+    "items": [
+      {
+        "question": "O TrackDraw é um criador de pistas de corrida de drone?",
+        "answer": "Sim. O TrackDraw é um criador de pistas de corrida de drone que roda no navegador, feito para diretores de prova FPV que precisam de layouts fiéis à escala, avaliação em 3D, compartilhamento e exportação em um único fluxo."
+      },
+      {
+        "question": "Qual é a melhor forma de planejar uma pista de corrida FPV?",
+        "answer": "Comece pelas dimensões do campo, posicione os obstáculos que você realmente tem e depois avalie o traçado em 3D antes de compartilhar ou exportar o plano. O TrackDraw foi feito exatamente em torno dessa sequência."
+      },
+      {
+        "question": "Os pilotos conseguem ver o layout sem ter conta?",
+        "answer": "Sim. Os links de compartilhamento abrem em modo somente leitura em qualquer dispositivo, sem precisar de conta ou aplicativo. Envie para pilotos, árbitros ou equipe e todo mundo vê a mesma versão publicada."
+      },
+      {
+        "question": "Funciona em um tablet no local da prova?",
+        "answer": "Sim. O editor é feito para toque, então ajustes rápidos no celular ou no tablet são práticos quando o local real exige uma mudança."
+      },
+      {
+        "question": "Quais formatos de exportação estão disponíveis?",
+        "answer": "PDF, PNG, SVG, JSON e uma exportação de vídeo FPV cinematográfica. Isso cobre briefings impressos, imagens para compartilhar, arquivos de projeto reutilizáveis e a avaliação do traçado em movimento."
+      },
+      {
+        "question": "Preciso de uma conta para começar?",
+        "answer": "Não. Abra o studio e comece a desenhar na hora. Criar uma conta adiciona armazenamento na nuvem, links publicados duradouros, publicação na galeria e incorporações."
+      },
+      {
+        "question": "Posso reaproveitar um layout em um evento futuro?",
+        "answer": "Sim. Salve partes de um layout como predefinições nomeadas e posicione-as de novo com um clique. Para reaproveitar um projeto inteiro, exporte-o em JSON e importe no começo de um novo evento."
+      },
+      {
+        "question": "O TrackDraw ajuda a encontrar problemas no traçado antes do dia da corrida?",
+        "answer": "Sim. A visualização 3D e os avisos de análise do traçado ajudam a revelar espaçamentos irregulares, quebras de ritmo e problemas de alinhamento antes de você compartilhar o layout ou começar a montá-lo."
+      }
+    ]
+  },
+  "pricing": {
+    "sectionEyebrow": "Planos",
+    "sectionHeading": "Comece agora e crie uma conta quando precisar de mais.",
+    "sectionDescription": "As duas opções atuais são gratuitas. O modo convidado mantém o editor principal aberto sem configuração; as contas adicionam publicação duradoura, incorporações, listagem na galeria e continuidade dos projetos entre dispositivos.",
+    "guest": {
+      "badge": "Sem cadastro",
+      "name": "Convidado",
+      "price": "Grátis",
+      "description": "Melhor para rascunhos rápidos, links temporários de avaliação pontuais e exportação local sem criar uma conta.",
+      "cta": "Abrir o Studio"
+    },
+    "account": {
+      "badge": "Com conta",
+      "name": "Conta",
+      "price": "Grátis",
+      "description": "Melhor para links publicados duradouros, incorporações, galeria, seções de pista, acesso à API REST e continuidade dos projetos entre dispositivos.",
+      "cta": "Criar conta"
+    },
+    "features": {
+      "fullDesigner": "Editor de pistas completo",
+      "preview2d3d": "Visualização 2D e 3D",
+      "export": "Exportação em PDF, SVG, PNG e JSON",
+      "shareLinks": "Links de compartilhamento",
+      "temporaryLinks": "Links temporários",
+      "publishedLinks": "Publicados até serem revogados",
+      "shareLinksNote": "Os links de compartilhamento de convidado são temporários. Os links publicados por uma conta ficam ativos até serem revogados e também podem ser incorporados.",
+      "embeds": "Incorporação em sites",
+      "embedsDetail": "Incorpore em qualquer site por iframe",
+      "gallery": "Publicação na galeria",
+      "cloudProjects": "Projetos sincronizados na nuvem",
+      "cloudProjectsDetail": "Os projetos sincronizam com a sua conta para você continuar em qualquer dispositivo — do computador em casa ao celular no local da prova.",
+      "sections": "Seções de pista",
+      "sectionsDetail": "Salve qualquer seleção da tela como uma predefinição nomeada e posicione-a de novo pelo seletor de predefinições. Sincroniza com a sua conta em todos os dispositivos.",
+      "api": "Acesso à API REST",
+      "apiDetail": "Autenticação por bearer e gerenciamento de chaves de API"
+    },
+    "categories": {
+      "design": "Projeto",
+      "sharing": "Compartilhamento",
+      "projects": "Projetos",
+      "integration": "Integração"
+    }
+  },
+  "footer": {
+    "tagline": "Editor de pistas no navegador para diretores de prova FPV. Desenhe em escala, visualize em 3D, compartilhe um link somente leitura e faça ajustes rápidos pelo celular.",
+    "productTitle": "Produto",
+    "openStudio": "Abrir o Studio",
+    "releaseNotes": "Notas de versão",
+    "legalTitle": "Jurídico",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "communityTitle": "Comunidade",
+    "github": "GitHub",
+    "dutchDroneSquad": "Dutch Drone Squad",
+    "translate": "Ajude a traduzir",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "reportIssue": "Relatar um problema",
+    "supportTitle": "Apoio",
+    "githubSponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi",
+    "copyright": "© {year} <organization>Dutch Drone Squad</organization>. Projeto de código aberto.",
+    "madeWithPre": "Feito com",
+    "madeWithPost": "para a comunidade FPV"
+  },
+  "translationCta": {
+    "eyebrow": "Traduções da comunidade",
+    "title": "Ajude a levar o TrackDraw para mais idiomas",
+    "description": "Fala outro idioma? Participe do projeto de tradução no Crowdin e ajude mais clubes FPV e organizadores de corrida a usar o TrackDraw.",
+    "action": "Traduzir no Crowdin"
+  },
+  "gallery": {
+    "pageTitle": "Galeria de pistas de corrida de drone FPV",
+    "metaTitle": "TrackDraw | Galeria de pistas de corrida de drone FPV",
+    "metaDescription": "Explore projetos de pistas de corrida de drone FPV compartilhados pela comunidade TrackDraw.",
+    "sectionLabel": "Galeria",
+    "headingLine1": "Descubra layouts que inspiram",
+    "headingLine2": "o seu próximo projeto de pista.",
+    "description": "Explore layouts públicos do TrackDraw compartilhados pela comunidade para se inspirar. As pistas em destaque mostram os melhores exemplos primeiro, com os envios recentes da comunidade logo abaixo.",
+    "grid": {
+      "recentlyAdded": "Adicionado recentemente",
+      "fieldSizeNotSet": "Tamanho do campo não definido",
+      "unknownPilot": "Piloto TrackDraw",
+      "featuredBadge": "Em destaque",
+      "byOwner": "por {owner}",
+      "obstacleCount": "{count} obstáculos",
+      "published": "Publicado em {date}",
+      "open": "Abrir",
+      "emptyTitle": "Nenhuma pista por enquanto.",
+      "emptyDescription": "As listagens da galeria vão aparecer aqui assim que os pilotos do TrackDraw escolherem compartilhá-las publicamente.",
+      "featuredHeading": "Em destaque",
+      "featuredSubtitle": "Layouts escolhidos a dedo no topo da galeria.",
+      "recentHeading": "Recentes",
+      "recentSubtitle": "Layouts recém-listados pela comunidade.",
+      "loadMore": "Carregar mais"
+    }
+  },
+  "notFound": {
+    "logoAriaLabel": "TrackDraw",
+    "badge": "Erro 404",
+    "heading": "Esta página saiu do traçado",
+    "description": "A página que você pediu não existe, pode ter mudado de lugar ou pode ter errado a curva no gate. A pista ou o traçado mais recente devem estar por perto.",
+    "whatToTry": "O que tentar",
+    "step1": "Volte para o studio e abra a pista mais recente.",
+    "step2": "Volte para o início se você chegou aqui por um favorito antigo.",
+    "step3": "Tente o traçado mais recente de novo se a página mudou de lugar há pouco.",
+    "goHome": "Ir para o início",
+    "openStudio": "Abrir o Studio"
+  },
+  "screenshotPlaceholder": {
+    "label": "Espaço para captura de tela",
+    "plannedAsset": "Recurso planejado"
+  }
+}

@@ -11,7 +11,7 @@ import { useUserPresets } from "@/store/user-presets";
 import { formatFieldSize, formatMeasurement } from "@/lib/track/units";
 import { getShapeGroupId, getShapeGroupName } from "@/lib/track/shape-groups";
 import { getToolLabel, type Translate } from "@/lib/editor/tool-registry";
-import { Magnet } from "lucide-react";
+import { Grid3x3, Magnet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -30,10 +30,11 @@ export default function StatusBar({ cursorPos, snapActive }: StatusBarProps) {
   const tShapes = useTranslations("shapes") as unknown as Translate;
   const { enabled, toggle } = useDeveloperMode();
   const { unitSystem } = useMeasurementUnitSystem();
-  const { toggleSnapEnabled } = useUiActions();
+  const { toggleSnapEnabled, toggleSnapGridEnabled } = useUiActions();
   const activeTool = useEditor((state) => state.ui.activeTool);
   const activePresetId = useEditor((state) => state.ui.activePresetId);
   const snapEnabled = useEditor((state) => state.ui.snapEnabled);
+  const snapGridEnabled = useEditor((state) => state.ui.snapGridEnabled);
   const field = useEditor((state) => state.track.design.field);
   const selection = useEditor((state) => state.session.selection);
   const selectionCount = selection.length;
@@ -153,6 +154,49 @@ export default function StatusBar({ cursorPos, snapActive }: StatusBarProps) {
           </span>
         </TooltipContent>
       </Tooltip>
+
+      {/* Grid snap indicator — only meaningful while snap is on */}
+      {snapEnabled ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={toggleSnapGridEnabled}
+              className={cn(
+                "pointer-events-auto inline-flex h-5 items-center gap-1 rounded px-1.5 text-[11px] transition-colors",
+                snapGridEnabled
+                  ? "text-foreground/70 hover:bg-muted hover:text-foreground"
+                  : "hover:bg-muted text-amber-500/85 hover:text-amber-400"
+              )}
+              aria-pressed={snapGridEnabled}
+            >
+              <Grid3x3
+                className={cn(
+                  "size-3",
+                  snapGridEnabled ? "text-foreground/60" : "text-amber-500/85"
+                )}
+              />
+              <span>
+                {snapGridEnabled
+                  ? t("statusBar.gridOn")
+                  : t("statusBar.gridOff")}
+              </span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={6} className="max-w-64">
+            <span className="block font-medium">
+              {snapGridEnabled
+                ? t("statusBar.gridIsOn")
+                : t("statusBar.gridIsOff")}
+            </span>
+            <span className="mt-1 block opacity-80">
+              {snapGridEnabled
+                ? t("statusBar.gridOnDescription")
+                : t("statusBar.gridOffDescription")}
+            </span>
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
 
       <div className="flex-1" />
 

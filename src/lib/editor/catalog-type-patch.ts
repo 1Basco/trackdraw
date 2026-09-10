@@ -16,6 +16,7 @@ import type {
   FlagShape,
   GateShape,
   LadderShape,
+  PvcFrameShape,
   Shape,
   TowerShape,
 } from "@/lib/types";
@@ -26,7 +27,8 @@ type CatalogPatchShape =
   | LadderShape
   | TowerShape
   | DiveGateShape
-  | BarrierShape;
+  | BarrierShape
+  | PvcFrameShape;
 
 function isCatalogPatchShape(shape: Shape): shape is CatalogPatchShape {
   return hasCatalogPlacement(shape.kind);
@@ -49,7 +51,7 @@ function buildCatalogTypePatchInner<S extends CatalogPatchShape>(
       )
     : {};
   const newCatalogIdentity =
-    entry.official || entry.kind === "barrier"
+    entry.official || entry.kind === "barrier" || entry.kind === "pvcframe"
       ? createTrackElementCatalogIdentity(entry)
       : undefined;
   const newMeta =

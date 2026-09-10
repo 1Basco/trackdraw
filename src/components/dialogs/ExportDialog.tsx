@@ -11,11 +11,16 @@ import { serializeDesign } from "@/lib/track/design";
 import { downloadJsonFile } from "@/lib/export/download-json";
 import { useEditor } from "@/store/editor";
 import type { FlythroughProgress, FlythroughTheme } from "@/lib/export/shared";
+import type {
+  WhoopPackProgress,
+  WhoopPackStage,
+} from "@/lib/export/exportWhoopPack";
 import { cn } from "@/lib/utils";
 import type { TrackCanvasHandle } from "@/components/canvas/editor/TrackCanvas";
 import {
   AlertTriangle,
   ArrowRight,
+  Boxes,
   Database,
   Download,
   FileText,
@@ -52,13 +57,21 @@ type Theme = FlythroughTheme;
 type ExportCategoryId =
   "visuals" | "raceDay" | "projectData" | "motion" | "simulatorLab";
 type ExportFormatId =
-  "png" | "svg" | "render3d" | "racePack" | "json" | "webm" | "velocidrone";
+  | "png"
+  | "svg"
+  | "render3d"
+  | "racePack"
+  | "whoopPack"
+  | "json"
+  | "webm"
+  | "velocidrone";
 
 function getProductEventExportFormat(
   format: ExportFormatId
 ): ProductEventExportFormat {
   if (format === "render3d") return "render_3d";
   if (format === "racePack") return "race_pack";
+  if (format === "whoopPack") return "whoop_pack";
   return format;
 }
 
@@ -152,6 +165,27 @@ function getFlythroughStatusText(
   );
 
   return `${percent}% - ${formatDuration(remainingSeconds)} left`;
+}
+
+const WHOOP_PACK_STAGE_KEYS: Record<WhoopPackStage, string> = {
+  map: "export.whoopPack.stageMap",
+  views: "export.whoopPack.stageViews",
+  animation: "export.whoopPack.stageAnimation",
+  archive: "export.whoopPack.stageArchive",
+};
+
+function getWhoopPackStatusText(
+  progress: WhoopPackProgress,
+  t: ReturnType<typeof useTranslations>
+) {
+  const percent =
+    progress.total > 0
+      ? Math.round((progress.completed / progress.total) * 100)
+      : 0;
+  const stage = t("export.whoopPack.progressLabel", {
+    stage: t(WHOOP_PACK_STAGE_KEYS[progress.stage]),
+  });
+  return `${stage} ${percent}%`;
 }
 
 function sanitizeFilenameStem(
@@ -500,6 +534,7 @@ export default function ExportDialog({
     "setupEstimate"
   ) as unknown as Translate;
   const tShapes = useTranslations("shapes") as unknown as Translate;
+  const tInspector = useTranslations("inspector") as unknown as Translate;
   const design = useEditor((s) => s.track.design);
   const { unitSystem } = useMeasurementUnitSystem();
   const currentTheme = useTheme();
@@ -647,7 +682,11 @@ export default function ExportDialog({
     useState<ExportCategoryId>("visuals");
   const [selectedFormatByCategory, setSelectedFormatByCategory] = useState<
     Record<ExportCategoryId, ExportFormatId>
-  >(DEFAULT_SELECTED_FORMAT_BY_CATEGORY);
+  >(() => ({
+    ...DEFAULT_SELECTED_FORMAT_BY_CATEGORY,
+    // Whoop layouts get the pack that was built for them.
+    raceDay: design.trackClass === "whoop" ? "whoopPack" : "racePack",
+  }));
   const [filenameByFormat, setFilenameByFormat] = useState<
     Partial<Record<ExportFormatId, string>>
   >({});
@@ -704,6 +743,19 @@ export default function ExportDialog({
       showRouteNumbers: true,
     },
     {
+      id: "whoopPack",
+      category: "raceDay",
+      ext: "ZIP",
+      fileExtension: "zip",
+      label: t("export.formats.whoopPack.label"),
+      color: "bg-teal-500/15 text-teal-400",
+      icon: <Boxes className="size-4" />,
+      description: t("export.formats.whoopPack.descriptionFull"),
+      busyId: "whoop-pack",
+      showTheme: true,
+      showRouteNumbers: true,
+    },
+    {
       id: "json",
       category: "projectData",
       ext: "JSON",
@@ -750,6 +802,8 @@ export default function ExportDialog({
         return [baseName, "3d", currentTheme, dateStamp].join("_");
       case "racePack":
         return [baseName, "race_pack", exportTheme, dateStamp].join("_");
+      case "whoopPack":
+        return [baseName, "whoop_pack", exportTheme, dateStamp].join("_");
       case "json":
       case "velocidrone":
         return [baseName, dateStamp].join("_");
@@ -843,6 +897,43 @@ export default function ExportDialog({
             );
           },
           { eventFormat: formatId }
+        );
+      case "whoopPack":
+        return run(
+          "whoop-pack",
+          async () => {
+            const toastId = "whoop-pack-export";
+            toast.loading(t("export.whoopPack.renderingBackground"), {
+              id: toastId,
+            });
+            const { exportWhoopPack } =
+              await import("@/lib/export/exportWhoopPack");
+            return exportWhoopPack(
+              design,
+              filenameStemFor(format),
+              exportTheme,
+              { t: tExportPdf, tShapes, tInspector },
+              {
+                includeObstacleNumbers,
+                locale,
+                unitSystem,
+                onProgress: (progress) => {
+                  toast.loading(
+                    t("export.whoopPack.renderingProgress", {
+                      status: getWhoopPackStatusText(progress, t),
+                    }),
+                    { id: toastId }
+                  );
+                },
+              }
+            );
+          },
+          {
+            closeOnStart: true,
+            eventFormat: formatId,
+            successMessage: t("export.whoopPack.ready"),
+            toastId: "whoop-pack-export",
+          }
         );
       case "json":
         return run(
@@ -966,6 +1057,20 @@ export default function ExportDialog({
           status: "blocked",
           message: t("export.readiness.open3d"),
         };
+      case "whoopPack":
+        if (!hasTrackContent) {
+          return {
+            status: "blocked",
+            message: t("export.readiness.emptyWhoopPack"),
+          };
+        }
+        if (!hasFlythroughRoute) {
+          return {
+            status: "warning",
+            message: t("export.readiness.whoopPackWithoutRoute"),
+          };
+        }
+        return undefined;
       case "racePack":
         if (!hasTrackContent) {
           return {

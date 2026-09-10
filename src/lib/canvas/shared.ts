@@ -85,3 +85,18 @@ export const mergeClientRects = (rects: RectLike[]): RectLike | null => {
 
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 };
+
+/**
+ * Round a stage scale to ~9 % relative steps.
+ *
+ * Mobile touch targets and waypoint pucks are sized against the live stage
+ * scale, so feeding them the raw value re-rendered every shape on every frame
+ * of a zoom gesture. Quantizing on a log scale keeps the on-screen size correct
+ * at both 0.2x and 12x while cutting the number of re-renders by roughly an
+ * order of magnitude. The step matches the 8 % threshold the wheel animation
+ * already uses before pushing zoom into the store.
+ */
+export const quantizeViewportScale = (scale: number): number => {
+  const safe = Math.max(scale, 0.01);
+  return 2 ** (Math.round(Math.log2(safe) * 8) / 8);
+};

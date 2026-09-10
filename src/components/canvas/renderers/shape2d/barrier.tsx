@@ -221,6 +221,9 @@ export function renderBarrier(
         cornerRadius={radius}
         stroke={edgeColor}
         strokeWidth={1}
+        // Filled + stroked below full opacity would otherwise go through
+        // Konva's stage-sized buffer canvas on every redraw.
+        perfectDrawEnabled={false}
       />
       <Rect
         x={-width / 2 + 1}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import {
   formatMeasurement,
   type MeasurementUnitSystem,
@@ -22,7 +22,7 @@ interface RulerProps {
   unitSystem?: MeasurementUnitSystem;
 }
 
-export function CanvasRuler({
+function CanvasRulerComponent({
   orientation,
   stageTransform,
   ppm,
@@ -32,6 +32,7 @@ export function CanvasRuler({
   unitSystem = "metric",
 }: RulerProps) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const { x: stX, y: stY, scale } = stageTransform;
 
   useEffect(() => {
     const canvas = ref.current;
@@ -44,13 +45,19 @@ export function CanvasRuler({
     const cw = isH ? length : RULER_SIZE;
     const ch = isH ? RULER_SIZE : length;
 
-    canvas.width = cw * dpr;
-    canvas.height = ch * dpr;
-    canvas.style.width = `${cw}px`;
-    canvas.style.height = `${ch}px`;
-    ctx.scale(dpr, dpr);
-
-    const { x: stX, y: stY, scale } = stageTransform;
+    // Assigning canvas.width/height reallocates the backing store and resets
+    // the 2D context, which is far too expensive to do on every wheel-zoom
+    // frame. Only resize when the pixel size actually changes; otherwise just
+    // reset the transform and repaint over the existing buffer.
+    const pixelWidth = Math.round(cw * dpr);
+    const pixelHeight = Math.round(ch * dpr);
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
+      canvas.style.width = `${cw}px`;
+      canvas.style.height = `${ch}px`;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // ── Background ───────────────────────────────────────────────
     ctx.fillStyle = isDark ? "#070b12" : "#f2f4f7";
@@ -85,6 +92,32 @@ export function CanvasRuler({
 
     ctx.font = `10px ui-monospace, monospace`;
 
+    // Ticks are bucketed by class and stroked in three passes. Stroking each of
+    // the ~100 ticks on its own turned the ruler into a per-frame hot spot
+    // while the wheel zoom animation runs; the ticks never overlap, so drawing
+    // them grouped is visually identical.
+    const tickClasses = [
+      {
+        tickLen: 5,
+        lineWidth: 0.75,
+        strokeStyle: isDark ? "#1e3448" : "#bdd0dc",
+        positions: [] as number[],
+      },
+      {
+        tickLen: 9,
+        lineWidth: 0.75,
+        strokeStyle: isDark ? "#2a4860" : "#9ab0c4",
+        positions: [] as number[],
+      },
+      {
+        tickLen: 14,
+        lineWidth: 1,
+        strokeStyle: isDark ? "#4a7090" : "#6a8aa8",
+        positions: [] as number[],
+      },
+    ];
+    const labels: { sp: number; text: string }[] = [];
+
     for (let i = iStart; i <= iEnd; i++) {
       const sp = offset + i * minorScreenStep;
       if (sp < -1 || sp > length + 1) continue;
@@ -95,53 +128,55 @@ export function CanvasRuler({
       const isCoarse =
         !isMajor && Math.abs(meters % (majorM / 2)) < majorM * 0.01;
 
-      const tickLen = isMajor ? 14 : isCoarse ? 9 : 5;
-      ctx.strokeStyle = isDark
-        ? isMajor
-          ? "#4a7090"
-          : isCoarse
-            ? "#2a4860"
-            : "#1e3448"
-        : isMajor
-          ? "#6a8aa8"
-          : isCoarse
-            ? "#9ab0c4"
-            : "#bdd0dc";
-      ctx.lineWidth = isMajor ? 1 : 0.75;
-
-      ctx.beginPath();
-      if (isH) {
-        ctx.moveTo(sp + 0.5, ch - tickLen);
-        ctx.lineTo(sp + 0.5, ch);
-      } else {
-        ctx.moveTo(cw - tickLen, sp + 0.5);
-        ctx.lineTo(cw, sp + 0.5);
-      }
-      ctx.stroke();
+      tickClasses[isMajor ? 2 : isCoarse ? 1 : 0].positions.push(sp);
 
       if (isMajor) {
-        const label = formatMeasurement(meters, unitSystem, {
-          precision: Number.isInteger(meters) ? 0 : 1,
+        labels.push({
+          sp,
+          text: formatMeasurement(meters, unitSystem, {
+            precision: Number.isInteger(meters) ? 0 : 1,
+          }),
         });
-        ctx.fillStyle = isDark ? "#7aa8cc" : "#4a6a88";
-
-        if (isH) {
-          ctx.textAlign = "left";
-          ctx.textBaseline = "top";
-          ctx.fillText(label, sp + 3, 2);
-        } else {
-          // Rotate label to run bottom-to-top, centered on tick position
-          ctx.save();
-          ctx.translate(cw / 2 - 1, sp);
-          ctx.rotate(-Math.PI / 2);
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(label, 0, 0);
-          ctx.restore();
-        }
       }
     }
-  }, [orientation, stageTransform, ppm, gridStep, length, isDark, unitSystem]);
+
+    for (const tickClass of tickClasses) {
+      if (!tickClass.positions.length) continue;
+      ctx.strokeStyle = tickClass.strokeStyle;
+      ctx.lineWidth = tickClass.lineWidth;
+      ctx.beginPath();
+      for (const sp of tickClass.positions) {
+        if (isH) {
+          ctx.moveTo(sp + 0.5, ch - tickClass.tickLen);
+          ctx.lineTo(sp + 0.5, ch);
+        } else {
+          ctx.moveTo(cw - tickClass.tickLen, sp + 0.5);
+          ctx.lineTo(cw, sp + 0.5);
+        }
+      }
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = isDark ? "#7aa8cc" : "#4a6a88";
+    for (const { sp, text } of labels) {
+      if (isH) {
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(text, sp + 3, 2);
+      } else {
+        // Rotate label to run bottom-to-top, centered on tick position
+        ctx.save();
+        ctx.translate(cw / 2 - 1, sp);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      }
+    }
+    // Primitive deps: the caller rebuilds the stageTransform object on every
+    // render, so depending on the object would repaint even when nothing moved.
+  }, [orientation, stX, stY, scale, ppm, gridStep, length, isDark, unitSystem]);
 
   const isH = orientation === "h";
   return (
@@ -157,3 +192,19 @@ export function CanvasRuler({
     />
   );
 }
+
+// The stage transform arrives as a freshly built object on every parent render,
+// so compare it field by field instead of by identity.
+export const CanvasRuler = memo(CanvasRulerComponent, (prev, next) => {
+  return (
+    prev.orientation === next.orientation &&
+    prev.stageTransform.x === next.stageTransform.x &&
+    prev.stageTransform.y === next.stageTransform.y &&
+    prev.stageTransform.scale === next.stageTransform.scale &&
+    prev.ppm === next.ppm &&
+    prev.gridStep === next.gridStep &&
+    prev.length === next.length &&
+    prev.isDark === next.isDark &&
+    prev.unitSystem === next.unitSystem
+  );
+});

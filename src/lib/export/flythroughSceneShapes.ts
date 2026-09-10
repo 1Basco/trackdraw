@@ -6,6 +6,7 @@ import type {
   FlagShape,
   GateShape,
   LadderShape,
+  PvcFrameShape,
   Shape,
   ShapeKind,
   StartFinishShape,
@@ -19,6 +20,7 @@ import { addStartFinishSceneShapes } from "./flythrough/startfinish";
 import { addDiveGateSceneShapes } from "./flythrough/divegate";
 import { addFlagSceneShapes } from "./flythrough/flag";
 import { addConeSceneShapes } from "./flythrough/cone";
+import { addPvcFrameSceneShapes } from "./flythrough/pvcframe";
 
 type FlythroughRenderer = (
   shape: Shape,
@@ -39,6 +41,8 @@ const flythroughRenderers: Record<ShapeKind, FlythroughRenderer> = {
   cone: (shape, scene) => addConeSceneShapes(shape as ConeShape, scene),
   label: () => undefined,
   polyline: () => undefined,
+  pvcframe: (shape, scene) =>
+    addPvcFrameSceneShapes(shape as PvcFrameShape, scene),
 };
 
 export async function addFlythroughShapes(

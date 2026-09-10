@@ -7,6 +7,10 @@ import {
 import { getDesignShapes } from "./design";
 import type { PolylinePoint, PolylineShape, TrackDesign } from "../types";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "./constants";
+import {
+  STANDARD_TRACK_SCALE_PROFILE,
+  type TrackScaleProfile,
+} from "./track-class";
 import { m2px } from "./units";
 
 const POLYLINE_2D_SAMPLES_PER_SEGMENT = 18;
@@ -390,7 +394,10 @@ export function getPolylineManeuverDetections(
  * - spacing-shift: abrupt jump from a short segment into a much longer one
  * - rhythm-break: short corrective segment between longer sections
  */
-export function getPolylineRouteWarnings(path: PolylineShape): RouteWarning[] {
+export function getPolylineRouteWarnings(
+  path: PolylineShape,
+  scale: TrackScaleProfile = STANDARD_TRACK_SCALE_PROFILE
+): RouteWarning[] {
   const pts = path.points;
   if (pts.length < 2) return [{ kind: "stub" }];
 
@@ -414,14 +421,14 @@ export function getPolylineRouteWarnings(path: PolylineShape): RouteWarning[] {
     const routeDist = Math.hypot(horizDist, dz);
     segmentLengths.push(horizDist);
 
-    if (routeDist < 0.5) {
+    if (routeDist < scale.closePointsMeters) {
       warnings.push({ kind: "close-points", waypointIndex: i });
       continue;
     }
 
     if (
       hasElevation &&
-      horizDist >= 0.5 &&
+      horizDist >= scale.shortSegmentMeters &&
       !maneuverSegmentIndexes.has(i - 1)
     ) {
       if (dz / horizDist > 0.5) {
@@ -462,8 +469,8 @@ export function getPolylineRouteWarnings(path: PolylineShape): RouteWarning[] {
     if (
       typeof previousLength !== "number" ||
       typeof nextLength !== "number" ||
-      previousLength < 0.5 ||
-      nextLength < 0.5
+      previousLength < scale.shortSegmentMeters ||
+      nextLength < scale.shortSegmentMeters
     ) {
       continue;
     }
@@ -490,13 +497,13 @@ export function getPolylineRouteWarnings(path: PolylineShape): RouteWarning[] {
     if (
       typeof startTurn !== "number" ||
       typeof endTurn !== "number" ||
-      currentLength < 0.5
+      currentLength < scale.shortSegmentMeters
     ) {
       continue;
     }
 
     if (
-      currentLength <= 1.8 &&
+      currentLength <= scale.rhythmSegmentMaxMeters &&
       previousLength >= currentLength * 1.9 &&
       nextLength >= currentLength * 1.9 &&
       startTurn < 135 &&
@@ -512,11 +519,12 @@ export function getPolylineRouteWarnings(path: PolylineShape): RouteWarning[] {
 }
 
 export function getPolylineRouteWarningVisuals(
-  path: PolylineShape
+  path: PolylineShape,
+  scale: TrackScaleProfile = STANDARD_TRACK_SCALE_PROFILE
 ): RouteWarningVisual[] {
   const visuals: RouteWarningVisual[] = [];
 
-  for (const warning of getPolylineRouteWarnings(path)) {
+  for (const warning of getPolylineRouteWarnings(path, scale)) {
     if (warning.kind === "flat" || warning.kind === "stub") continue;
     if (typeof warning.waypointIndex !== "number") continue;
 

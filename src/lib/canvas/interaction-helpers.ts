@@ -81,6 +81,8 @@ export function pointerToMeters(options: {
   pointer: { x: number; y: number } | null;
   routeCandidates?: PolylineShape[];
   snap?: boolean;
+  /** Round to the field grid before object snapping. Off keeps objects and routes only. */
+  snapToGrid?: boolean;
   snapRadiusMeters: number;
   stepPx: number;
 }) {
@@ -91,13 +93,15 @@ export function pointerToMeters(options: {
     pointer,
     routeCandidates,
     snap = true,
+    snapToGrid = true,
     snapRadiusMeters,
     stepPx,
   } = options;
 
   if (!pointer) return null;
-  const px = snap ? Math.round(pointer.x / stepPx) * stepPx : pointer.x;
-  const py = snap ? Math.round(pointer.y / stepPx) * stepPx : pointer.y;
+  const roundToGrid = snap && snapToGrid;
+  const px = roundToGrid ? Math.round(pointer.x / stepPx) * stepPx : pointer.x;
+  const py = roundToGrid ? Math.round(pointer.y / stepPx) * stepPx : pointer.y;
   const gridMeters = {
     x: px2m(px, designPpm),
     y: px2m(py, designPpm),
@@ -141,7 +145,8 @@ export function buildCursorState(
   pointer: { x: number; y: number },
   rawMeters: { x: number; y: number },
   snappedMeters: { x: number; y: number },
-  stepPx: number
+  stepPx: number,
+  snapToGrid = true
 ): CursorState {
   const safePointer = {
     x: finiteOrZero(pointer.x),
@@ -161,10 +166,12 @@ export function buildCursorState(
     rawMeters: safeRawMeters,
     snappedMeters: safeSnappedMeters,
     rawPx: safePointer,
-    snappedPx: {
-      x: Math.round(safePointer.x / safeStepPx) * safeStepPx,
-      y: Math.round(safePointer.y / safeStepPx) * safeStepPx,
-    },
+    snappedPx: snapToGrid
+      ? {
+          x: Math.round(safePointer.x / safeStepPx) * safeStepPx,
+          y: Math.round(safePointer.y / safeStepPx) * safeStepPx,
+        }
+      : safePointer,
   };
 }
 
@@ -203,8 +210,12 @@ export function isTrackpadPanGesture(options: {
   );
 }
 
+// Whoop-scale PVC frames (61 cm pitch) need a closer view than 5-inch gates,
+// so the editor allows 12x before pixels stop being useful.
+export const MAX_CANVAS_ZOOM = 12;
+
 export function clampZoom(zoom: number) {
-  return Math.max(0.2, Math.min(5, zoom));
+  return Math.max(0.2, Math.min(MAX_CANVAS_ZOOM, zoom));
 }
 
 export function getWheelZoomTarget(options: {

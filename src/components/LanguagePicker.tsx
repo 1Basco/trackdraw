@@ -23,6 +23,7 @@ const localeConfig: Record<SupportedLocale, { label: string; abbr: string }> = {
   en: { label: "English", abbr: "EN" },
   nl: { label: "Nederlands", abbr: "NL" },
   de: { label: "Deutsch", abbr: "DE" },
+  "pt-BR": { label: "Português (Brasil)", abbr: "PT" },
   "zh-CN": { label: "简体中文", abbr: "ZH" },
 };
 

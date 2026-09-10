@@ -47,6 +47,11 @@
     "requiredColumn": "Required",
     "availableColumn": "Available",
     "missingColumn": "Missing",
+    "spacingTitle": "Obstacle spacing",
+    "spacingFromColumn": "From",
+    "spacingToColumn": "To",
+    "spacingDistanceColumn": "Centre distance",
+    "spacingObstacle": "Obstacle #{number}",
     "timingPointsTitle": "Timing points",
     "noTimingPoints": "No timing points are assigned yet. Mark a gate as start/finish or split in the inspector before race-day handoff.",
     "setupSequenceTitle": "Setup sequence",
@@ -62,5 +67,66 @@
     "note2": "Treat the stock check as the source of truth before committing the layout for build.",
     "note3": "Anchor the course first, then secure higher-effort structures such as dive gates and ladders before the standard gate pass.",
     "note4": "If the route or obstacle count changes, regenerate the Race Pack so the map, stock list, and setup sequence stay aligned."
+  },
+  "whoopPack": {
+    "lapStartLabel": "Lap start",
+    "views": {
+      "topLeft": "Top-left corner",
+      "topRight": "Top-right corner",
+      "bottomRight": "Bottom-right corner"
+    },
+    "bom": {
+      "title": "Bill of materials",
+      "summaryTitle": "Overview",
+      "trackRow": "Track",
+      "fieldRow": "Field",
+      "dateRow": "Date",
+      "obstaclesRow": "Obstacles",
+      "lapLengthRow": "Lap length",
+      "itemColumn": "Item",
+      "quantityColumn": "Quantity",
+      "fittingColumn": "Fitting",
+      "edgeGapColumn": "Edge gap",
+      "structureGapsTitle": "Structure gaps",
+      "structureGapsNote": "Distances between neighbouring structures, measured on the floor. Each structure is linked to its nearest neighbours, so every piece has at least one gap to set out. Edge gap is the clear space between the two footprints; centre distance is measured between their centres.",
+      "structureLabel": "{kind} {id}",
+      "contentsTitle": "In this archive",
+      "contents": {
+        "routeMap": "2D route map with the lap start, obstacle numbers, and centre-to-centre distances.",
+        "viewRoute": "{view}, with the race line and direction arrows.",
+        "viewObstacles": "{view}, obstacles only, for the build crew.",
+        "flythrough": "{seconds}-second looping animation of a whoop flying the lap through the obstacles.",
+        "markdown": "This file.",
+        "csv": "The same bill of materials as a spreadsheet."
+      },
+      "csv": {
+        "sectionColumn": "Section",
+        "itemColumn": "Item",
+        "quantityColumn": "Quantity",
+        "availableColumn": "Available",
+        "missingColumn": "Missing",
+        "distanceColumn": "Distance"
+      }
+    },
+    "partsPage": {
+      "title": "Parts list",
+      "pvcTitle": "PVC frames",
+      "framesRow": "Frames",
+      "tubesRow": "Tubes cut to {length}",
+      "totalTubeLengthRow": "Total tube length",
+      "fittingsTitle": "Fittings",
+      "noFittings": "No fittings are needed for these frames.",
+      "feetRow": "Feet on the ground",
+      "unbuildableWarning": "{count, plural, one {1 joint needs six sockets, which common 20 mm fittings cannot provide.} other {# joints need six sockets, which common 20 mm fittings cannot provide.}}",
+      "stockTitle": "Obstacle stock check",
+      "notesTitle": "Build notes",
+      "note1": "Push every tube fully into its fitting before standing a frame up, then check that all feet touch the floor.",
+      "note2": "Set the frames out in numbered order and measure the centre-to-centre distances from the route map.",
+      "note3": "Regenerate this pack after moving frames or editing the race line so map, views, and parts stay aligned."
+    },
+    "warnings": {
+      "animationFailed": "The lap animation could not be rendered ({message}), so the archive has no GIF.",
+      "noRoute": "This design has no race line, so the archive has no lap animation and no race-line views."
+    }
   }
 }

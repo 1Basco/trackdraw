@@ -1,0 +1,632 @@
+{
+  "toolbar": {
+    "homepageLabel": "Ir para a página inicial",
+    "projects": "Projetos",
+    "projectsTooltip": "Gerenciar projetos",
+    "import": "Importar",
+    "importTooltip": "Importar JSON",
+    "export": "Exportar",
+    "exportTooltip": "Exportar pista",
+    "feedbackSupport": "Feedback"
+  },
+  "contextMenu": {
+    "quickActions": "Ações rápidas",
+    "selectedCount": "{count, plural, one {1 selecionado} other {{count} selecionados}}",
+    "segmentSelected": "Segmento selecionado",
+    "waypointSelected": "Waypoint selecionado",
+    "addWaypoint": "Adicionar waypoint",
+    "deleteWaypoint": "Excluir waypoint",
+    "arrange": "Organizar",
+    "bringForward": "Trazer para frente",
+    "sendBackward": "Enviar para trás",
+    "rotate": "Girar",
+    "rotateLeft": "Girar à esquerda",
+    "rotateRight": "Girar à direita"
+  },
+  "canvasOverlay": {
+    "pathEditing": "Edição do traçado",
+    "addPoints": "Adicionar pontos",
+    "finish": "concluir",
+    "cancel": "cancelar",
+    "connectEnds": "Clique para fechar o traçado",
+    "grid": "Grade {grid}",
+    "snapOn": "Encaixe ligado: grade, objetos, traçados",
+    "snapOff": "Encaixe desligado: posicionamento livre",
+    "midClick": "Clique do meio",
+    "rightClick": "Clique direito",
+    "pan": "mover",
+    "menu": "menu",
+    "bypass": "ignorar",
+    "fitToWindow": "Ajustar à janela",
+    "viewerPanZoom": "Arraste para mover, role para dar zoom"
+  },
+  "preview3dOverlay": {
+    "pause": "Pausar",
+    "play": "Reproduzir",
+    "speed": "Velocidade",
+    "toggleFpv": "Alternar o comportamento da câmera FPV",
+    "on": "Ligado",
+    "off": "Desligado",
+    "exit": "Sair",
+    "flyThrough": "Fly-through",
+    "dragWaypointMobile": "Arraste a alça de um waypoint para cima ou para baixo para ajustar a elevação",
+    "dragWaypointDesktop": "Arraste as alças dos waypoints para cima ou para baixo para ajustar a elevação",
+    "dragDiveGateMobile": "Arraste o anel para girar · o disco laranja para inclinar",
+    "dragDiveGateDesktop": "Arraste o anel para girar · arraste o disco laranja para inclinar",
+    "dragRing": "Arraste o anel para girar",
+    "orbitHint": "Orbite para inspecionar · role para dar zoom · arraste com o botão do meio para mover",
+    "drawRoute": "Desenhe o traçado no 2D para liberar o fly-through"
+  },
+  "statusBar": {
+    "snapActive": "Encaixe",
+    "snapOn": "Encaixe ligado",
+    "snapOff": "Encaixe desligado",
+    "snapIsOn": "O encaixe está ligado",
+    "snapIsOff": "O encaixe está desligado",
+    "snapOnDescription": "Pontos e arrastos travam nas posições próximas da grade, nos objetos e nos pontos do traçado. Segure Alt ao posicionar ou arrastar para ignorar uma vez.",
+    "snapOffDescription": "O posicionamento e o arrasto ficam livres até você ligar o encaixe de novo.",
+    "gridOn": "Grade ligada",
+    "gridOff": "Grade desligada",
+    "gridIsOn": "O encaixe na grade está ligado",
+    "gridIsOff": "O encaixe na grade está desligado",
+    "gridOnDescription": "Pontos e arrastos são arredondados para a grade do campo antes de encaixar nos objetos. Desligue para peças pequenas, como quadros PVC de whoop.",
+    "gridOffDescription": "Pontos e arrastos ficam livres, mas ainda encaixam em objetos, pontos do traçado e junções de PVC.",
+    "selected": "{count} selecionados",
+    "grouped": "Agrupado",
+    "groupNamed": "Grupo: {name}",
+    "groups": "{count} grupos",
+    "devOn": "Dev ligado",
+    "dev": "Dev"
+  },
+  "accountMenu": {
+    "checkingAuth": "Verificando o acesso…",
+    "signIn": "Entrar",
+    "signedIn": "Conectado",
+    "noDisplayName": "Nenhum nome de exibição definido",
+    "trackdrawAccount": "Conta TrackDraw",
+    "profile": "Perfil",
+    "dashboard": "Painel",
+    "signOut": "Sair",
+    "signingOut": "Saindo…"
+  },
+  "common": {
+    "canvas2d": "Tela 2D",
+    "preview3d": "Visualização 3D"
+  },
+  "commandPalette": {
+    "title": "Paleta de comandos",
+    "description": "Busque e execute ações do TrackDraw",
+    "placeholder": "Buscar ações…",
+    "searchLabel": "Buscar comandos",
+    "resultsLabel": "Comandos disponíveis",
+    "empty": "Nenhuma ação correspondente",
+    "escapeKey": "Esc",
+    "hintNavigate": "↑↓ Navegar",
+    "hintRun": "Enter Executar",
+    "groups": {
+      "navigate": "Navegar",
+      "view": "Visualizar",
+      "transfer": "Compartilhar e transferir",
+      "support": "Suporte"
+    },
+    "actions": {
+      "projects": {
+        "label": "Gerenciador de projetos",
+        "description": "Abrir e gerenciar projetos salvos"
+      },
+      "accountSettings": {
+        "label": "Configurações da conta",
+        "description": "Gerenciar perfil, segurança e chaves de API"
+      },
+      "shortcuts": {
+        "label": "Atalhos de teclado",
+        "description": "Ver as teclas e os atalhos do editor"
+      },
+      "view2d": {
+        "label": "Abrir a tela 2D",
+        "description": "Mudar para a vista superior editável",
+        "alreadyActive": "Você já está na tela 2D"
+      },
+      "view3d": {
+        "label": "Abrir a visualização 3D",
+        "description": "Avaliar a pista em três dimensões",
+        "alreadyActive": "Você já está na visualização 3D"
+      },
+      "flyThrough": {
+        "label": "Iniciar o fly-through",
+        "description": "Ver a linha de corrida pela visão do piloto",
+        "noPathReason": "Desenhe um traçado primeiro para liberar o fly-through"
+      },
+      "share": {
+        "label": "Compartilhar",
+        "description": "Publicar um link somente leitura desta pista"
+      },
+      "export": {
+        "label": "Exportar",
+        "description": "Baixar PNG, PDF, SVG ou JSON"
+      },
+      "import": {
+        "label": "Importar",
+        "description": "Trazer um arquivo de projeto JSON"
+      },
+      "feedback": {
+        "label": "Feedback",
+        "description": "Relatar um problema, sugerir uma ideia ou tirar uma dúvida"
+      }
+    }
+  },
+  "elementPlacementControl": {
+    "official": "Oficial",
+    "typeLabel": "Tipo de {tool}"
+  },
+  "header": {
+    "untitledTitle": "Sem título",
+    "statusFailed": "Falhou",
+    "statusPending": "Pendente",
+    "statusSyncing": "Sincronizando",
+    "statusSynced": "Sincronizado",
+    "expandSidebar": "Expandir a barra lateral",
+    "collapseSidebar": "Recolher a barra lateral",
+    "sharedReviewBadge": "Avaliação compartilhada",
+    "makeEditableCopy": "Criar cópia editável",
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "saveSnapshot": "Salvar snapshot",
+    "keyboardShortcuts": "Atalhos de teclado",
+    "retrySync": "Tentar sincronizar com a conta de novo ({status})",
+    "share": "Compartilhar",
+    "export": "Exportar",
+    "feedbackSupport": "Feedback",
+    "openAppMenu": "Abrir o menu do aplicativo",
+    "hideObstacleNumbers": "Ocultar os números dos obstáculos",
+    "showObstacleNumbers": "Mostrar os números dos obstáculos"
+  },
+  "sharedHeader": {
+    "embedLabel": "Incorporar",
+    "sharedPreviewLabel": "Prévia compartilhada"
+  },
+  "mobileAppMenu": {
+    "openAppMenu": "Abrir o menu do aplicativo",
+    "title": "TrackDraw",
+    "subtitle": "Projetos, compartilhamento, conta e configurações do app",
+    "signIn": "Entrar",
+    "yourAccount": "Sua conta TrackDraw",
+    "trackdrawAccount": "Conta TrackDraw",
+    "projectsSection": "Projetos",
+    "projectsLabel": "Projetos",
+    "projectsDescription": "Abrir e gerenciar projetos salvos",
+    "accountSection": "Conta",
+    "profileLabel": "Perfil",
+    "profileDescription": "Gerenciar perfil, segurança e chaves de API",
+    "dashboardLabel": "Painel",
+    "dashboardDescription": "Abrir as ferramentas de moderação e administração",
+    "shareSection": "Compartilhar e transferir",
+    "shareLabel": "Compartilhar",
+    "shareDescription": "Publicar um link somente leitura desta pista",
+    "importLabel": "Importar",
+    "importDescription": "Trazer um arquivo de projeto JSON",
+    "exportLabel": "Exportar",
+    "exportDescription": "Baixar PNG, PDF, SVG ou JSON",
+    "supportSection": "Suporte",
+    "feedbackLabel": "Feedback",
+    "feedbackDescription": "Relatar um problema, sugerir uma ideia ou tirar uma dúvida",
+    "themeLabel": "Tema",
+    "themeDescription": "Alternar entre claro, escuro ou sistema",
+    "signOut": "Sair",
+    "signingOut": "Saindo…"
+  },
+  "layoutPresetPicker": {
+    "itemsCount": "{count} itens",
+    "renamePresetTooltip": "Renomear predefinição",
+    "deletePresetTooltip": "Excluir predefinição",
+    "signInTitle": "Entre para usar as predefinições",
+    "signInDescription": "As predefinições são salvas na sua conta, então ficam sempre disponíveis em todos os seus dispositivos.",
+    "noPresetsTitle": "Nenhuma predefinição ainda",
+    "noPresetsDescription": "Selecione vários elementos na tela e use <strong>Salvar predefinição</strong> no inspetor para adicionar a sua primeira predefinição aqui.",
+    "comingSoonTitle": "Em breve",
+    "comingSoonDescription": "As predefinições compartilhadas pela comunidade vão aparecer aqui. Salve as suas e compartilhe com a comunidade TrackDraw.",
+    "myPresetsNav": "Minhas predefinições",
+    "storeNav": "Loja",
+    "soonBadge": "Em breve",
+    "mobileTitle": "Predefinições",
+    "mobileSubtitle": "Escolha uma predefinição e toque uma vez na tela para posicioná-la.",
+    "placeFlowTitle": "Fluxo de posicionamento",
+    "placeFlowDescription": "Selecione uma predefinição aqui e toque na tela. O resultado vira imediatamente elementos comuns e editáveis.",
+    "desktopTitle": "Predefinições de layout",
+    "desktopSubtitle": "Escolha uma predefinição, posicione na tela e depois edite normalmente os elementos inseridos.",
+    "tipText": "Selecione elementos na tela e use <strong>Salvar predefinição</strong> no inspetor para adicionar as suas."
+  },
+  "starterOverlay": {
+    "dialog": {
+      "title": "Boas-vindas ao TrackDraw",
+      "mobileSubtitle": "Posicione alguns gates, desenhe o traçado, confira no 3D e compartilhe quando a pista estiver pronta.",
+      "studioEyebrow": "Studio",
+      "desktopDescription": "Monte o layout em 2D, avalie a elevação em 3D e compartilhe um link somente leitura quando a pista estiver pronta.",
+      "dismissAria": "Dispensar a caixa de boas-vindas"
+    },
+    "hints": {
+      "gate": {
+        "badge": "Guiado",
+        "title": "Posicione o seu primeiro gate",
+        "description": "Toque ou clique na tela para soltar o primeiro gate. Adicione alguns gates antes de mudar para o Traçado.",
+        "action": "Entendi",
+        "dismiss": "Dispensar a dica de posicionamento de gate"
+      },
+      "path": {
+        "badge": "Guiado",
+        "title": "Agora desenhe o traçado",
+        "description": "Posicione alguns gates primeiro, depois mude para o Traçado e desenhe a volta passando por eles. Conclua o traçado antes de conferir no 3D.",
+        "action": "Começar o traçado",
+        "dismiss": "Dispensar a dica de introdução ao traçado"
+      },
+      "preview3d": {
+        "badge": "Prévia",
+        "title": "O 3D funciona melhor depois do traçado",
+        "description": "O posicionamento dos obstáculos já aparece aqui, mas é o traçado que torna útil a avaliação de elevação e o fly-through.",
+        "action": "Desenhar o traçado no 2D",
+        "dismiss": "Dispensar a dica de introdução à visualização 3D"
+      },
+      "review3d": {
+        "badge": "Guiado",
+        "title": "Agora avalie em 3D",
+        "description": "Orbite ao redor do traçado, confira a elevação e o espaçamento e depois compartilhe ou exporte quando o layout estiver do seu gosto.",
+        "action": "Compartilhar ou exportar",
+        "dismiss": "Dispensar a dica de avaliação em 3D"
+      },
+      "postPath": {
+        "badge": "Próximo passo",
+        "title": "Traçado pronto — confira no 3D",
+        "description": "Mude agora para a aba 3D e avalie o traçado antes de refinar mais o posicionamento dos obstáculos.",
+        "action": "Mudar para o 3D",
+        "dismiss": "Dispensar o aviso de ir para o 3D depois do traçado"
+      }
+    }
+  },
+  "starterFlow": {
+    "intro": {
+      "goodFirstSteps": "Bons primeiros passos"
+    },
+    "steps": {
+      "step1": {
+        "title": "Posicione alguns gates e obstáculos",
+        "description": "Comece pequeno para a estrutura do circuito aparecer rápido."
+      },
+      "step2": {
+        "title": "Desenhe a linha de corrida passando por eles",
+        "description": "O traçado costuma fazer o layout fazer sentido mais rápido do que só ajustar obstáculos."
+      },
+      "step3": {
+        "title": "Confira no 3D e depois exporte ou compartilhe",
+        "description": "Avalie o traçado cedo e envie um link somente leitura quando estiver pronto."
+      }
+    },
+    "starterLayouts": {
+      "label": "Layouts iniciais",
+      "layouts": {
+        "open-practice": {
+          "name": "Treino livre",
+          "title": "Layout de treino livre",
+          "description": "Fluxo aberto com uma área de largada e espaço para montar a sua própria volta."
+        },
+        "compact-race-start": {
+          "name": "Largada compacta",
+          "title": "Largada compacta de corrida",
+          "description": "Abertura fechada com uma linha de gates logo de cara e uma curva no início."
+        },
+        "technical-ladder-line": {
+          "name": "Linha técnica com escadas",
+          "title": "Linha técnica com escadas",
+          "description": "Primeiro gate, duas escadas e um gate na sequência para dar ritmo rápido."
+        }
+      }
+    },
+    "guided": {
+      "label": "Início guiado",
+      "title": "Comece com orientação",
+      "descriptionDesktop": "Abre um campo vazio com o `Gate` selecionado para você montar o esqueleto do circuito primeiro. Desenhe o traçado depois que os primeiros obstáculos estiverem no lugar.",
+      "descriptionMobile": "Abre um campo vazio com o Gate selecionado. Desenhe o traçado depois que os primeiros obstáculos estiverem no lugar."
+    },
+    "empty": {
+      "label": "Início vazio",
+      "continue": "Continuar com a tela vazia",
+      "description": "Pule o início guiado e abra o studio vazio."
+    },
+    "shortcuts": {
+      "gate": "posiciona gates",
+      "path": "inicia o traçado",
+      "finish": "conclui o traçado"
+    }
+  },
+  "saveAsPresetDialog": {
+    "title": "Salvar como predefinição",
+    "subtitle": "Dê um nome à sua seleção para posicioná-la de novo pelo seletor de predefinições.",
+    "shapeCount": "{count, plural, one {# elemento} other {# elementos}}",
+    "pathsExcluded": "{count, plural, one {1 traçado será excluído} other {# traçados serão excluídos}} — as predefinições só capturam elementos que não sejam traçados.",
+    "presetNameLabel": "Nome da predefinição",
+    "presetNamePlaceholder": "ex.: Montagem do gate de cronometragem",
+    "savePreset": "Salvar predefinição"
+  },
+  "mobilePanels": {
+    "viewControls": {
+      "mode": {
+        "current": "Modo atual",
+        "viewModeLabel": "Modo de visualização"
+      },
+      "controls": {
+        "fitToField": {
+          "label": "Ajustar ao campo",
+          "description": "Centralizar o projeto atual na tela"
+        },
+        "snap": {
+          "label": "Encaixe",
+          "description": "Travar nas posições próximas da grade e nos objetos"
+        },
+        "gridSnap": {
+          "label": "Encaixe na grade",
+          "description": "Arredonda pontos e arrastos para a grade do campo; desligado mantém só o encaixe em objetos"
+        },
+        "rulers": {
+          "label": "Réguas",
+          "description": "Mostrar as guias de cima e da esquerda no celular"
+        },
+        "obstacleNumbers": {
+          "label": "Números dos obstáculos",
+          "description": "Mostrar a numeração do traçado nos obstáculos do percurso"
+        },
+        "flyThrough": {
+          "label": "Fly-through",
+          "descriptions": {
+            "available": "Iniciar a câmera de prévia da linha de corrida",
+            "readOnly": "Esta pista compartilhada não tem traçado",
+            "draw": "Desenhe um traçado no 2D primeiro para liberar isto"
+          }
+        },
+        "gizmo": {
+          "label": "Gizmo",
+          "description": "Mostrar o indicador de eixos na visualização 3D"
+        }
+      },
+      "readOnly": {
+        "review3dWithPath": "Avaliação 3D somente leitura, com fly-through disponível para esta pista compartilhada.",
+        "review3dNoPath": "Avaliação 3D somente leitura desta pista compartilhada. Não há traçado disponível para o fly-through.",
+        "review2dWithPath": "Avaliação 2D somente leitura desta pista compartilhada. Mude para o 3D para usar o fly-through.",
+        "review2dNoPath": "Avaliação 2D somente leitura desta pista compartilhada."
+      },
+      "share": {
+        "sectionLabel": "Compartilhar",
+        "editableCopy": "Cópia editável",
+        "shareButton": "Compartilhar"
+      },
+      "support": {
+        "sectionLabel": "Suporte",
+        "label": "Feedback",
+        "description": "Relatar um problema, sugerir uma ideia ou tirar uma dúvida"
+      }
+    },
+    "multiSelect": {
+      "header": {
+        "title": "Seleção múltipla",
+        "lockedHint": "Seleção bloqueada. Desbloqueie antes de mover ou redimensionar.",
+        "tapHint": "Toque nos itens para adicionar ou remover."
+      },
+      "fields": {
+        "groupNamePlaceholder": "Nome do grupo"
+      },
+      "actions": {
+        "duplicate": "Duplicar",
+        "lock": "Bloquear",
+        "unlock": "Desbloquear",
+        "delete": "Excluir",
+        "ungroup": "Desagrupar",
+        "group": "Agrupar"
+      }
+    },
+    "pathBuilder": {
+      "header": {
+        "title": "Construtor de traçado"
+      },
+      "status": {
+        "loopConnected": "Volta fechada · {count} pontos · {length}",
+        "pointsCount": "{count} pontos · {length}",
+        "tapToStart": "Toque na tela para posicionar o primeiro ponto"
+      },
+      "actions": {
+        "undo": "Desfazer",
+        "connectEnds": "Fechar o traçado",
+        "finish": "Concluir",
+        "cancel": "Cancelar"
+      }
+    },
+    "editorPanels": {
+      "quickActions": {
+        "title": "Ações rápidas",
+        "adjustTitle": "Ajustar",
+        "hints": {
+          "addPoint": "Adicionar ponto no segmento selecionado",
+          "deleteWaypoint": "Excluir o waypoint selecionado",
+          "resume": "Retomar ou ajustar este traçado",
+          "selectionStep": "{label} · passo de {step}",
+          "selectionFallback": "Seleção"
+        },
+        "actions": {
+          "addPoint": "Adicionar ponto",
+          "editPath": "Editar traçado",
+          "duplicate": "Duplicar",
+          "lock": "Bloquear",
+          "unlock": "Desbloquear",
+          "delete": "Excluir",
+          "deletePoint": "Excluir ponto",
+          "adjust": "Ajustar",
+          "back": "Voltar"
+        },
+        "adjust": {
+          "step": "Passo",
+          "left": "Esquerda",
+          "up": "Cima",
+          "down": "Baixo",
+          "right": "Direita"
+        }
+      },
+      "nav": {
+        "exit": "Sair",
+        "select": "Selecionar",
+        "tools": "Ferramentas",
+        "inspect": "Inspecionar",
+        "view": "Visualizar",
+        "review": "Avaliar",
+        "share": "Compartilhar",
+        "feedback": "Feedback",
+        "editCopy": "Editar cópia",
+        "preview": "Prévia"
+      },
+      "inspector": {
+        "designSettingsHint": "Configurações do projeto",
+        "title": "Inspetor",
+        "subtitles": {
+          "empty": "Configurações do projeto e itens posicionados",
+          "selected": "Propriedades da seleção e edição"
+        }
+      },
+      "tools": {
+        "title": "Ferramentas",
+        "sections": {
+          "items": "Itens da pista",
+          "tools": "Ferramentas da tela"
+        },
+        "toolDescriptions": {
+          "startfinish": "Marcar os pads de largada ou de cronometragem",
+          "cone": "Posicionar marcadores do circuito",
+          "label": "Adicionar anotações na tela",
+          "polyline": "Desenhar ou editar a linha de corrida"
+        },
+        "subtitles": {
+          "preview3d": "Ações de projeto para a sessão 3D atual",
+          "canvas2d": "Ferramentas de desenho e edição"
+        }
+      },
+      "view": {
+        "title": "Visualizar",
+        "subtitle": "Modo da tela, guias e controles da área de visualização"
+      }
+    }
+  },
+  "viewModeSwitch": {
+    "ariaLabel": "Modo de visualização",
+    "canvas2dShort": "2D",
+    "preview3dShort": "3D",
+    "canvas2dDrawer": "Tela 2D",
+    "preview3dDrawer": "Visualização 3D"
+  },
+  "desktopInspectorPanel": {
+    "ariaLabel": "Inspetor",
+    "expandTooltip": "Expandir o inspetor",
+    "collapseTooltip": "Recolher o inspetor",
+    "verticalLabel": "Inspetor"
+  },
+  "accountProjectSync": {
+    "cloudUnavailableDev": "Os projetos na nuvem não estão disponíveis no `npm run dev`. Use `npm run preview` para testar a sincronização com a conta.",
+    "syncedToAccountAt": "Sincronizado com a conta às {time}",
+    "projectSynced": "Projeto sincronizado",
+    "projectSyncedDescription": "\"{title}\" agora está disponível na sua conta.",
+    "untitled": "Sem título",
+    "signInToSync": "Entre para sincronizar este projeto",
+    "cloudSyncUnavailable": "Sincronização na nuvem indisponível",
+    "localProjectLoadFailed": "Não foi possível carregar o projeto local",
+    "localProjectLoadFailedDescription": "O TrackDraw não conseguiu ler a cópia salva neste dispositivo. Tente abrir outro projeto local ou exporte um backup em JSON da tela atual.",
+    "reviewProjectVersion": "Revisar a versão do projeto",
+    "accountCopyChangedDescription": "A cópia da conta mudou antes que este dispositivo conseguisse sincronizar.",
+    "accountSyncFailed": "A sincronização com a conta falhou",
+    "accountSyncFailedDescription": "Uma cópia local foi salva neste dispositivo. Tente sincronizar de novo quando a conexão ou o serviço de contas estiver disponível, ou exporte em JSON se precisar de um backup manual.",
+    "accountSyncFailedSavedLocally": "A sincronização com a conta falhou; salvo localmente",
+    "autosyncFailedDescription": "O TrackDraw salvou a cópia mais recente neste dispositivo, mas não conseguiu atualizar a cópia da conta. Tente sincronizar de novo quando a conexão voltar.",
+    "autoPromoteFailedDescription": "O TrackDraw salvou este novo projeto neste dispositivo, mas ainda não conseguiu criar a cópia na conta. Tente sincronizar de novo quando a conexão voltar.",
+    "retry": "Tentar de novo",
+    "signInToOpen": "Entre para abrir os projetos da conta",
+    "cloudProjectsUnavailable": "Projetos na nuvem indisponíveis",
+    "projectOpenedFromAccount": "Projeto aberto a partir da conta",
+    "openProjectFailed": "Não foi possível abrir o projeto",
+    "openProjectFailedDescription": "O TrackDraw não conseguiu carregar a cópia da conta. Tente de novo ou siga trabalhando no projeto local, se houver um.",
+    "signInToDuplicate": "Entre para duplicar os projetos da conta",
+    "projectDuplicated": "Projeto duplicado",
+    "projectDuplicatedDescription": "\"{title}\" foi salvo neste dispositivo como um novo projeto.",
+    "duplicateProjectFailed": "Não foi possível duplicar o projeto",
+    "duplicateProjectFailedDescription": "O TrackDraw não conseguiu carregar a cópia da conta para duplicar. Tente de novo.",
+    "keptAsLocalCopy": "Mantido como cópia local",
+    "localCopyKept": "Cópia local mantida",
+    "localCopyKeptDescription": "\"{title}\" agora fica neste dispositivo como um projeto separado.",
+    "status": {
+      "readOnlySharedView": "Visualização compartilhada somente leitura",
+      "syncFailed": "Falha na sincronização",
+      "reviewNeeded": "Precisa de revisão",
+      "syncing": "Sincronizando…",
+      "changesPending": "Alterações pendentes",
+      "syncedAt": "Sincronizado {time}",
+      "syncedProject": "Projeto sincronizado"
+    }
+  },
+  "shell": {
+    "untitledTrack": "Pista sem título",
+    "untitledFallback": "Sem título",
+    "untitledTrackCopy": "Cópia da pista sem título",
+    "copyOfTitle": "Cópia de {title}",
+    "savingLocally": "Salvando localmente…",
+    "savedLocallyAt": "Salvo localmente às {time}",
+    "localAutosaveFailed": "O salvamento automático local falhou",
+    "localAutosaveFailedDescription": "As últimas edições continuam na tela, mas o TrackDraw não conseguiu salvar uma cópia local. Tente de novo agora ou exporte um backup em JSON antes de sair deste navegador.",
+    "retry": "Tentar de novo",
+    "localAutosaveRecovered": "Salvamento automático local recuperado",
+    "latestLocalCopySaved": "A cópia local mais recente foi salva.",
+    "localAutosaveStillFailing": "O salvamento automático local ainda está falhando",
+    "localAutosaveStillFailingDescription": "Exporte um backup em JSON antes de fazer mais alterações se o armazenamento do navegador continuar falhando.",
+    "editableCopyCreated": "Cópia editável criada",
+    "restoredFromLocalDraft": "Restaurado a partir do rascunho local",
+    "freshLocalProject": "Novo projeto local",
+    "editing": "Editando…",
+    "snapshotSaved": "Snapshot salvo",
+    "snapshotSavedAt": "Snapshot salvo às {time}",
+    "restorePointCreatedAt": "Ponto de restauração criado às {time}",
+    "projectOpened": "Projeto aberto",
+    "restoredFromSnapshot": "Restaurado a partir do snapshot",
+    "projectDuplicated": "Projeto duplicado",
+    "projectDuplicatedDescription": "\"{title}\" foi salvo neste dispositivo como um projeto novo e independente.",
+    "duplicateProjectFailed": "Não foi possível duplicar o projeto",
+    "exportFailed": "A exportação falhou",
+    "exportFailedDescription": "{message} Tente de novo ou abra o Exportar e baixe por lá um backup do projeto em JSON.",
+    "exportFailedNoProjectDescription": "O TrackDraw não conseguiu carregar este projeto local. Abra-o primeiro ou escolha outro projeto salvo.",
+    "exportSuccess": "Projeto exportado em JSON",
+    "embeddedTrack": "Pista incorporada",
+    "sharedPreview": "Prévia compartilhada",
+    "loading3d": "Carregando o 3D…",
+    "portraitOnlyEyebrow": "Editor no celular",
+    "portraitOnlyTitle": "Coloque o celular na vertical",
+    "portraitOnlyDescription": "O editor do TrackDraw foi feito para o modo retrato no celular. Gire o aparelho para continuar editando."
+  },
+  "languagePicker": {
+    "ariaLabel": "Idioma"
+  },
+  "performanceHud": {
+    "title": "HUD do desenvolvedor",
+    "summary": "Ferramenta {tool} · {count} selecionados",
+    "reset": "Redefinir",
+    "close": "Fechar",
+    "metrics": {
+      "canvas2d": "Tela 2D",
+      "preview3d": "Vista 3D",
+      "inspector": "Inspetor",
+      "autosave": "Salvamento automático"
+    },
+    "levels": {
+      "noData": "Sem dados",
+      "heavy": "Pesado",
+      "busy": "Ocupado",
+      "ok": "OK"
+    }
+  },
+  "textureDebug": {
+    "title": "Depuração de texturas",
+    "copyConfig": "Copiar configuração",
+    "copied": "Copiado",
+    "noPanels": "Nenhum painel registrado ainda",
+    "flip": "inverter"
+  }
+}

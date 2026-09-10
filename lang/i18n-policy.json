@@ -3,6 +3,7 @@
     "en": "en-US",
     "nl": "nl-NL",
     "de": "de-DE",
+    "pt-BR": "pt-BR",
     "zh-CN": "zh-CN"
   },
   "englishOnlyNamespaces": ["dashboard", "legal"]

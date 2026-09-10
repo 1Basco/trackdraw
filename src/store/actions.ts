@@ -19,6 +19,7 @@ export function useTrackActions() {
   );
   const rotateShapes = useEditor((state) => state.rotateShapes);
   const removeShapes = useEditor((state) => state.removeShapes);
+  const mergePvcFrames = useEditor((state) => state.mergePvcFrames);
   const duplicateShapes = useEditor((state) => state.duplicateShapes);
   const groupSelection = useEditor((state) => state.groupSelection);
   const setGroupName = useEditor((state) => state.setGroupName);
@@ -61,6 +62,7 @@ export function useTrackActions() {
     reversePolylinePoints,
     rotateShapes,
     removeShapes,
+    mergePvcFrames,
     duplicateShapes,
     groupSelection,
     setGroupName,
@@ -112,6 +114,11 @@ export function useUiActions() {
   );
   const setSnapEnabled = useEditor((state) => state.setSnapEnabled);
   const toggleSnapEnabled = useEditor((state) => state.toggleSnapEnabled);
+  const setSnapGridEnabled = useEditor((state) => state.setSnapGridEnabled);
+  const toggleSnapGridEnabled = useEditor(
+    (state) => state.toggleSnapGridEnabled
+  );
+  const setPvcBuildLevel = useEditor((state) => state.setPvcBuildLevel);
   const setZoom = useEditor((state) => state.setZoom);
   const setPanOffset = useEditor((state) => state.setPanOffset);
   const setHoveredShapeId = useEditor((state) => state.setHoveredShapeId);
@@ -135,6 +142,9 @@ export function useUiActions() {
     setActivePlacementElementId,
     setSnapEnabled,
     toggleSnapEnabled,
+    setSnapGridEnabled,
+    toggleSnapGridEnabled,
+    setPvcBuildLevel,
     setZoom,
     setPanOffset,
     setHoveredShapeId,

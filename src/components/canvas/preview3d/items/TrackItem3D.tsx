@@ -26,11 +26,13 @@ import type {
   LabelShape,
   LadderShape,
   PolylineShape,
+  PvcFrameShape,
   Shape,
   ShapeKind,
   TowerShape,
 } from "@/lib/types";
 import { assertNever } from "@/lib/utils";
+import { PvcFrame3D, getPvcFrameTopY } from "./PvcFrame3D";
 import { Barrier3D, getBarrierTopY } from "./Barrier3D";
 import { Gate3D } from "./Gate3D";
 import { Ladder3D } from "./Ladder3D";
@@ -103,17 +105,24 @@ const shapeTopYDispatch: Record<ShapeKind, (shape: Shape) => number> = {
   },
   divegate: (shape) => Math.max(getDiveGateTopY(shape as DiveGateShape), 0.5),
   barrier: (shape) => getBarrierTopY(shape as BarrierShape),
+  pvcframe: (shape) => getPvcFrameTopY(shape as PvcFrameShape),
 };
 
 function getShapeTopY(shape: Shape): number {
   return shapeTopYDispatch[shape.kind](shape);
 }
 
-function SelectionMarker3D({ shape }: { shape: Shape }) {
+function SelectionMarker3D({
+  shape,
+  scale = 1,
+}: {
+  shape: Shape;
+  scale?: number;
+}) {
   const pulse = useRef(0);
   const meshRef = useRef<THREE.Mesh>(null);
 
-  const markerY = getShapeTopY(shape) + SELECTION_MARKER_MARGIN;
+  const markerY = getShapeTopY(shape) + SELECTION_MARKER_MARGIN * scale;
 
   useFrame((_, delta) => {
     pulse.current += delta * 3.4;
@@ -124,7 +133,7 @@ function SelectionMarker3D({ shape }: { shape: Shape }) {
 
   return (
     <mesh ref={meshRef} position={[shape.x, markerY, shape.y]} renderOrder={10}>
-      <sphereGeometry args={[0.12, 18, 18]} />
+      <sphereGeometry args={[0.12 * scale, 18, 18]} />
       <meshBasicMaterial
         color="#60a5fa"
         transparent
@@ -144,6 +153,7 @@ function Shape3D({
   tiltDragRef,
   elevationOverrideRef,
   theme,
+  selectionMarkerScale = 1,
 }: {
   isPrimaryPolyline: boolean;
   isSelected: boolean;
@@ -153,13 +163,17 @@ function Shape3D({
   tiltDragRef?: RefObject<number | null>;
   elevationOverrideRef?: RefObject<number | null>;
   theme: Scene3DTheme;
+  /** Shrinks the selection marker for small-scale (whoop) designs. */
+  selectionMarkerScale?: number;
 }) {
   switch (shape.kind) {
     case "gate":
       return (
         <group onClick={(event) => onSelect(event, shape.id)}>
           <Gate3D shape={shape} selected={isSelected} outerRef={outerRef} />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "tower":
@@ -171,28 +185,36 @@ function Shape3D({
             outerRef={outerRef}
             elevationOverrideRef={elevationOverrideRef}
           />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "flag":
       return (
         <group onClick={(event) => onSelect(event, shape.id)}>
           <Flag3D shape={shape} selected={isSelected} outerRef={outerRef} />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "cone":
       return (
         <group onClick={(event) => onSelect(event, shape.id)}>
           <Cone3D shape={shape} selected={isSelected} />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "label":
       return (
         <group onClick={(event) => onSelect(event, shape.id)}>
           <Label3D shape={shape} selected={isSelected} />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "polyline":
@@ -204,14 +226,18 @@ function Shape3D({
             selected={isSelected}
             theme={theme}
           />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "startfinish":
       return (
         <group onClick={(event) => onSelect(event, shape.id)}>
           <StartFinish3D shape={shape} selected={isSelected} />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "ladder":
@@ -223,7 +249,9 @@ function Shape3D({
             outerRef={outerRef}
             elevationOverrideRef={elevationOverrideRef}
           />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "divegate":
@@ -236,7 +264,9 @@ function Shape3D({
             tiltDragRef={tiltDragRef}
             elevationOverrideRef={elevationOverrideRef}
           />
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     case "barrier":
@@ -257,7 +287,18 @@ function Shape3D({
               depthWrite={false}
             />
           </mesh>
-          {isSelected && <SelectionMarker3D shape={shape} />}
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
+        </group>
+      );
+    case "pvcframe":
+      return (
+        <group onClick={(event) => onSelect(event, shape.id)}>
+          <PvcFrame3D shape={shape} selected={isSelected} outerRef={outerRef} />
+          {isSelected && (
+            <SelectionMarker3D shape={shape} scale={selectionMarkerScale} />
+          )}
         </group>
       );
     default:
@@ -275,5 +316,6 @@ export const MemoShape3D = memo(
     prev.outerRef === next.outerRef &&
     prev.tiltDragRef === next.tiltDragRef &&
     prev.elevationOverrideRef === next.elevationOverrideRef &&
-    prev.theme === next.theme
+    prev.theme === next.theme &&
+    prev.selectionMarkerScale === next.selectionMarkerScale
 );

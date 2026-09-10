@@ -15,8 +15,10 @@ import {
 import { isTouchLikeEvent } from "@/lib/canvas/shared";
 import { zToColor } from "@/lib/track/alt";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "@/lib/track/constants";
+import { getTrackScaleProfile } from "@/lib/track/track-class";
 import { m2px, px2m } from "@/lib/track/units";
 import type { PolylinePoint, PolylineShape } from "@/lib/types";
+import { useEditor } from "@/store/editor";
 
 export interface PolylineShapeContentProps {
   allowInteraction: boolean;
@@ -109,6 +111,10 @@ export function PolylineShapeContent({
     touchIdentifier: number | null;
   } | null>(null);
   const dragFrameRef = useRef<number | null>(null);
+  // Quantized so wheel zoom does not re-render the whole path on every tick.
+  const zoom = useEditor((state) => Math.round(state.ui.zoom * 2) / 2);
+  const trackClass = useEditor((state) => state.track.design.trackClass);
+  const scaleProfile = getTrackScaleProfile(trackClass);
   const displayPath = useMemo(
     () =>
       previewPoints
@@ -168,8 +174,17 @@ export function PolylineShapeContent({
     (isSelected && selectedSegmentIndex !== null);
   const arrowMarkers = polylineMetrics.arrowMarkers;
   const color = displayPath.color ?? "#3b82f6";
-  const waypointRadius = Math.max(4, m2px(0.08, designPpm));
-  const waypointDesktopHitRadius = Math.max(10, waypointRadius * 2.35);
+  // Whoop-scale designs shrink the pucks and stop them growing with zoom, so
+  // a 6 cm race line through a 61 cm frame is not buried under its handles.
+  const handleScale = scaleProfile.handle2dScale;
+  const waypointRadius = Math.min(
+    Math.max(4, m2px(0.08, designPpm)) * handleScale,
+    scaleProfile.handle2dScreenRadiusCapPx / Math.max(zoom, 0.1)
+  );
+  const waypointDesktopHitRadius = Math.max(
+    10 * handleScale,
+    waypointRadius * 2.35
+  );
   const waypointTouchRadius = isMobile
     ? Math.max(22, waypointRadius * 3.6)
     : waypointRadius;
@@ -615,7 +630,7 @@ export function PolylineShapeContent({
           />
         )}
         {arrowMarkers.map((marker, index) => {
-          const arrowLength = Math.max(12, strokePx * 7);
+          const arrowLength = Math.max(12 * handleScale, strokePx * 7);
           const tailLength = arrowLength * 0.55;
           const x = m2px(marker.x, designPpm);
           const y = m2px(marker.y, designPpm);
@@ -633,13 +648,16 @@ export function PolylineShapeContent({
               ]}
               stroke={color}
               fill={color}
-              strokeWidth={Math.max(1.2, strokePx * 0.9)}
-              pointerLength={Math.max(8, strokePx * 2.8)}
-              pointerWidth={Math.max(7, strokePx * 2.2)}
+              strokeWidth={Math.max(1.2 * handleScale, strokePx * 0.9)}
+              pointerLength={Math.max(8 * handleScale, strokePx * 2.8)}
+              pointerWidth={Math.max(7 * handleScale, strokePx * 2.2)}
               opacity={0.82}
               lineCap="round"
               lineJoin="round"
               pointerAtEnding
+              // One flow arrow per spacing interval; each would otherwise go
+              // through Konva's stage-sized buffer canvas on every redraw.
+              perfectDrawEnabled={false}
             />
           );
         })}
@@ -656,18 +674,19 @@ export function PolylineShapeContent({
               <Circle
                 x={mx}
                 y={my}
-                radius={Math.max(9, waypointRadius * 2.2)}
+                radius={Math.max(9 * handleScale, waypointRadius * 2.2)}
                 fill="#3b82f6"
                 opacity={0.18}
               />
               <Circle
                 x={mx}
                 y={my}
-                radius={Math.max(5.5, waypointRadius * 1.2)}
+                radius={Math.max(5.5 * handleScale, waypointRadius * 1.2)}
                 fill="#ffffff"
                 stroke="#3b82f6"
                 strokeWidth={1.5}
                 opacity={0.96}
+                perfectDrawEnabled={false}
               />
             </Group>
           );

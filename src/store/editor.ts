@@ -48,6 +48,7 @@ import {
   getShapeGroupId,
 } from "@/lib/track/shape-groups";
 import { buildCatalogTypePatch } from "@/lib/editor/catalog-type-patch";
+import { mergePvcFrames as buildPvcFrameMergePatch } from "@/lib/track/pvc-frame/snap";
 import { trackProductEvent } from "@/lib/product-events";
 
 export type { EditorTool } from "@/lib/editor/tool-registry";
@@ -75,6 +76,7 @@ interface EditorState {
   reversePolylinePoints: EditorTrackActions["reversePolylinePoints"];
   rotateShapes: EditorTrackActions["rotateShapes"];
   removeShapes: EditorTrackActions["removeShapes"];
+  mergePvcFrames: EditorTrackActions["mergePvcFrames"];
   duplicateShapes: EditorTrackActions["duplicateShapes"];
   groupSelection: EditorTrackActions["groupSelection"];
   setGroupName: EditorTrackActions["setGroupName"];
@@ -107,6 +109,9 @@ interface EditorState {
   setActivePlacementElementId: EditorUiActions["setActivePlacementElementId"];
   setSnapEnabled: EditorUiActions["setSnapEnabled"];
   toggleSnapEnabled: EditorUiActions["toggleSnapEnabled"];
+  setSnapGridEnabled: EditorUiActions["setSnapGridEnabled"];
+  toggleSnapGridEnabled: EditorUiActions["toggleSnapGridEnabled"];
+  setPvcBuildLevel: EditorUiActions["setPvcBuildLevel"];
   setZoom: EditorUiActions["setZoom"];
   setPanOffset: EditorUiActions["setPanOffset"];
   setHoveredShapeId: EditorUiActions["setHoveredShapeId"];
@@ -131,6 +136,11 @@ function addShapeRecord(design: TrackDesign, shape: Shape) {
 function findShapeOrderIndex(design: TrackDesign, id: string) {
   return design.shapeOrder.indexOf(id);
 }
+
+const historyPartialCache = new WeakMap<
+  TrackDesign,
+  { track: { design: TrackDesign } }
+>();
 
 function removeShapeRecord(design: TrackDesign, id: string) {
   delete design.shapeById[id];
@@ -399,6 +409,43 @@ export const useEditor = create<EditorState>()(
         if (changed) trackMeaningfulEdit("delete");
       },
 
+      mergePvcFrames: (sourceId, targetId, sourcePosition) => {
+        let merged = false;
+        set((draft) => {
+          const source = draft.track.design.shapeById[sourceId];
+          const target = draft.track.design.shapeById[targetId];
+          if (
+            !source ||
+            !target ||
+            source.kind !== "pvcframe" ||
+            target.kind !== "pvcframe" ||
+            source.locked ||
+            target.locked ||
+            sourceId === targetId
+          ) {
+            return;
+          }
+
+          const patch = buildPvcFrameMergePatch(target, source, sourcePosition);
+          if (!patch) return;
+
+          // The merged frame is a hand-built structure, not a catalog template.
+          if (target.meta && "catalog" in target.meta) {
+            const { catalog: _catalog, ...rest } = target.meta;
+            target.meta = Object.keys(rest).length > 0 ? rest : undefined;
+          }
+          applyShapePatch(target, patch);
+          removeShapeRecord(draft.track.design, sourceId);
+          draft.session.selection = draft.session.selection.includes(sourceId)
+            ? [targetId]
+            : draft.session.selection.filter((id) => id !== sourceId);
+          touchTrackDesign(draft);
+          merged = true;
+        });
+        if (merged) trackMeaningfulEdit("transform");
+        return merged;
+      },
+
       nudgeShapes: (ids, dx, dy) =>
         set((draft) => {
           if (!nudgeShapes(draft.track.design.shapeById, ids, dx, dy)) return;
@@ -618,9 +665,27 @@ export const useEditor = create<EditorState>()(
           draft.ui.snapEnabled = !draft.ui.snapEnabled;
         }),
 
+      setSnapGridEnabled: (enabled) =>
+        set((draft) => {
+          draft.ui.snapGridEnabled = enabled;
+        }),
+
+      toggleSnapGridEnabled: () =>
+        set((draft) => {
+          draft.ui.snapGridEnabled = !draft.ui.snapGridEnabled;
+        }),
+
+      setPvcBuildLevel: (level) =>
+        set((draft) => {
+          draft.ui.pvcBuildLevel = Math.max(
+            0,
+            Math.min(32, Math.round(Number.isFinite(level) ? level : 0))
+          );
+        }),
+
       setZoom: (zoom) =>
         set((draft) => {
-          draft.ui.zoom = Math.max(0.1, Math.min(5, zoom));
+          draft.ui.zoom = Math.max(0.1, Math.min(12, zoom));
         }),
 
       setPanOffset: (offset) =>
@@ -877,11 +942,22 @@ export const useEditor = create<EditorState>()(
       },
     })),
     {
-      partialize: (state) => ({
-        track: {
-          design: normalizeDesign(serializeDesign(state.track.design)),
-        },
-      }),
+      // zundo partializes on every store update, including UI-only ones such
+      // as zoom, hover, and cursor state. Serializing and normalizing the whole
+      // design for each of those made wheel zoom stutter, so the partial is
+      // cached per design object: UI updates keep the same design reference
+      // and hit the cache, track edits produce a new design and recompute.
+      partialize: (state) => {
+        const cached = historyPartialCache.get(state.track.design);
+        if (cached) return cached;
+        const partial = {
+          track: {
+            design: normalizeDesign(serializeDesign(state.track.design)),
+          },
+        };
+        historyPartialCache.set(state.track.design, partial);
+        return partial;
+      },
       equality: (past, current) =>
         past.track.design.id === current.track.design.id &&
         past.track.design.updatedAt === current.track.design.updatedAt,

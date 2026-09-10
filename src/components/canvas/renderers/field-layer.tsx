@@ -1,8 +1,120 @@
 "use client";
 
 import { memo } from "react";
-import { Group, Line, Rect, Text } from "react-konva";
+import { Group, Line, Rect, Shape, Text } from "react-konva";
 import type { RectLike } from "@/lib/canvas/shared";
+import { m2px } from "@/lib/track/units";
+
+// ── Infinite grid ───────────────────────────────────────────────────────────
+
+const GRID_MAX_LINES_PER_AXIS = 320;
+
+type GridLineClass = "major" | "coarse" | "minor";
+
+/**
+ * Build the infinite background grid.
+ *
+ * Every grid line used to be its own Konva `Line`, which meant ~600 nodes and
+ * ~600 `stroke()` calls on every stage redraw — and the stage is fully redrawn
+ * on each frame of a wheel-zoom animation. The lines only come in six visual
+ * variants (three weights x inside/outside the field), so they are batched into
+ * six custom shapes that stroke a single path each.
+ */
+export function buildFieldGridElements({
+  heightPx,
+  isDark,
+  ppm,
+  stepPx,
+  widthPx,
+}: {
+  heightPx: number;
+  isDark: boolean;
+  ppm: number;
+  stepPx: number;
+  widthPx: number;
+}): React.JSX.Element[] {
+  const padX = Math.max(widthPx * 2, 1400);
+  const padY = Math.max(heightPx * 2, 1400);
+  const gx0 = -padX;
+  const gy0 = -padY;
+  const gx1 = widthPx + padX;
+  const gy1 = heightPx + padY;
+
+  const coarseStepPx = m2px(5, ppm);
+  const coarseEvery = Math.max(1, Math.round(coarseStepPx / stepPx));
+  const majorEvery = coarseEvery * 2;
+  const pmod = (n: number, m: number) => ((Math.round(n) % m) + m) % m;
+
+  const skipX = Math.max(
+    1,
+    Math.ceil(Math.ceil((gx1 - gx0) / stepPx) / GRID_MAX_LINES_PER_AXIS)
+  );
+  const skipY = Math.max(
+    1,
+    Math.ceil(Math.ceil((gy1 - gy0) / stepPx) / GRID_MAX_LINES_PER_AXIS)
+  );
+  const effStepX = stepPx * skipX;
+  const effStepY = stepPx * skipY;
+
+  const stroke = isDark
+    ? { major: "#365a80", coarse: "#2a4060", minor: "#1e2f42" }
+    : { major: "#6890b0", coarse: "#98b4cc", minor: "#bdd0e0" };
+  const strokeWidth = { major: 1.4, coarse: 1, minor: 0.6 };
+  const outsideOpacity = isDark ? 0.2 : 0.28;
+
+  const buckets = new Map<string, { verticals: number[]; horizontals: number[] }>();
+  const bucketFor = (lineClass: GridLineClass, inside: boolean) => {
+    const key = `${lineClass}-${inside ? "in" : "out"}`;
+    let bucket = buckets.get(key);
+    if (!bucket) {
+      bucket = { verticals: [], horizontals: [] };
+      buckets.set(key, bucket);
+    }
+    return bucket;
+  };
+  const classFor = (idx: number): GridLineClass =>
+    pmod(idx, majorEvery) === 0
+      ? "major"
+      : pmod(idx, coarseEvery) === 0
+        ? "coarse"
+        : "minor";
+
+  const startX = Math.floor(gx0 / effStepX) * effStepX;
+  for (let x = startX; x <= gx1; x += effStepX) {
+    bucketFor(classFor(Math.round(x / stepPx)), x >= 0 && x <= widthPx).verticals.push(x);
+  }
+
+  const startY = Math.floor(gy0 / effStepY) * effStepY;
+  for (let y = startY; y <= gy1; y += effStepY) {
+    bucketFor(classFor(Math.round(y / stepPx)), y >= 0 && y <= heightPx).horizontals.push(y);
+  }
+
+  return Array.from(buckets.entries()).map(([key, bucket]) => {
+    const [lineClass, placement] = key.split("-") as [GridLineClass, string];
+    return (
+      <Shape
+        key={`grid-${key}`}
+        listening={false}
+        perfectDrawEnabled={false}
+        stroke={stroke[lineClass]}
+        strokeWidth={strokeWidth[lineClass]}
+        opacity={placement === "in" ? 1 : outsideOpacity}
+        sceneFunc={(context, shape) => {
+          context.beginPath();
+          for (const x of bucket.verticals) {
+            context.moveTo(x, gy0);
+            context.lineTo(x, gy1);
+          }
+          for (const y of bucket.horizontals) {
+            context.moveTo(gx0, y);
+            context.lineTo(gx1, y);
+          }
+          context.strokeShape(shape);
+        }}
+      />
+    );
+  });
+}
 
 // ── Stable content (grid + field chrome) ────────────────────────────────────
 // Only re-renders when design, theme, or field dimensions change.

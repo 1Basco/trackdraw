@@ -15,6 +15,7 @@ import {
   type RouteWarningKind,
 } from "@/lib/track/polyline-derived";
 import { getDesignTimingMarkers } from "@/lib/track/timing";
+import { getDesignScaleProfile } from "@/lib/track/track-class";
 import type {
   InventoryShapeKind,
   PolylineShape,
@@ -109,8 +110,12 @@ function getRouteIssues(design: TrackDesign): TrackPreflightIssue[] {
     }
   }
 
+  const scale = getDesignScaleProfile(design);
   for (const route of routes) {
-    for (const [index, warning] of getPolylineRouteWarnings(route).entries()) {
+    for (const [index, warning] of getPolylineRouteWarnings(
+      route,
+      scale
+    ).entries()) {
       if (warning.kind === "flat") continue;
       issues.push({
         category: "route",

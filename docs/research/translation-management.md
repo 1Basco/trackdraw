@@ -6,7 +6,7 @@ This document records the current comparison, but deliberately does not make an 
 
 ## Current repository scope
 
-The source remains `lang/en-US/{namespace}.json`. The ten translatable namespaces are `common`, `dialogs`, `editor`, `exportPdf`, `inspector`, `landing`, `login`, `setupEstimate`, `shapes`, and `share`. Target catalogs and generated locale assets use Crowdin-compatible regional directories: `nl-NL`, `de-DE`, and `zh-CN`. Frontend product locale identifiers remain `en`, `nl`, `de`, and `zh-CN`. `dashboard` and `legal` remain English-only.
+The source remains `lang/en-US/{namespace}.json`. The ten translatable namespaces are `common`, `dialogs`, `editor`, `exportPdf`, `inspector`, `landing`, `login`, `setupEstimate`, `shapes`, and `share`. Target catalogs and generated locale assets use Crowdin-compatible regional directories: `nl-NL`, `de-DE`, `pt-BR`, and `zh-CN`. Frontend product locale identifiers remain `en`, `nl`, `de`, `pt-BR`, and `zh-CN`. `dashboard` and `legal` remain English-only.
 
 Measured on 2026-08-09, those ten namespaces contain:
 
@@ -96,6 +96,18 @@ Practical contribution flow:
 6. The PR runs locale validation, unresolved-key checks, hardcoded-copy checks, and any relevant UI/export tests before merge.
 
 If a contributor leaves, remove them from platform teams or disable the account. Ordinary translators should never receive repository or service-account tokens.
+
+## Brazilian Portuguese is repo-authored
+
+Brazilian Portuguese (`pt-BR`) is a deliberate, documented exception to the Crowdin ownership rule described above and in `AGENTS.md`. The repository owner explicitly requested a complete `pt-BR` catalog committed directly to this fork, so:
+
+- `lang/pt-BR/**` is authored and reviewed in normal pull requests, not in Crowdin. The repository is its source of truth.
+- `crowdin.yml` does not enumerate target languages, so no configuration change was needed and a Crowdin sync cannot delete the catalog. If target languages are ever listed explicitly, `pt-BR` must either be added there or the file must keep excluding it deliberately — never both silently.
+- `nl-NL`, `de-DE`, and `zh-CN` keep the existing Crowdin ownership. Do not treat `pt-BR` as precedent for hand-editing those.
+- Anyone adding English keys should keep `pt-BR` updated in the same pull request when convenient. Missing `pt-BR` keys are not an error; they use the same tested English runtime fallback as every other target locale.
+- `dashboard` and `legal` stay English-only for `pt-BR` too. `catalogs.ts` and `ClientLanguageProvider` force those namespaces to the default locale, so a translated file would never be served, would never be validated by `npm run i18n:check`, and would become an unreviewed second source of legal text. Translating `legal` needs the separate legal-review standard already noted under "Risks and decisions".
+
+All Portuguese tags resolve to `pt-BR`, including `pt`, `pt_BR`, and European `pt-PT`. TrackDraw ships one Portuguese catalog, and a mostly-understood Brazilian catalog is a better default for a Portuguese-speaking pilot than the English fallback. Add a separate `pt-PT` locale only if someone owns that terminology.
 
 ## Product and repo requirements
 

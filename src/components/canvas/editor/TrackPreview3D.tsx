@@ -15,6 +15,7 @@ import {
 } from "react";
 import * as THREE from "three";
 import { SCENE_3D_THEME } from "@/components/canvas/preview3d/theme";
+import { getTrackScaleProfile } from "@/lib/track/track-class";
 import { useIsTouchDevice } from "@/hooks/use-mobile";
 import { usePerfMetric } from "@/hooks/usePerfMetric";
 import { useTheme } from "@/hooks/useTheme";
@@ -23,6 +24,7 @@ import type {
   FlagShape,
   GateShape,
   LadderShape,
+  PvcFrameShape,
   TowerShape,
 } from "@/lib/types";
 import {
@@ -274,6 +276,8 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
     usePerfMetric("render:TrackPreview3D");
 
     const field = useEditor((state) => state.track.design.field);
+    const trackClass = useEditor((state) => state.track.design.trackClass);
+    const scaleProfile = getTrackScaleProfile(trackClass);
     const selection = useEditor((state) => state.session.selection);
     const {
       setSelection,
@@ -521,6 +525,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
           {shapes.map((shape) => (
             <Suspense key={shape.id} fallback={null}>
               <MemoShape3D
+                selectionMarkerScale={scaleProfile.handle3dScale}
                 isPrimaryPolyline={primaryPolyline?.id === shape.id}
                 isSelected={selectedIdSet.has(shape.id)}
                 onSelect={handleShapeSelect}
@@ -553,6 +558,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
 
           {previewPolyline && !flyMode && !readOnly ? (
             <PolylineElevationHandles3D
+              handleScale={scaleProfile.handle3dScale}
               isMobile={isMobile}
               path={previewPolyline}
               activeIndex={elevationDrag?.idx ?? null}
@@ -581,6 +587,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               }
               return (
                 <LadderElevationHandle3D
+                  handleScale={scaleProfile.handle3dScale}
                   key={`ladder-elevation-${shape.id}`}
                   shape={shape}
                   onDragStart={(event) =>
@@ -618,6 +625,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               }
               return (
                 <TowerElevationHandle3D
+                  handleScale={scaleProfile.handle3dScale}
                   key={`tower-elevation-${shape.id}`}
                   shape={shape}
                   onDragStart={(event) =>
@@ -653,6 +661,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                   : "generic";
               return (
                 <DiveGateElevationHandle3D
+                  handleScale={scaleProfile.handle3dScale}
                   key={`divegate-elevation-${shape.id}`}
                   shape={shape}
                   onDragStart={(event) =>
@@ -681,6 +690,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               }
               return (
                 <GateRotateHandle3D
+                  handleScale={scaleProfile.handle3dScale}
                   key={`rotate-${shape.id}`}
                   shape={
                     shape as
@@ -689,6 +699,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                       | LadderShape
                       | TowerShape
                       | DiveGateShape
+                      | PvcFrameShape
                   }
                   onDragStart={(event) =>
                     handleRotateDragStart(event, shape.id, shape.rotation)
@@ -744,7 +755,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               !towerElevationDrag &&
               !diveGateElevationDrag
             }
-            minDistance={8}
+            minDistance={scaleProfile.cameraMinDistanceMeters}
             maxDistance={Math.max(120, longest * 3)}
           />
           <OrbitGroundConstraint controlsRef={orbitControlsRef} />
@@ -777,7 +788,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               screenSpacePanning
               target={[cx, 0, cz]}
               maxPolarAngle={ORBIT_MAX_POLAR_ANGLE}
-              minDistance={8}
+              minDistance={scaleProfile.cameraMinDistanceMeters}
               maxDistance={Math.max(120, longest * 3)}
               mouseButtons={{
                 LEFT: THREE.MOUSE.ROTATE,
@@ -807,7 +818,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               screenSpacePanning
               target={[cx, 0, cz]}
               maxPolarAngle={ORBIT_MAX_POLAR_ANGLE}
-              minDistance={8}
+              minDistance={scaleProfile.cameraMinDistanceMeters}
               maxDistance={Math.max(120, longest * 3)}
               mouseButtons={{
                 LEFT: THREE.MOUSE.ROTATE,

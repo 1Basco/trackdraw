@@ -106,6 +106,7 @@ export function RotationGuideOverlay({
             stroke="#60a5fa"
             strokeWidth={1}
             opacity={0.96}
+            perfectDrawEnabled={false}
           />
           <Text
             x={handleOuterX + frontLabelOffsetX - 20}
@@ -133,6 +134,7 @@ export function RotationGuideOverlay({
             stroke="#60a5fa"
             strokeWidth={1}
             opacity={0.96}
+            perfectDrawEnabled={false}
           />
           <Text
             x={handleOuterX + labelOffsetX - 22}

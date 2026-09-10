@@ -43,6 +43,7 @@
     "startfinish": "Set this first so the launch and finish reference is fixed before the rest of the course goes down.",
     "ladder": "Treat this as a higher-effort item. Allow extra time if it needs overhead rigging or a careful suspend point.",
     "divegate": "Place and secure this early. Dive gates usually need more alignment and anchoring than a standard gate.",
-    "barrier": "Set up barriers after the main gates and obstacles are positioned."
+    "barrier": "Set up barriers after the main gates and obstacles are positioned.",
+    "pvcframe": "Push the PVC tubes fully into their fittings before placing the frame, then check that the feet sit flat so the frame does not rock."
   }
 }

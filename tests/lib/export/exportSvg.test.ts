@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { designToSvg, exportSvg } from "@/lib/export/exportSvg";
-import { normalizeDesign } from "@/lib/track/design";
+import { normalizeDesign, serializeDesign } from "@/lib/track/design";
 import { getObstacleNumberingReport } from "@/lib/track/obstacleNumbering";
 
 const inventory = {
@@ -124,6 +124,49 @@ describe("exportSvg", () => {
 
     expect(withNumbers).toContain(`<circle cx="`);
     expect(withoutNumbers).not.toContain(`font-weight="700" fill="#f8fafc"`);
+  });
+
+  it("marks where the lap starts and which way it is flown", () => {
+    const design = createDesign();
+
+    expect(designToSvg(design, "dark")).not.toContain("LAP START");
+
+    const svg = designToSvg(design, "dark", { includeLapStart: true });
+    const marker = svg.slice(svg.indexOf("<!-- Lap start -->"));
+
+    expect(svg).toContain("<!-- Lap start -->");
+    expect(marker).toContain("LAP START");
+    // First waypoint of the primary route at 20 px per metre.
+    expect(marker).toContain("translate(200,200)");
+
+    const rotation = /rotate\((-?[\d.]+)\)/.exec(marker);
+    expect(rotation).not.toBeNull();
+    // The route leaves the first waypoint down and to the right.
+    expect(Number(rotation?.[1])).toBeGreaterThan(0);
+    expect(Number(rotation?.[1])).toBeLessThan(90);
+    // Arrow head plus start bar.
+    expect(marker).toContain("<polygon");
+  });
+
+  it("uses the translated lap-start caption and skips the marker without a route", () => {
+    const design = createDesign();
+
+    expect(
+      designToSvg(design, "light", {
+        includeLapStart: true,
+        lapStartLabel: "Rondestart",
+      })
+    ).toContain("Rondestart");
+
+    const serialized = serializeDesign(design);
+    const withoutRoute = normalizeDesign({
+      ...serialized,
+      shapes: serialized.shapes.filter((shape) => shape.kind !== "polyline"),
+    });
+
+    expect(
+      designToSvg(withoutRoute, "light", { includeLapStart: true })
+    ).not.toContain("LAP START");
   });
 
   it("keeps very fine grid exports bounded for large layout stability", () => {

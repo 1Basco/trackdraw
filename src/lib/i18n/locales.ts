@@ -1,6 +1,6 @@
 import i18nPolicy from "@lang/i18n-policy.json";
 
-export const supportedLocales = ["en", "nl", "de", "zh-CN"] as const;
+export const supportedLocales = ["en", "nl", "de", "pt-BR", "zh-CN"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 export const defaultLocale: SupportedLocale = "en";
@@ -29,6 +29,13 @@ export function resolveSupportedLocale(
   const language = tag.split("-")[0];
   if (language === "en" || language === "nl" || language === "de") {
     return language;
+  }
+
+  // Portuguese is served from a single Brazilian catalog. European and other
+  // regional Portuguese tags resolve to pt-BR because a mostly-understood
+  // Portuguese catalog beats the English fallback for those pilots.
+  if (language === "pt") {
+    return "pt-BR";
   }
 
   if (

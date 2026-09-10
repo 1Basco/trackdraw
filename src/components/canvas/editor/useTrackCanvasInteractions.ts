@@ -28,6 +28,7 @@ import {
   type EditorTool,
 } from "@/lib/editor/tool-registry";
 import type { TrackElementCatalogId } from "@/lib/track/elements/catalog";
+import type { TrackScaleProfile } from "@/lib/track/track-class";
 import {
   findPresetById,
   placeLayoutPreset,
@@ -49,6 +50,7 @@ interface TrackCanvasInteractionsParams {
   addShapes: (shapes: ShapeDraft[]) => string[];
   contentDragActiveRef: React.RefObject<boolean>;
   designField: { gridStep: number; ppm: number };
+  scaleProfile: TrackScaleProfile;
   designShapes: Shape[];
   disableTouchGestures: boolean;
   draftPath: DraftPoint[];
@@ -97,6 +99,7 @@ interface TrackCanvasInteractionsParams {
   setZoom: (zoom: number) => void;
   shapeRefs: React.RefObject<Record<string, KonvaGroup | null>>;
   snapTarget: { x: number; y: number; id: string } | null;
+  snapGridEnabled: boolean;
   stageRef: React.RefObject<KonvaStage | null>;
   stepPx: number;
   suppressTapRef: React.RefObject<boolean>;
@@ -105,6 +108,10 @@ interface TrackCanvasInteractionsParams {
     "none" | "pan" | "content" | "viewportGesture"
   >;
 }
+
+const WHEEL_ZOOM_EASE = 0.28;
+/** Relative zoom change that has to accumulate before the store is updated. */
+const ZOOM_STORE_PUSH_STEP = 0.08;
 
 function startAnimationLoop(
   frameRef: { current: number | null },
@@ -127,6 +134,7 @@ export function useTrackCanvasInteractions({
   addShapes,
   contentDragActiveRef,
   designField,
+  scaleProfile,
   designShapes,
   disableTouchGestures,
   draftPath,
@@ -161,16 +169,26 @@ export function useTrackCanvasInteractions({
   setZoom,
   shapeRefs,
   snapTarget,
+  snapGridEnabled,
   stageRef,
   stepPx,
   suppressTapRef,
   syncTransform,
   touchInteractionModeRef,
 }: TrackCanvasInteractionsParams) {
-  const snapRadiusMeters = Math.max(1, designField.gridStep * 1.5);
-  const closeLoopRadiusMeters = Math.max(designField.gridStep * 1.25, 0.9);
+  const snapRadiusMeters = Math.max(
+    scaleProfile.pointerSnapRadiusMinMeters,
+    designField.gridStep * scaleProfile.pointerSnapRadiusGridFactor
+  );
+  const closeLoopRadiusMeters = Math.max(
+    designField.gridStep * scaleProfile.closeLoopRadiusGridFactor,
+    scaleProfile.closeLoopRadiusMinMeters
+  );
   const minWaypointGapMeters = isMobile
-    ? Math.max(designField.gridStep * 0.7, 0.45)
+    ? Math.max(
+        designField.gridStep * 0.7,
+        scaleProfile.mobileMinWaypointGapMinMeters
+      )
     : 0.15;
   const mobileTapMoveThresholdPx = 10;
   const lastCursorKeyRef = useRef("");
@@ -178,7 +196,9 @@ export function useTrackCanvasInteractions({
   const lastSnapTargetIdRef = useRef<string | null>(null);
   const wheelTargetScaleRef = useRef<number | null>(null);
   const wheelPointerRef = useRef<{ x: number; y: number } | null>(null);
+  const wheelPushedZoomRef = useRef<number | null>(null);
   const wheelAnimFrameRef = useRef<number | null>(null);
+  const pinchPushedZoomRef = useRef<number | null>(null);
   const snapCellSize = Math.max(snapRadiusMeters * 2, designField.gridStep * 4);
   const snapIndex = useMemo(
     () => buildSnapIndex(designShapes, snapCellSize),
@@ -222,6 +242,7 @@ export function useTrackCanvasInteractions({
         pointer,
         routeCandidates: routeSnapCandidates,
         snap: snapEnabled && snap,
+        snapToGrid: snapGridEnabled,
         snapRadiusMeters,
         stepPx,
       });
@@ -231,6 +252,7 @@ export function useTrackCanvasInteractions({
       getNearbySnapCandidates,
       routeSnapCandidates,
       snapEnabled,
+      snapGridEnabled,
       snapRadiusMeters,
       stepPx,
     ]
@@ -346,8 +368,11 @@ export function useTrackCanvasInteractions({
             return false;
           }
           const current = s.scaleX();
-          const next = current + (target - current) * 0.1;
-          const settled = Math.abs(target - next) < 0.0005;
+          // A firmer ease settles in a handful of frames instead of ~60, so a
+          // wheel gesture does not keep the canvas re-rendering for a second.
+          const next = current + (target - current) * WHEEL_ZOOM_EASE;
+          const settled =
+            Math.abs(target - next) < Math.max(0.002, target * 0.002);
           const applied = settled ? target : next;
           const nextPosition = getZoomedStagePosition({
             currentScale: current,
@@ -357,11 +382,23 @@ export function useTrackCanvasInteractions({
           });
           s.scale({ x: applied, y: applied });
           s.position(nextPosition);
-          setZoom(applied);
+          // The Konva stage already carries the live scale. Push it to the
+          // store only on meaningful steps and at the end, so store
+          // subscribers (status bar, path pucks, handles) are not re-rendered
+          // on every animation frame.
+          const lastPushed = wheelPushedZoomRef.current ?? current;
+          if (
+            settled ||
+            Math.abs(applied - lastPushed) / lastPushed > ZOOM_STORE_PUSH_STEP
+          ) {
+            wheelPushedZoomRef.current = applied;
+            setZoom(applied);
+          }
           syncTransform();
           if (settled) {
             wheelTargetScaleRef.current = null;
             wheelPointerRef.current = null;
+            wheelPushedZoomRef.current = null;
             wheelAnimFrameRef.current = null;
             return false;
           }
@@ -528,7 +565,20 @@ export function useTrackCanvasInteractions({
       stage.scale({ x: nextViewport.scale, y: nextViewport.scale });
       stage.position(nextViewport.position);
       stage.batchDraw();
-      setZoom(nextViewport.scale);
+      // Same throttle as the wheel path: the Konva stage already carries the
+      // live scale, so only push meaningful steps into the store instead of one
+      // store write per touchmove (120 Hz on modern phones).
+      const lastPushedPinchZoom =
+        pinchPushedZoomRef.current ?? nextViewport.scale;
+      if (
+        pinchPushedZoomRef.current === null ||
+        Math.abs(nextViewport.scale - lastPushedPinchZoom) /
+          lastPushedPinchZoom >
+          ZOOM_STORE_PUSH_STEP
+      ) {
+        pinchPushedZoomRef.current = nextViewport.scale;
+        setZoom(nextViewport.scale);
+      }
       syncTransform();
       lastPinchCenterRef.current = center;
     },
@@ -550,6 +600,15 @@ export function useTrackCanvasInteractions({
     ]
   );
 
+  // The pinch gesture only pushes meaningful zoom steps into the store, so the
+  // exact final scale has to be committed when the gesture ends.
+  const flushPinchZoom = useCallback(() => {
+    if (pinchPushedZoomRef.current === null) return;
+    pinchPushedZoomRef.current = null;
+    const stage = stageRef.current;
+    if (stage) setZoom(stage.scaleX());
+  }, [setZoom, stageRef]);
+
   const onTouchEnd = useCallback(
     (event: { evt: TouchEvent }) => {
       const remainingTouches = event.evt.touches.length;
@@ -559,6 +618,7 @@ export function useTrackCanvasInteractions({
         lastPinchCenterRef.current = null;
         lastTouchPosRef.current = null;
         lastTouchStartClientRef.current = null;
+        flushPinchZoom();
         return;
       }
 
@@ -571,9 +631,11 @@ export function useTrackCanvasInteractions({
         lastTouchPosRef.current = { x: touch.clientX, y: touch.clientY };
         lastPinchDistRef.current = null;
         lastPinchCenterRef.current = null;
+        flushPinchZoom();
       }
     },
     [
+      flushPinchZoom,
       lastPinchCenterRef,
       lastPinchDistRef,
       lastTouchPosRef,
@@ -799,7 +861,8 @@ export function useTrackCanvasInteractions({
         pointer,
         rawMeters,
         snappedMeters,
-        stepPx
+        stepPx,
+        snapEnabled && snapGridEnabled
       );
       const cursorKey = getCursorStateKey(nextCursor);
       if (cursorKey !== lastCursorKeyRef.current) {
@@ -836,6 +899,7 @@ export function useTrackCanvasInteractions({
     setMarqueeRect,
     setSnapTarget,
     snapEnabled,
+    snapGridEnabled,
     snapTarget,
     stageRef,
     stepPx,

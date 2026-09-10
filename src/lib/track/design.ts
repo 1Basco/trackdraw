@@ -3,9 +3,14 @@ import { normalizeMapReference } from "@/lib/map-reference/geometry";
 import { normalizeInventoryProfile } from "@/lib/planning/inventory";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "@/lib/track/constants";
 import { normalizeShapeTimingMeta } from "@/lib/track/timing";
+import { resolvePvcFrameKit } from "@/lib/track/pvc-frame/kit";
+import { normalizePvcFrameEdges } from "@/lib/track/pvc-frame/lattice";
+import { PVC_ARCH_GATE_EDGES } from "@/lib/track/pvc-frame/templates";
+import { normalizeTrackClass } from "@/lib/track/track-class";
 import type {
   DiveGateShape,
   PolylineShape,
+  PvcFrameShape,
   SerializedTrackDesign,
   Shape,
   TowerShape,
@@ -73,6 +78,19 @@ export function normalizeShape(shape: Shape): Shape {
       levels: Math.max(1, Math.min(4, Math.round(tower.levels ?? 1))),
       elevation: Math.max(0, tower.elevation ?? 0),
       frontOffsetDeg: tower.frontOffsetDeg ?? 0,
+    });
+  }
+
+  if (shape.kind === "pvcframe") {
+    const frame = shape as PvcFrameShape;
+    const kit = resolvePvcFrameKit(frame);
+    const edges = normalizePvcFrameEdges(frame.edges);
+    return normalizeShapeTimingMeta({
+      ...frame,
+      edges: edges.length > 0 ? edges : [...PVC_ARCH_GATE_EDGES],
+      tubeLength: kit.tubeLength,
+      pipeDiameter: kit.pipeDiameter,
+      frontOffsetDeg: frame.frontOffsetDeg ?? 0,
     });
   }
 
@@ -152,6 +170,7 @@ export function serializeDesign(
     description: design.description,
     tags: design.tags,
     authorName: design.authorName,
+    trackClass: normalizeTrackClass(design.trackClass),
     inventory: normalizeInventoryProfile(design.inventory),
     field: design.field,
     mapReference:
@@ -203,6 +222,9 @@ export function normalizeDesign(
   return {
     ...design,
     version: 2,
+    trackClass: normalizeTrackClass(
+      (design as Partial<TrackDesign>).trackClass
+    ),
     inventory: normalizeInventoryProfile(
       (design as Partial<TrackDesign>).inventory
     ),

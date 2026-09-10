@@ -1,0 +1,49 @@
+{
+  "complexity": {
+    "light": "Leve",
+    "standard": "Padrão",
+    "heavy": "Pesada"
+  },
+  "kinds": {
+    "trackGroup": "Grupo da pista",
+    "crew": "Equipe"
+  },
+  "flagsFinalPass": {
+    "label": "Passada final das bandeiras",
+    "note": "Finalize o campo com as bandeiras e as últimas checagens de visibilidade depois que a linha principal de obstáculos numerados estiver montada."
+  },
+  "conesTrackWalk": {
+    "label": "Posicionar os cones durante o track walk (opcional)",
+    "note": "Os cones podem ser posicionados durante o track walk dos pilotos, evitando uma passada separada. Se preferir colocá-los antes, reserve um tempo extra no local."
+  },
+  "crewUnloadStage": {
+    "label": "Descarregar e organizar o equipamento",
+    "note": "Descarregue o veículo, separe as estacas e as ferragens e organize o kit para que a montagem dos quadros não atrapalhe o posicionamento no campo depois."
+  },
+  "crewPreassemble": {
+    "label": "Pré-montar quadros e itens de tecido",
+    "noteWithSoftGoods": "Prepare os quadros PVC dos gates e as beach flags antes de levar os itens para o campo, para que a passada de posicionamento fique focada no espaçamento.",
+    "noteWithoutSoftGoods": "Prepare os quadros PVC dos gates antes de levar os itens para o campo, para que a passada de posicionamento fique focada no espaçamento."
+  },
+  "crewRiggingCheck": {
+    "label": "Checagem de fixação e ancoragem",
+    "note": "Confirme os pontos de ancoragem, os cabos suspensos e o plano de folga antes de erguer ou suspender estruturas mais pesadas."
+  },
+  "obstacleNoteWithNumber": "{note} Use o obstáculo #{number} do mapa como referência de posicionamento.",
+  "summaryHeavy": "{count, plural, one {1 estrutura de maior esforço deve ser posicionada e fixada antes da passada dos gates padrão.} other {{count} estruturas de maior esforço devem ser posicionadas e fixadas antes da passada dos gates padrão.}} O tempo considera uma equipe típica de 2 a 3 pessoas e pode aumentar quando há fixação suspensa ou distâncias longas de carregamento.",
+  "summaryLight": "A maior parte do tempo de montagem vem de descarregar, pré-montar os quadros e depois posicionar a linha de obstáculos numerados com capricho, com uma equipe de 2 a 3 pessoas.",
+  "crewAssumption": "O tempo é baseado em uma equipe típica de 2 a 3 pessoas e considera a preparação padrão de clube: descarregar, organizar, pré-montar e depois posicionar e fixar.",
+  "obstacleNotes": {
+    "gate": "Posicione e esquadreje este gate depois que as estruturas de ancoragem estiverem no lugar.",
+    "tower": "Posicione e fixe junto com as outras estruturas de maior esforço. Torres precisam de pés estáveis, alinhamento vertical limpo e folga suficiente para as aberturas empilhadas.",
+    "flag": "Use as bandeiras para a visibilidade final e a definição das bordas depois que os obstáculos principais estiverem no lugar.",
+    "cone": "Use os cones na passada final de ajuste, para marcar limites e conferir o espaçamento.",
+    "label": "Ainda não há orientação de montagem para este item.",
+    "polyline": "Ainda não há orientação de montagem para este item.",
+    "startfinish": "Monte isto primeiro, para que a referência de largada e chegada esteja fixada antes do resto do circuito.",
+    "ladder": "Trate isto como um item de maior esforço. Reserve um tempo extra se precisar de fixação suspensa ou de um ponto de suspensão cuidadoso.",
+    "divegate": "Posicione e fixe cedo. Dive gates costumam exigir mais alinhamento e ancoragem do que um gate padrão.",
+    "barrier": "Monte as barreiras depois que os gates e obstáculos principais estiverem posicionados.",
+    "pvcframe": "Encaixe os tubos de PVC até o fim nas conexões antes de posicionar o quadro e, em seguida, confira se os pés ficam apoiados no plano para o quadro não balançar."
+  }
+}

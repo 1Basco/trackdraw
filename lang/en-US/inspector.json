@@ -191,10 +191,20 @@
       "routeNumbering": "Route numbering",
       "inventory": "Inventory",
       "field": "Field",
-      "advanced": "Advanced"
+      "advanced": "Advanced",
+      "pvcMaterials": "PVC materials"
     },
     "field": {
       "unitsLabel": "Units",
+      "trackClassLabel": "Track class",
+      "trackClass": {
+        "standard": "Standard (5-inch)",
+        "whoop": "Tiny whoop"
+      },
+      "trackClassDescription": {
+        "standard": "Metre-scale gates: snapping, route review, and race line defaults sized for outdoor racing.",
+        "whoop": "Indoor PVC frames: tighter snapping, waypoints can sit centimetres apart, route review and race line defaults scaled down. Switching also sets a 0.5 m grid."
+      },
       "renderScaleLabel": "Render scale",
       "renderScaleTooltip": "Internal canvas density in pixels per meter",
       "pxPerMeterAriaLabel": "pixels per meter, internal canvas scale"
@@ -232,6 +242,9 @@
       "numbered": "{count} numbered",
       "numberingIdle": "numbering idle",
       "numberingNeedsReview": "numbering needs review"
+    },
+    "pvcMaterials": {
+      "description": "{count, plural, one {Tubes and fittings needed for the 1 PVC frame in this layout.} other {Tubes and fittings needed for the # PVC frames in this layout.}}"
     }
   },
   "routeNumbering": {
@@ -387,5 +400,31 @@
     "locationPermissionDenied": "Location permission was denied.",
     "locationTimeout": "Location lookup timed out.",
     "locationError": "Could not determine your location."
+  },
+  "pvcFrame": {
+    "sectionTitle": "PVC frame",
+    "buildLevelLabel": "Build level",
+    "levelHeight": "at {height}",
+    "buildHint": "Snap-on: with the frame selected, tap a green + on the canvas to add a tube, a blue ↑ to stand a tube on a joint, or a red × to remove one. Standing a tube up moves you to the row above; use the ▼ level ▲ chip next to the frame (or this field) to go back down.",
+    "tubeLengthLabel": "Tube ({unit})",
+    "pipeDiameterLabel": "Pipe Ø ({unit})",
+    "pitchLabel": "Pitch",
+    "openingLabel": "Opening",
+    "heightLabel": "Height",
+    "materialsTitle": "Materials",
+    "tubesLabel": "Tubes",
+    "tubesValue": "{count} × {length}",
+    "feetLabel": "Feet",
+    "unbuildableWarning": "{count, plural, one {1 joint needs six sockets, which common 20 mm fittings cannot provide.} other {# joints need six sockets, which common 20 mm fittings cannot provide.}}",
+    "fittings": {
+      "elbow": "Elbows",
+      "tee": "Tees",
+      "corner": "3-way corners",
+      "cross": "Crosses",
+      "sideOutlet": "Side outlets",
+      "fiveWay": "5-way",
+      "straight": "Couplings",
+      "sixWay": "6-way"
+    }
   }
 }

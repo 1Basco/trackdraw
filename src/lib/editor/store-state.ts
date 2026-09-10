@@ -29,6 +29,8 @@ export function createDefaultEditorUiState(
       ...toolCatalogEntryIds,
     },
     snapEnabled: true,
+    snapGridEnabled: true,
+    pvcBuildLevel: 0,
     zoom: options.zoom ?? 1,
     panOffset: options.panOffset ?? { x: 0, y: 0 },
     hoveredShapeId: null,

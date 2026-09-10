@@ -18,6 +18,7 @@ import {
   renderShape2D,
 } from "./shape2d";
 import { PolylineShapeContent } from "./polyline-shape";
+import { PvcFrameBuildHandles } from "@/components/canvas/editor/PvcFrameBuildHandles";
 import { getShapeLocalBounds } from "./shape-bounds";
 
 export interface TrackShapeNodeProps {
@@ -45,6 +46,12 @@ export interface TrackShapeNodeProps {
     shape: Shape,
     options?: { segmentIndex?: number | null }
   ) => void;
+  /** Return true to take over the drop (e.g. merging PVC frames); the default position update is skipped. */
+  onShapeDropped?: (
+    shapeId: string,
+    positionMeters: { x: number; y: number },
+    snapped: boolean
+  ) => boolean;
   setSelection: (ids: string[]) => void;
   setDragSnapPreview: React.Dispatch<
     React.SetStateAction<{ x: number; y: number } | null>
@@ -114,6 +121,7 @@ function TrackShapeNodeComponent({
   onSelectOnly,
   onToggleSelection,
   onShapeContextMenu,
+  onShapeDropped,
   setSelection,
   setDragSnapPreview,
   setSegmentSelection,
@@ -207,10 +215,14 @@ function TrackShapeNodeComponent({
     }
 
     event.currentTarget.position(resolved);
-    updateShape(shape.id, {
+    const positionMeters = {
       x: px2m(resolved.x, designPpm),
       y: px2m(resolved.y, designPpm),
-    });
+    };
+    if (onShapeDropped?.(shape.id, positionMeters, dragSnapRef.current)) {
+      return;
+    }
+    updateShape(shape.id, positionMeters);
   };
 
   const handleDragCancel = () => {
@@ -370,6 +382,18 @@ function TrackShapeNodeComponent({
           />
         )}
       </Group>
+      {shape.kind === "pvcframe" &&
+        selected &&
+        selectionCount === 1 &&
+        allowInteraction &&
+        !shape.locked && (
+          <PvcFrameBuildHandles
+            shape={shape}
+            designPpm={designPpm}
+            isMobile={isMobile}
+            updateShape={updateShape}
+          />
+        )}
       {shape.locked && renderLockedIndicator(shape, highlighted, designPpm)}
       {shape.locked && allowInteraction && (
         <LockedPathSelectBadge shape={shape} ppm={designPpm} />

@@ -15,6 +15,7 @@ import {
   LadderSection,
 } from "@/components/inspector/sections/LadderSection";
 import { PolylineSection } from "@/components/inspector/sections/PolylineSection";
+import { PvcFrameSection } from "@/components/inspector/sections/PvcFrameSection";
 import { StartFinishDimensionFields } from "@/components/inspector/sections/StartFinishDimensionFields";
 import {
   TowerDimensionFields,
@@ -74,7 +75,7 @@ import {
 import { useTranslations } from "next-intl";
 
 type SingleCatalogKind =
-  "gate" | "flag" | "ladder" | "tower" | "divegate" | "barrier";
+  "gate" | "flag" | "ladder" | "tower" | "divegate" | "barrier" | "pvcframe";
 
 function getSingleDefaultCatalogEntryId(
   kind: SingleCatalogKind
@@ -93,7 +94,8 @@ function getSingleCatalogKind(shape: Shape): SingleCatalogKind | null {
     shape.kind === "ladder" ||
     shape.kind === "tower" ||
     shape.kind === "divegate" ||
-    shape.kind === "barrier"
+    shape.kind === "barrier" ||
+    shape.kind === "pvcframe"
   ) {
     return shape.kind;
   }
@@ -647,6 +649,16 @@ export function SingleInspectorView({
               updateShape={updateShape}
               hasFixedCatalogDimensions={hasFixedCatalogDimensions}
               defaultOpen={secondarySectionDefaultOpen}
+            />
+          )}
+
+          {shape.kind === "pvcframe" && (
+            <PvcFrameSection
+              shape={shape}
+              unitSystem={unitSystem}
+              unitLabel={unitLabel}
+              updateShape={updateShape}
+              defaultOpen
             />
           )}
 

@@ -28,8 +28,52 @@ import type {
   GateShape,
   LadderShape,
   PolylineShape,
+  PvcFrameShape,
   TowerShape,
 } from "@/lib/types";
+import { getPvcFrameLocalFootprint } from "@/lib/track/pvc-frame/lattice";
+
+type GripSize = { radius: number; height: number };
+
+type GripSizeTable = {
+  mobile: { idle: GripSize; active: GripSize };
+  desktop: { idle: GripSize; active: GripSize };
+};
+
+const ELEVATION_GRIP_SIZES: GripSizeTable = {
+  mobile: {
+    idle: { radius: 0.2, height: 0.22 },
+    active: { radius: 0.22, height: 0.26 },
+  },
+  desktop: {
+    idle: { radius: 0.16, height: 0.17 },
+    active: { radius: 0.18, height: 0.2 },
+  },
+};
+
+const POLYLINE_GRIP_SIZES: GripSizeTable = {
+  mobile: {
+    idle: { radius: 0.2, height: 0.2 },
+    active: { radius: 0.23, height: 0.24 },
+  },
+  desktop: {
+    idle: { radius: 0.16, height: 0.15 },
+    active: { radius: 0.19, height: 0.18 },
+  },
+};
+
+function getGripSize(
+  sizes: GripSizeTable,
+  {
+    isMobile,
+    isActive,
+    handleScale,
+  }: { isMobile: boolean; isActive: boolean; handleScale: number }
+) {
+  const { radius, height } =
+    sizes[isMobile ? "mobile" : "desktop"][isActive ? "active" : "idle"];
+  return { gripRadius: radius * handleScale, gripHeight: height * handleScale };
+}
 
 export function TowerElevationHandle3D({
   shape,
@@ -39,6 +83,7 @@ export function TowerElevationHandle3D({
   elevationOverrideRef,
   elevationMin,
   elevationMax,
+  handleScale = 1,
 }: {
   shape: TowerShape;
   onDragStart: (event: ThreeEvent<PointerEvent>) => void;
@@ -47,28 +92,20 @@ export function TowerElevationHandle3D({
   elevationOverrideRef: RefObject<number | null>;
   elevationMin: number;
   elevationMax: number | null;
+  handleScale?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const guideGroupRef = useRef<THREE.Group>(null);
   const guideColor = isDragging ? "#f59e0b" : hovered ? "#bfdbfe" : "#93c5fd";
-  const guideHeight = 0.65;
-  const handleY = 0.42;
-  const gripRadius = isMobile
-    ? isDragging
-      ? 0.22
-      : 0.2
-    : isDragging
-      ? 0.18
-      : 0.16;
-  const gripHeight = isMobile
-    ? isDragging
-      ? 0.26
-      : 0.22
-    : isDragging
-      ? 0.2
-      : 0.17;
-  const touchTargetRadius = isMobile ? 0.34 : gripRadius;
-  const touchTargetHeight = isMobile ? 0.58 : gripHeight;
+  const guideHeight = 0.65 * handleScale;
+  const handleY = 0.42 * handleScale;
+  const { gripRadius, gripHeight } = getGripSize(ELEVATION_GRIP_SIZES, {
+    isMobile,
+    isActive: isDragging,
+    handleScale,
+  });
+  const touchTargetRadius = isMobile ? 0.34 * handleScale : gripRadius;
+  const touchTargetHeight = isMobile ? 0.58 * handleScale : gripHeight;
   const getHandleBaseY = (elevation: number) =>
     getTowerTopY({
       ...shape,
@@ -173,12 +210,14 @@ export function LadderElevationHandle3D({
   isDragging,
   isMobile,
   elevationOverrideRef,
+  handleScale = 1,
 }: {
   shape: LadderShape;
   onDragStart: (event: ThreeEvent<PointerEvent>) => void;
   isDragging: boolean;
   isMobile: boolean;
   elevationOverrideRef: RefObject<number | null>;
+  handleScale?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const guideGroupRef = useRef<THREE.Group>(null);
@@ -188,24 +227,15 @@ export function LadderElevationHandle3D({
     ladderVisual?.variant === "panel-frame" ? ladderVisual : null
   );
   const renderedHeight = Math.max(ladderRenderedHeight, 1);
-  const guideHeight = renderedHeight + 0.65;
-  const handleY = renderedHeight + 0.42;
-  const gripRadius = isMobile
-    ? isDragging
-      ? 0.22
-      : 0.2
-    : isDragging
-      ? 0.18
-      : 0.16;
-  const gripHeight = isMobile
-    ? isDragging
-      ? 0.26
-      : 0.22
-    : isDragging
-      ? 0.2
-      : 0.17;
-  const touchTargetRadius = isMobile ? 0.34 : gripRadius;
-  const touchTargetHeight = isMobile ? 0.58 : gripHeight;
+  const guideHeight = renderedHeight + 0.65 * handleScale;
+  const handleY = renderedHeight + 0.42 * handleScale;
+  const { gripRadius, gripHeight } = getGripSize(ELEVATION_GRIP_SIZES, {
+    isMobile,
+    isActive: isDragging,
+    handleScale,
+  });
+  const touchTargetRadius = isMobile ? 0.34 * handleScale : gripRadius;
+  const touchTargetHeight = isMobile ? 0.58 * handleScale : gripHeight;
   const guideColor = isDragging ? "#f59e0b" : hovered ? "#bfdbfe" : "#93c5fd";
 
   useFrame(() => {
@@ -272,12 +302,14 @@ export function DiveGateElevationHandle3D({
   isDragging,
   isMobile,
   elevationOverrideRef,
+  handleScale = 1,
 }: {
   shape: DiveGateShape;
   onDragStart: (event: ThreeEvent<PointerEvent>) => void;
   isDragging: boolean;
   isMobile: boolean;
   elevationOverrideRef: RefObject<number | null>;
+  handleScale?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
@@ -305,25 +337,16 @@ export function DiveGateElevationHandle3D({
   );
   const baseTopY = getGateTopY(storedElev);
 
-  const gripRadius = isMobile
-    ? isDragging
-      ? 0.22
-      : 0.2
-    : isDragging
-      ? 0.18
-      : 0.16;
-  const gripHeight = isMobile
-    ? isDragging
-      ? 0.26
-      : 0.22
-    : isDragging
-      ? 0.2
-      : 0.17;
-  const touchTargetRadius = isMobile ? 0.34 : gripRadius;
-  const touchTargetHeight = isMobile ? 0.58 : gripHeight;
+  const { gripRadius, gripHeight } = getGripSize(ELEVATION_GRIP_SIZES, {
+    isMobile,
+    isActive: isDragging,
+    handleScale,
+  });
+  const touchTargetRadius = isMobile ? 0.34 * handleScale : gripRadius;
+  const touchTargetHeight = isMobile ? 0.58 * handleScale : gripHeight;
   const guideColor = isDragging ? "#f59e0b" : hovered ? "#bfdbfe" : "#93c5fd";
-  const guideHeight = 0.65;
-  const handleY = 0.42;
+  const guideHeight = 0.65 * handleScale;
+  const handleY = 0.42 * handleScale;
 
   const elevationMin = getDiveGateElevationMin(shape);
   const elevationMax = getDiveGateElevationMax(shape);
@@ -423,11 +446,13 @@ export function PolylineElevationHandles3D({
   path,
   activeIndex,
   onDragStart,
+  handleScale = 1,
 }: {
   isMobile: boolean;
   path: PolylineShape;
   activeIndex: number | null;
   onDragStart: (event: ThreeEvent<PointerEvent>, index: number) => void;
+  handleScale?: number;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -442,35 +467,28 @@ export function PolylineElevationHandles3D({
           : isHovered
             ? "#bfdbfe"
             : "#93c5fd";
-        const gripRadius = isMobile
-          ? isActive
-            ? 0.23
-            : 0.2
-          : isActive
-            ? 0.19
-            : 0.16;
-        const gripHeight = isMobile
-          ? isActive
-            ? 0.24
-            : 0.2
-          : isActive
-            ? 0.18
-            : 0.15;
+        const { gripRadius, gripHeight } = getGripSize(POLYLINE_GRIP_SIZES, {
+          isMobile,
+          isActive,
+          handleScale,
+        });
         const tubeRadius = Math.max(
           0.02,
           (path.strokeWidth ?? DEFAULT_POLYLINE_STROKE_WIDTH) / 2
         );
         const lineCenterY = pointHeight + POLYLINE_3D_HEIGHT_OFFSET;
         const lineTopY = lineCenterY + tubeRadius;
-        const handleGap = isMobile ? 0.04 : 0.025;
+        const handleGap = (isMobile ? 0.04 : 0.025) * handleScale;
         const handleY = lineTopY + gripHeight / 2 + handleGap;
-        const guideHeight = Math.max(0.4, handleY);
+        const guideHeight = Math.max(0.4 * handleScale, handleY);
         const ringY = lineCenterY - tubeRadius * 0.25;
         const ringInnerRadius = tubeRadius * 0.35;
         const ringOuterRadius = tubeRadius * 0.72;
         const hoverDiscRadius = tubeRadius * 0.82;
-        const touchTargetRadius = isMobile ? 0.38 : gripRadius + 0.06;
-        const touchTargetHeight = isMobile ? 0.58 : gripHeight;
+        const touchTargetRadius = isMobile
+          ? 0.38 * handleScale
+          : gripRadius + 0.06 * handleScale;
+        const touchTargetHeight = isMobile ? 0.58 * handleScale : gripHeight;
         return (
           <group key={`${path.id}-elev-${index}`}>
             <mesh position={[point.x, guideHeight / 2, point.y]}>
@@ -584,30 +602,43 @@ export function GateRotateHandle3D({
   isDragging,
   isMobile,
   rotationOverrideRef,
+  handleScale = 1,
 }: {
-  shape: GateShape | LadderShape | TowerShape | DiveGateShape | FlagShape;
+  shape:
+    | GateShape
+    | LadderShape
+    | TowerShape
+    | DiveGateShape
+    | FlagShape
+    | PvcFrameShape;
   onDragStart: (event: ThreeEvent<PointerEvent>) => void;
   isDragging: boolean;
   isMobile: boolean;
   rotationOverrideRef: RefObject<number | null>;
+  handleScale?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const guideRotationDeg = getPreviewRotationGuideDegrees(shape);
-  const ringRadius = Math.max(
-    shape.kind === "gate"
-      ? ((shape as GateShape).width ?? 3) / 2 + 0.85
-      : shape.kind === "flag"
-        ? Math.max(((shape as FlagShape).poleHeight ?? 3.5) * 0.22, 1.45)
-        : shape.kind === "ladder"
-          ? ((shape as LadderShape).width ?? 2) / 2 + 0.85
-          : shape.kind === "tower"
-            ? ((shape as TowerShape).width ?? 2) / 2 + 0.85
-            : ((shape as DiveGateShape).width ?? 2.8) / 2 + 0.85,
-    1.7
-  );
+  // Whoop PVC frames are far smaller than 5-inch gates, so their ring hugs the
+  // footprint instead of using the outdoor minimum radius.
+  const ringRadius =
+    shape.kind === "pvcframe"
+      ? Math.max(getPvcFrameLocalFootprint(shape).width / 2 + 0.45, 0.9)
+      : Math.max(
+          shape.kind === "gate"
+            ? ((shape as GateShape).width ?? 3) / 2 + 0.85
+            : shape.kind === "flag"
+              ? Math.max(((shape as FlagShape).poleHeight ?? 3.5) * 0.22, 1.45)
+              : shape.kind === "ladder"
+                ? ((shape as LadderShape).width ?? 2) / 2 + 0.85
+                : shape.kind === "tower"
+                  ? ((shape as TowerShape).width ?? 2) / 2 + 0.85
+                  : ((shape as DiveGateShape).width ?? 2.8) / 2 + 0.85,
+          1.7
+        );
   const yawRad = (-guideRotationDeg * Math.PI) / 180;
-  const hitR = isMobile ? 0.65 : 0.5;
-  const ringThickness = 0.16;
+  const hitR = (isMobile ? 0.65 : 0.5) * handleScale;
+  const ringThickness = 0.16 * handleScale;
   const indicatorThickness = ringThickness;
 
   const ringColor = isDragging ? "#fbbf24" : hovered ? "#7dd3fc" : "#38bdf8";

@@ -1,0 +1,61 @@
+{
+  "badge": "Visualização compartilhada",
+  "backToHome": "Voltar ao início",
+  "whatToTry": "O que tentar",
+  "openStudio": "Abrir o Studio",
+  "error": {
+    "heading": "Este link de pista compartilhada não é mais suportado",
+    "description": "O TrackDraw agora usa links de compartilhamento publicados no lugar do formato antigo com os dados embutidos na URL. Este link antigo não pode mais ser aberto diretamente.",
+    "whatToDo": "O que fazer",
+    "step1": "Peça a quem enviou para publicar um novo link de compartilhamento no <strong>Studio</strong>.",
+    "step2": "Se ainda precisar de uma entrega offline, peça uma <strong>exportação em JSON</strong> e abra-a no Studio com o Importar.",
+    "step3": "Os novos links publicados usam a rota canônica `/share/[token]` e continuam sendo a forma suportada de compartilhar layouts somente leitura.",
+    "openStudioToImport": "Abrir o Studio para importar"
+  },
+  "expired": {
+    "heading": "Este link de compartilhamento expirou",
+    "description": "Os links de compartilhamento temporários do TrackDraw expiram após o prazo escolhido na criação. Os links de projetos publicados por uma conta ficam ativos até o dono revogá-los. Peça a quem enviou para publicar um link novo se ainda precisar deste layout.",
+    "step1": "Peça a quem enviou para publicar a pista de novo, ou envie um link publicado por conta para um acesso somente leitura mais duradouro.",
+    "step2": "Peça uma exportação em JSON se o layout precisar de uma entrega mais duradoura."
+  },
+  "notFound": {
+    "heading": "Não foi possível abrir esta pista compartilhada",
+    "description": "O link de compartilhamento pode ter sido revogado pelo dono, ou pode estar desatualizado, incompleto ou copiado pela metade. Peça a quem enviou para confirmar se o link continua ativo ou para publicar um link novo. Se a pista for muito grande, uma exportação em JSON é uma alternativa mais confiável do que um link de compartilhamento.",
+    "step1": "Peça a quem enviou para confirmar se o compartilhamento continua ativo e copiar o link mais recente de novo.",
+    "step2": "Abra o link diretamente da mensagem em que ele foi enviado.",
+    "step3": "Peça uma exportação em JSON se a pista for muito grande — arquivos JSON não têm o limite de tamanho das URLs."
+  },
+  "viewer": {
+    "dismissIntro": "Dispensar a introdução da pista compartilhada",
+    "sharedByReadOnly": "Compartilhado por {author}. Somente leitura, nenhuma edição é salva. Mude para {view} ou crie sua própria cópia editável no Studio.",
+    "readOnlyNoAuthor": "Somente leitura, nenhuma edição é salva. Mude para {view} ou crie sua própria cópia editável no Studio.",
+    "openView": "Abrir {view}",
+    "makeEditableCopy": "Criar cópia editável"
+  },
+  "metadata": {
+    "title": "Ver pista",
+    "description": "Veja esta pista de corrida FPV criada com o TrackDraw.",
+    "expiredTitle": "Compartilhamento de pista expirado",
+    "expiredDescription": "Este link de compartilhamento do TrackDraw expirou. Peça a quem enviou para publicar um link novo.",
+    "retiredTitle": "Compartilhamento de pista sem suporte",
+    "retiredDescription": "Este formato antigo de compartilhamento do TrackDraw não é mais suportado. Peça a quem enviou para publicar um link novo.",
+    "embedTitle": "Pista incorporada",
+    "embedDescription": "Visualização somente leitura de pista do TrackDraw incorporada."
+  },
+  "embed": {
+    "privacy": "Política de Privacidade"
+  },
+  "embedUnavailable": {
+    "temporaryTitle": "Incorporação indisponível",
+    "temporaryDescription": "A incorporação está disponível para compartilhamentos publicados por uma conta. Abra o link de compartilhamento ou entre na sua conta para publicar uma incorporação duradoura.",
+    "expiredTitle": "Esta incorporação expirou",
+    "expiredDescription": "Este compartilhamento temporário do TrackDraw não está mais ativo. Peça ao dono para publicar um compartilhamento de conta duradouro.",
+    "revokedTitle": "Esta incorporação foi revogada",
+    "revokedDescription": "O dono revogou este compartilhamento do TrackDraw, então a pista incorporada não está mais disponível.",
+    "missingTitle": "Pista não encontrada",
+    "missingDescription": "Esta incorporação do TrackDraw não corresponde a nenhum compartilhamento de conta publicado e ativo.",
+    "openShareLink": "Abrir link de compartilhamento",
+    "signIn": "Entrar",
+    "brand": "TrackDraw"
+  }
+}

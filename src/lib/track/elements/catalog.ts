@@ -1,7 +1,30 @@
 import { feetToMeters, type MeasurementUnitSystem } from "@/lib/track/units";
+import {
+  DEFAULT_PVC_PIPE_DIAMETER_METERS,
+  DEFAULT_PVC_TUBE_LENGTH_METERS,
+  getPvcFramePitch,
+  resolvePvcFrameKit,
+} from "@/lib/track/pvc-frame/kit";
+import {
+  getPvcFrameLatticeBounds,
+  getPvcFrameTopLevel,
+} from "@/lib/track/pvc-frame/lattice";
+import {
+  clonePvcFrameEdges,
+  PVC_ARCH_GATE_EDGES,
+  PVC_DIVE_GATE_EDGES,
+  PVC_DOUBLE_ARCH_EDGES,
+  PVC_FLAG_POST_EDGES,
+  PVC_SLALOM_PAIR_EDGES,
+  PVC_SQUARE_GATE_EDGES,
+  PVC_TALL_ARCH_EDGES,
+  PVC_TOWER_EDGES,
+  PVC_TURN_POST_EDGES,
+} from "@/lib/track/pvc-frame/templates";
 import type {
   BarrierVariant,
   PolylineShape,
+  PvcFrameEdge,
   Shape,
   ShapeDraft,
 } from "@/lib/types";
@@ -19,6 +42,15 @@ export const TRACKDRAW_TOWER_ELEMENT_ID = "trackdraw-generic-tower";
 export const TRACKDRAW_BANNER_ELEMENT_ID = "trackdraw-generic-banner";
 export const TRACKDRAW_FENCE_ELEMENT_ID = "trackdraw-generic-fence";
 export const TRACKDRAW_NET_ELEMENT_ID = "trackdraw-generic-net";
+export const TRACKDRAW_PVC_ARCH_GATE_ELEMENT_ID = "trackdraw-pvc-arch-gate";
+export const TRACKDRAW_PVC_SQUARE_GATE_ELEMENT_ID = "trackdraw-pvc-square-gate";
+export const TRACKDRAW_PVC_TALL_ARCH_ELEMENT_ID = "trackdraw-pvc-tall-arch";
+export const TRACKDRAW_PVC_DOUBLE_ARCH_ELEMENT_ID = "trackdraw-pvc-double-arch";
+export const TRACKDRAW_PVC_DIVE_GATE_ELEMENT_ID = "trackdraw-pvc-dive-gate";
+export const TRACKDRAW_PVC_TURN_POST_ELEMENT_ID = "trackdraw-pvc-turn-post";
+export const TRACKDRAW_PVC_FLAG_POST_ELEMENT_ID = "trackdraw-pvc-flag-post";
+export const TRACKDRAW_PVC_TOWER_ELEMENT_ID = "trackdraw-pvc-tower";
+export const TRACKDRAW_PVC_SLALOM_PAIR_ELEMENT_ID = "trackdraw-pvc-slalom-pair";
 
 // MultiGP elements
 export const MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID = "multigp-standard-gate-5x5";
@@ -54,6 +86,15 @@ export type TrackElementCatalogId =
   | typeof TRACKDRAW_BANNER_ELEMENT_ID
   | typeof TRACKDRAW_FENCE_ELEMENT_ID
   | typeof TRACKDRAW_NET_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_ARCH_GATE_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_SQUARE_GATE_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_TALL_ARCH_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_DOUBLE_ARCH_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_DIVE_GATE_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_TURN_POST_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_FLAG_POST_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_TOWER_ELEMENT_ID
+  | typeof TRACKDRAW_PVC_SLALOM_PAIR_ELEMENT_ID
   // MultiGP
   | typeof MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID
   | typeof MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID
@@ -443,6 +484,64 @@ const panelFrameChampionshipTowerVisual = {
     },
   },
 } satisfies TowerVisualSpec;
+
+export const DEFAULT_PVC_FRAME_COLOR = "#f97316";
+
+function formatCentimeters(meters: number): string {
+  return `${Math.round(meters * 100)}`;
+}
+
+/**
+ * Whoop PVC frame entries share one kit (20 mm tubes, 60 cm) and differ only
+ * in their edge list. Dimensions are derived from the lattice so the displayed
+ * size always matches what the tubes and fittings really build.
+ */
+function createPvcFrameCatalogEntry(options: {
+  id: TrackElementCatalogId;
+  name: string;
+  edges: readonly PvcFrameEdge[];
+  tags: string[];
+}): TrackElementCatalogEntry {
+  const pitch = getPvcFramePitch(resolvePvcFrameKit(null));
+  const bounds = getPvcFrameLatticeBounds(options.edges);
+  const widthMeters = bounds ? (bounds.max.x - bounds.min.x) * pitch : 0;
+  const depthMeters = bounds ? (bounds.max.y - bounds.min.y) * pitch : 0;
+  const heightMeters = getPvcFrameTopLevel(options.edges) * pitch;
+  const footprint =
+    depthMeters > 0
+      ? `${formatCentimeters(widthMeters)} × ${formatCentimeters(depthMeters)} cm`
+      : `${formatCentimeters(widthMeters)} cm`;
+  const label =
+    heightMeters > 0
+      ? `${footprint}, ${formatCentimeters(heightMeters)} cm tall, ${options.edges.length} tubes`
+      : `${footprint}, ${options.edges.length} tubes`;
+
+  return {
+    id: options.id,
+    name: options.name,
+    organization: "TrackDraw",
+    kind: "pvcframe",
+    dimensions: {
+      widthMeters,
+      heightMeters,
+      display: { unitSystem: "metric", label },
+    },
+    defaultShape: {
+      kind: "pvcframe",
+      x: 0,
+      y: 0,
+      rotation: 0,
+      edges: clonePvcFrameEdges(options.edges),
+      tubeLength: DEFAULT_PVC_TUBE_LENGTH_METERS,
+      pipeDiameter: DEFAULT_PVC_PIPE_DIAMETER_METERS,
+      color: DEFAULT_PVC_FRAME_COLOR,
+    },
+    tags: ["whoop", "pvc", ...options.tags],
+    render2d: { icon: "pvcframe" },
+    render3d: { modelHint: "pvc-frame" },
+    exportHints: { simulatorFriendly: false },
+  };
+}
 
 export const trackElementCatalog = [
   {
@@ -1338,6 +1437,60 @@ export const trackElementCatalog = [
     } satisfies BarrierVisualSpec,
     exportHints: { simulatorFriendly: false },
   },
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_ARCH_GATE_ELEMENT_ID,
+    name: "PVC Arch Gate",
+    edges: PVC_ARCH_GATE_EDGES,
+    tags: ["gate"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_SQUARE_GATE_ELEMENT_ID,
+    name: "PVC Square Gate",
+    edges: PVC_SQUARE_GATE_EDGES,
+    tags: ["gate"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_TALL_ARCH_ELEMENT_ID,
+    name: "PVC Tall Arch",
+    edges: PVC_TALL_ARCH_EDGES,
+    tags: ["gate"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_DOUBLE_ARCH_ELEMENT_ID,
+    name: "PVC Double Arch",
+    edges: PVC_DOUBLE_ARCH_EDGES,
+    tags: ["gate"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_DIVE_GATE_ELEMENT_ID,
+    name: "PVC Dive Gate",
+    edges: PVC_DIVE_GATE_EDGES,
+    tags: ["gate", "dive"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_TURN_POST_ELEMENT_ID,
+    name: "PVC Turn Post",
+    edges: PVC_TURN_POST_EDGES,
+    tags: ["post"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_FLAG_POST_ELEMENT_ID,
+    name: "PVC Flag Post",
+    edges: PVC_FLAG_POST_EDGES,
+    tags: ["post"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_TOWER_ELEMENT_ID,
+    name: "PVC Tower",
+    edges: PVC_TOWER_EDGES,
+    tags: ["post", "tower"],
+  }),
+  createPvcFrameCatalogEntry({
+    id: TRACKDRAW_PVC_SLALOM_PAIR_ELEMENT_ID,
+    name: "PVC Slalom Pair",
+    edges: PVC_SLALOM_PAIR_EDGES,
+    tags: ["slalom"],
+  }),
 ] satisfies TrackElementCatalogEntry[];
 
 const trackElementCatalogMap = new Map(

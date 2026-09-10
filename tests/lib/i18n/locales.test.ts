@@ -17,8 +17,13 @@ describe("locale resolution", () => {
       en: "en-US",
       nl: "nl-NL",
       de: "de-DE",
+      "pt-BR": "pt-BR",
       "zh-CN": "zh-CN",
     });
+  });
+
+  it("exposes every shipped product locale", () => {
+    expect(supportedLocales).toHaveLength(5);
   });
 
   it("uses zh-CN as the canonical Simplified Chinese locale", () => {
@@ -44,6 +49,33 @@ describe("locale resolution", () => {
   it("does not map explicit Traditional Chinese locales to Simplified Chinese", () => {
     expect(resolveSupportedLocale("zh-TW")).toBeUndefined();
     expect(resolveSupportedLocale("zh-Hant")).toBeUndefined();
+  });
+
+  it("uses pt-BR as the canonical Portuguese locale", () => {
+    expect(supportedLocales).toContain("pt-BR");
+    expect(supportedLocales).not.toContain("pt");
+  });
+
+  it.each([
+    "pt",
+    "pt-BR",
+    "pt_BR",
+    "pt-br",
+    "pt-BR-u-nu-latn",
+    "pt-PT",
+    "pt-AO",
+  ])("normalizes the Portuguese alias %s", (locale) => {
+    expect(resolveSupportedLocale(locale)).toBe("pt-BR");
+    expect(normalizeLocale(locale)).toBe("pt-BR");
+  });
+
+  it("selects pt-BR from weighted Accept-Language aliases", () => {
+    expect(
+      getLocaleFromAcceptLanguage("fr-FR, pt-PT;q=0.9, en-GB;q=0.8")
+    ).toBe("pt-BR");
+    expect(getLocaleFromAcceptLanguage("pt-BR,pt;q=0.9,en;q=0.8")).toBe(
+      "pt-BR"
+    );
   });
 
   it("resolves supported regional browser locales", () => {
