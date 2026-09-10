@@ -68,6 +68,14 @@ const DEFAULT_MAX_DURATION = 10;
 const DEFAULT_MAX_COLORS = 128;
 const PALETTE_SAMPLE_COUNT = 5;
 
+/**
+ * `routeGradient` runs from the start of the lap to the finish. Each ramp is a
+ * single hue whose steps all clear its own background, so the strand on top of
+ * a crossing is always a different colour from the one beneath it and the eye
+ * can follow one lap through a knot of race line. Both were checked for
+ * monotone lightness, step separation, and contrast against the background
+ * below.
+ */
 const GIF_THEME = {
   dark: {
     background: "#12161d",
@@ -75,6 +83,7 @@ const GIF_THEME = {
     gridSection: 0x3f4b5c,
     routeColor: "#7dd3fc",
     routeEmissive: "#38bdf8",
+    routeGradient: ["#075985", "#0284c7", "#38bdf8", "#7dd3fc"],
     ambient: 0.85,
     key: 1.15,
   },
@@ -84,6 +93,7 @@ const GIF_THEME = {
     gridSection: 0x9aa8ba,
     routeColor: "#1d4ed8",
     routeEmissive: "#1e40af",
+    routeGradient: ["#60a5fa", "#3b82f6", "#1d4ed8", "#1e3a8a"],
     ambient: 1.15,
     key: 1.35,
   },
@@ -205,8 +215,10 @@ export async function renderWhoopPackRouteGif(
       createRouteOverlay(route.curve, {
         closed: route.closed,
         color: theme.routeColor,
+        gradient: theme.routeGradient,
         emissive: theme.routeEmissive,
-        emissiveIntensity: 0.45,
+        // Lower than a flat route: a uniform glow would wash the ramp out.
+        emissiveIntensity: 0.18,
         tubeRadius: isWhoop ? 0.016 : 0.045,
         arrowSpacingMeters: Math.max(0.6, route.lengthMeters / 8),
         arrowLengthMeters: isWhoop ? 0.13 : 0.4,
